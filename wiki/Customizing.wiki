@@ -1,5 +1,5 @@
 #labels Featured
-JSyntaxPane uses "Lexers" to distinguish different tokens of any supported languages.  Each Lexer must implement the {{{Lexer interface}}}.  The Lexers provided were all done using the great <a href="http://jflex.de/">JFlex</a> .  JFlex takes a lexer definition file, and creates a one class lexer.  The Lex files for the languages currently supported are in the the JFlex folder of the zip distribution file.
+JSyntaxPane uses "Lexers" to distinguish different tokens of any supported languages.  Each Lexer must implement the {{{Lexer interface}}}.  The Lexers provided were all done using the great [http://jflex.de/ JFlex].  JFlex takes a lexer definition file, and creates a one class lexer.  The Lex files for the languages currently supported are in the the JFlex folder of the zip distribution file.
 
 I will not go into too much details about how to write lex files.  the JFLex site has a great manual.  But in a nutshell, you can copy a provided lex file, modify it to your needs, then run it through JFlex.  Put the generated Java file in the jsyntaxpane package, then build.  Make sure you modify the {{{%class }}} line and use the same name for the constructor in the block below.
 
