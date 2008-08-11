@@ -27,4 +27,6 @@ The JFlex generated sources will be found in {{{target/generated-sources}}}. The
 
 == Eclipse ==
 
+http://maven.apache.org/eclipse-plugin.html
+
 TODO -- Somebody write this!.
