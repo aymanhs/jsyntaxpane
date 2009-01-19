@@ -50,6 +50,7 @@ public class ToggleCommentsAction extends TextAction implements SyntaxAction {
         JTextComponent target = getTextComponent(e);
         if (target != null && target.getDocument() instanceof SyntaxDocument) {
             String[] lines = ActionUtils.getSelectedLines(target);
+            int start = target.getSelectionStart();
             StringBuffer toggled = new StringBuffer();
             for (int i = 0; i < lines.length; i++) {
                 Matcher m = lineCommentPattern.matcher(lines[i]);
@@ -62,6 +63,7 @@ public class ToggleCommentsAction extends TextAction implements SyntaxAction {
                 toggled.append('\n');
             }
             target.replaceSelection(toggled.toString());
+            target.select(start, start + toggled.length());
         }
     }
 

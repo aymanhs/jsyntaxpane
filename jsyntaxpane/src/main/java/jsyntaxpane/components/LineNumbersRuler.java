@@ -40,13 +40,16 @@ public class LineNumbersRuler extends JComponent
     public static final String PROPERTY_FOREGROUND = "LineNumbers.Foreground";
     public static final String PROPERTY_LEFT_MARGIN = "LineNumbers.LeftMargin";
     public static final String PROPERTY_RIGHT_MARGIN = "LineNumbers.RightMargin";
+    public static final String PROPERTY_Y_OFFSET = "LineNumbers.YOFFset";
     public static final int DEFAULT_R_MARGIN = 5;
     public static final int DEFAULT_L_MARGIN = 5;
+    public static final int DEFAULT_Y_OFFSET = -2;
     private JEditorPane pane;
     private String format;
     private int lineCount = -1;
-    private int r_margin;
-    private int l_margin;
+    private int r_margin = DEFAULT_R_MARGIN;
+    private int l_margin = DEFAULT_L_MARGIN;
+    private int y_offset = DEFAULT_Y_OFFSET;
     private int charHeight;
     private int charWidth;
     private GotoLineDialog gotoLineDialog = null;
@@ -78,7 +81,7 @@ public class LineNumbersRuler extends JComponent
         int lineNum = clip.y / lh + 1;
         // round the start to a multiple of lh, and shift by 2 pixels to align
         // properly to the text.
-        for (int y = (clip.y / lh) * lh + lh - 2; y <= end; y += lh) {
+        for (int y = (clip.y / lh) * lh + lh + y_offset; y <= end; y += lh) {
             String text = String.format(format, lineNum);
             g.drawString(text, l_margin, y);
             lineNum++;
@@ -130,6 +133,8 @@ public class LineNumbersRuler extends JComponent
                 PROPERTY_RIGHT_MARGIN, DEFAULT_R_MARGIN);
         l_margin = config.getPrefixInteger(prefix,
                 PROPERTY_LEFT_MARGIN, DEFAULT_L_MARGIN);
+        y_offset = config.getPrefixInteger(prefix, PROPERTY_Y_OFFSET,
+                DEFAULT_Y_OFFSET);
         Color foreground = config.getPrefixColor(prefix,
                 PROPERTY_FOREGROUND,
                 Color.BLACK);
@@ -203,5 +208,29 @@ public class LineNumbersRuler extends JComponent
 
     public void changedUpdate(DocumentEvent e) {
         updateSize();
+    }
+
+    public int getLeftMargin() {
+        return l_margin;
+    }
+
+    public void setLeftMargin(int l_margin) {
+        this.l_margin = l_margin;
+    }
+
+    public int getRightMargin() {
+        return r_margin;
+    }
+
+    public void setRightMargin(int r_margin) {
+        this.r_margin = r_margin;
+    }
+
+    public int getYOffset() {
+        return y_offset;
+    }
+
+    public void setYOffset(int y_offset) {
+        this.y_offset = y_offset;
     }
 }

@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * Wrapper around the Properties class with more functionality
  * This is mainly needed to provide easier support for getting values by an
  * optional prefix.
- * 
+ *
  * @author Ayman Al-Sairafi
  */
 public class Configuration extends Properties {

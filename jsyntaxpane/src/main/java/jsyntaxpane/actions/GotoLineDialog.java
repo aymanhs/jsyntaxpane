@@ -13,7 +13,12 @@
  */
 package jsyntaxpane.actions;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -23,6 +28,15 @@ import javax.swing.text.JTextComponent;
 public class GotoLineDialog extends javax.swing.JDialog {
 
     private JTextComponent text;
+    /**
+     * This ActionListener listens to ESC key and closes the dialog
+     */
+    ActionListener escListener = new ActionListener() {
+
+        public void actionPerformed(ActionEvent e) {
+            setVisible(false);
+        }
+    };
 
     /** 
      * Creates new form GotoLineDialog
@@ -33,6 +47,8 @@ public class GotoLineDialog extends javax.swing.JDialog {
         initComponents();
         this.text = text;
         setLocationRelativeTo(text.getRootPane());
+        getRootPane().registerKeyboardAction(escListener, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 
     /** This method is called from within the constructor to
@@ -59,6 +75,7 @@ public class GotoLineDialog extends javax.swing.JDialog {
             }
         });
 
+        jBtnOk.setAction(jCmbLineNumbers.getAction());
         jBtnOk.setText("Go");
         jBtnOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -83,16 +100,12 @@ public class GotoLineDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jCmbLineNumbers, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jBtnOk))
+                    .addComponent(jBtnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jBtnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnOkActionPerformed
-        setTextPos();
-    }//GEN-LAST:event_jBtnOkActionPerformed
 
     private void setTextPos() {
         Object line = jCmbLineNumbers.getSelectedItem();
@@ -111,10 +124,14 @@ public class GotoLineDialog extends javax.swing.JDialog {
     }
 
     private void jCmbLineNumbersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCmbLineNumbersActionPerformed
-        // FIXME: this is called twice by the action, skip it
-        setTextPos();
-        // FIXME: Add ESC key listener to hide the dialog
+        if (evt.getActionCommand().equals("comboBoxEdited")) {
+            setTextPos();
+        }
     }//GEN-LAST:event_jCmbLineNumbersActionPerformed
+
+    private void jBtnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnOkActionPerformed
+        setTextPos();
+    }//GEN-LAST:event_jBtnOkActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBtnOk;

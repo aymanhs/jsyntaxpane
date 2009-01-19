@@ -73,7 +73,7 @@ public class FindReplaceActions implements SyntaxAction {
     class FindDialogAction extends TextAction {
 
         public FindDialogAction() {
-            super("FIND_ACTION");
+            super("FIND");
         }
 
         public void actionPerformed(ActionEvent e) {

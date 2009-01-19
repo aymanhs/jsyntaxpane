@@ -330,9 +330,9 @@ public class ActionUtils {
      * the | vertical BAr char, then it will not be inserted, and the cursor will
      * be set to its location.
      * If there are TWO vertical bars, then the text between them will be selected
-     * <b>FIXME: add following feature
-     * If the String is multi-line, then it will be indented with the same
-     * indentattion as the line with pos.</b>
+     * If the toInsert String is multiLine, then indentation of all following lines
+     * will be the same as the first line.  TAB characters will be replaced by
+     * the number of spaces in the document's TAB property.
      * @param target
      * @param dot
      * @param toInsert
@@ -341,19 +341,38 @@ public class ActionUtils {
     public static void insertMagicString(JTextComponent target, int dot, String toInsert)
             throws BadLocationException {
         Document doc = target.getDocument();
+        String[] lines = toInsert.split("\n");
+        if (lines.length > 1) {
+            // multi line strings will need to be indented
+            String tabToSpaces = SPACES.substring(0, getTabSize(target));
+            String currentLine = getLineAt(target, dot);
+            String currentIndent = getIndent(currentLine);
+            StringBuilder sb = new StringBuilder(toInsert.length());
+            boolean firstLine = true;
+            for (String l : lines) {
+                if (!firstLine) {
+                    sb.append(currentIndent);
+                }
+                firstLine = false;
+                // replace tabs with spaces.
+                sb.append(l.replace("\t", tabToSpaces));
+                sb.append("\n");
+            }
+            toInsert = sb.toString();
+        }
         if (toInsert.indexOf('|') >= 0) {
             int ofst = toInsert.indexOf('|');
             int ofst2 = toInsert.indexOf('|', ofst + 1);
             toInsert = toInsert.replace("|", "");
             doc.insertString(dot, toInsert, null);
             dot = target.getCaretPosition();
-            final int strLength = toInsert.length();
+            int strLength = toInsert.length();
             if (ofst2 > 0) {
                 // note that we already removed the first |, so end offset is now
                 // one less than what it was.
                 target.select(dot + ofst - strLength, dot + ofst2 - strLength - 1);
             } else {
-                target.setCaretPosition(dot + ofst -strLength);
+                target.setCaretPosition(dot + ofst - strLength);
             }
         } else {
             doc.insertString(dot, toInsert, null);

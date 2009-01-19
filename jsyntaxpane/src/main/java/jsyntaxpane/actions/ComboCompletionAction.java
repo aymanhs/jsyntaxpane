@@ -16,6 +16,7 @@ package jsyntaxpane.actions;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.Map;
 import java.util.logging.Level;
@@ -58,20 +59,25 @@ public class ComboCompletionAction extends TextAction implements SyntaxAction {
                     sDoc.remove(token.start, token.length);
                     dot = token.start;
                 }
-                Frame frame = ActionUtils.getFrameFor(target);
+                Window window = SwingUtilities.getWindowAncestor(target);
                 if (dlg == null) {
-                    dlg = new ComboCompletionDialog(frame, true, items);
+                    if (window instanceof Frame) {
+                        Frame frame = (Frame) window;
+                        dlg = new ComboCompletionDialog(frame, true, items);
+                    } else {
+                        dlg = new ComboCompletionDialog(null, true, items);
+                    }
                 }
-                dlg.setLocationRelativeTo(frame);
-                Point p = frame.getLocation();
+                dlg.setLocationRelativeTo(window);
+                Point p = window.getLocation();
                 // Get location of Dot in rt
                 Rectangle rt = target.modelToView(dot);
                 Point loc = new Point(rt.x, rt.y);
                 // convert the location from Text Componet coordinates to
                 // Frame coordinates...
-                loc = SwingUtilities.convertPoint(target, loc, frame);
+                loc = SwingUtilities.convertPoint(target, loc, window);
                 // and then to Screen coordinates
-                SwingUtilities.convertPointToScreen(loc, frame);
+                SwingUtilities.convertPointToScreen(loc, window);
                 dlg.setLocation(loc);
                 dlg.setFonts(target.getFont());
                 dlg.setText(abbrev);

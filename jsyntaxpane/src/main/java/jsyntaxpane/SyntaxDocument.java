@@ -118,11 +118,12 @@ public class SyntaxDocument extends PlainDocument {
         super.fireRemoveUpdate(e);
     }
 
-    @Override
-    protected void fireUndoableEditUpdate(UndoableEditEvent e) {
-        parse();
-        super.fireUndoableEditUpdate(e);
-    }
+// Not needed as this will actually fire the other xxxUpdate methods which reparse.
+//    @Override
+//    protected void fireUndoableEditUpdate(UndoableEditEvent e) {
+//        parse();
+//        super.fireUndoableEditUpdate(e);
+//    }
 
     /**
      * Replace the token with the replacement string

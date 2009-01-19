@@ -81,15 +81,19 @@ public class Token implements Serializable, Comparable {
 
     @Override
     public String toString() {
-        return String.format("%s (%d, %d) (%d)", type, start, length, pairValue);
+        if (pairValue == 0) {
+            return String.format("%s (%d, %d)", type, start, length);
+        } else {
+            return String.format("%s (%d, %d) (%d)", type, start, length, pairValue);
+        }
     }
 
     @Override
     public int compareTo(Object o) {
         Token t = (Token) o;
-        if (this.start !=  t.start) {
+        if (this.start != t.start) {
             return (this.start - t.start);
-        } else if(this.length != t.length) {
+        } else if (this.length != t.length) {
             return (this.length - t.length);
         } else {
             return this.type.compareTo(t.type);
@@ -103,7 +107,7 @@ public class Token implements Serializable, Comparable {
     public int end() {
         return start + length;
     }
-    
+
     /**
      * Get the text of the token from this document
      * @param doc

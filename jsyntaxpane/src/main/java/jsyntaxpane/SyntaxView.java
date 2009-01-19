@@ -37,7 +37,6 @@ public class SyntaxView extends PlainView {
     public static final String PROPERTY_RIGHT_MARGIN_COLUMN = "RightMarginColumn";
     public static final String PROPERTY_SINGLE_COLOR_SELECT = "SingleColorSelect";
     public static final String PROPERTY_TEXTAA = "TextAA";
-    
     private static final Logger log = Logger.getLogger(SyntaxView.class.getName());
     private SyntaxStyle DEFAULT_STYLE = SyntaxStyles.getInstance().getStyle(TokenType.DEFAULT);
     private final boolean singleColorSelect;
@@ -120,8 +119,7 @@ public class SyntaxView extends PlainView {
                 x = DEFAULT_STYLE.drawText(segment, x, y, graphics, this, start);
             }
         } catch (BadLocationException ex) {
-            System.err.println("Requested: " + ex.offsetRequested());
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, "Requested: " + ex.offsetRequested(), ex);
         } finally {
             graphics.setFont(saveFont);
             graphics.setColor(saveColor);
@@ -153,12 +151,12 @@ public class SyntaxView extends PlainView {
         java.awt.Component host = getContainer();
         host.repaint();
     }
-
     /**
      * The values for the string key for Text Anti-Aliasing
      */
     private static Map<String, Object> TEXT_AA_HINT_NAMES =
             new HashMap<String, Object>();
+
 
     static {
         TEXT_AA_HINT_NAMES.put("DEFAULT", RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT);

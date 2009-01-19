@@ -14,9 +14,9 @@
 package jsyntaxpane;
 
 import java.awt.event.ItemEvent;
-import java.awt.Rectangle;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.text.BadLocationException;
+import jsyntaxpane.actions.ActionUtils;
 import jsyntaxpane.actions.CaretMonitor;
 
 public class SyntaxTester extends javax.swing.JFrame {
@@ -24,6 +24,7 @@ public class SyntaxTester extends javax.swing.JFrame {
     /** Creates new form Tester */
     public SyntaxTester() {
         DefaultSyntaxKit.initKit();
+        DefaultSyntaxKit.registerContentType("text/aa_regex", "jsyntaxpane.syntaxkits.RegexSyntaxKit");
         initComponents();
         jCmbLangs.setModel(new DefaultComboBoxModel(DefaultSyntaxKit.getContentTypes()));
         // jEdtTest.setContentType(jCmbLangs.getItemAt(0).toString());
@@ -48,10 +49,12 @@ public class SyntaxTester extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("JSyntaxPane Tester");
 
+        lblCaretPos.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         lblCaretPos.setText("Caret Position");
 
         jEdtTest.setContentType("");
         jEdtTest.setFont(new java.awt.Font("Monospaced", 0, 13));
+        jEdtTest.setCaretColor(new java.awt.Color(153, 204, 255));
         jEdtTest.addCaretListener(new javax.swing.event.CaretListener() {
             public void caretUpdate(javax.swing.event.CaretEvent evt) {
                 jEdtTestCaretUpdate(evt);
@@ -74,87 +77,96 @@ public class SyntaxTester extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lblToken, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 612, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(lblToken, javax.swing.GroupLayout.DEFAULT_SIZE, 487, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCaretPos, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 612, Short.MAX_VALUE))
+                        .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jCmbLangs, 0, 231, Short.MAX_VALUE)
-                        .addGap(262, 262, 262)
-                        .addComponent(lblCaretPos, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 612, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addComponent(jCmbLangs, 0, 247, Short.MAX_VALUE)
+                        .addGap(371, 371, 371))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 395, Short.MAX_VALUE)
-                .addGap(2, 2, 2)
-                .addComponent(lblToken, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCmbLangs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblCaretPos, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addComponent(lblToken, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblCaretPos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jCmbLangs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-private void jEdtTestCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_jEdtTestCaretUpdate
-    if (jEdtTest.getDocument() instanceof SyntaxDocument) {
-        SyntaxDocument sDoc = (SyntaxDocument) jEdtTest.getDocument();
-        Token t = sDoc.getTokenAt(evt.getDot());
-        if (t != null) {
-            try {
-                String tData = sDoc.getText(t.start, Math.min(t.length, 40));
+    private void jEdtTestCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_jEdtTestCaretUpdate
+        SyntaxDocument sDoc = ActionUtils.getSyntaxDocument(jEdtTest);
+        if (sDoc != null) {
+            Token t = sDoc.getTokenAt(evt.getDot());
+            if (t != null) {
+                String tData = t.getText(sDoc);
                 if (t.length > 40) {
-                    tData += "...";
+                    tData = tData.substring(0, 40) + "...";
                 }
                 lblToken.setText(t.toString() + ": " + tData);
-            } catch (BadLocationException ex) {
-                // should not happen.. and if it does, just ignore it
-                System.err.println(ex);
-                ex.printStackTrace();
+            } else {
+                // null token, remove the status
+                lblToken.setText("NO Token at cursor");
             }
         }
-    }
 
-}//GEN-LAST:event_jEdtTestCaretUpdate
+    }//GEN-LAST:event_jEdtTestCaretUpdate
 
-private void jCmbLangsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCmbLangsItemStateChanged
-    if (evt.getStateChange() == ItemEvent.SELECTED) {
-        String lang = jCmbLangs.getSelectedItem().toString();
+    private void jCmbLangsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCmbLangsItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            String lang = jCmbLangs.getSelectedItem().toString();
 
-        // save the state of the current JEditorPane, as it's Document is about
-        // to be replaced.
-        String t = jEdtTest.getText();
-        int caretPosition = jEdtTest.getCaretPosition();
-        Rectangle visibleRectangle = jEdtTest.getVisibleRect();
+            // save the state of the current JEditorPane, as it's Document is about
+            // to be replaced.
+            String t = jEdtTest.getText();
 
-        // install a new DefaultSyntaxKit on the JEditorPane for the requested language.
-        jEdtTest.setContentType(lang);
+            // install a new DefaultSyntaxKit on the JEditorPane for the requested language.
+            jEdtTest.setContentType(lang);
 
-        // restore the state of the JEditorPane - note that installing a new
-        // EditorKit causes the Document to be recreated.
-        SyntaxDocument sDoc = (SyntaxDocument) jEdtTest.getDocument();
-        jEdtTest.setText(t);
-        sDoc.clearUndos();
-        jEdtTest.setCaretPosition(caretPosition);
-        jEdtTest.scrollRectToVisible(visibleRectangle);
-    }
-}//GEN-LAST:event_jCmbLangsItemStateChanged
+            // restore the state of the JEditorPane - note that installing a new
+            // EditorKit causes the Document to be recreated.
+            SyntaxDocument sDoc = (SyntaxDocument) jEdtTest.getDocument();
+            jEdtTest.setText(t);
+            sDoc.clearUndos();
+            // Workaround: Set the caret to the top so that line numbers are
+            // painted correctly
+            jEdtTest.setCaretPosition(0);
+        }
+    }//GEN-LAST:event_jCmbLangsItemStateChanged
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                new SyntaxTester().setVisible(true);
+                try {
+                    new SyntaxTester().setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.exit(2);
+                }
             }
         });
     }

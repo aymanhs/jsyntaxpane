@@ -3,6 +3,11 @@ Version 0.9.4 - IntelliSense additions
     * Added Toggle Comment Actions using Control SLASH
     * Fixed Issue 47.
     * Added Clojure, Scala, DOS Batch and 'nix bash support
+    * Added Configurable Popup menus with default Tango Desktop icons
+    * Added configurable format for the CaretMonitor class
+    * Toggle Comments Action selects the lines affected after being performed
+    * Added multi-line support in ActionUtils.insertMagicSTring method.
+    * GotoLine dialog responds to ESC key
 Version 0.9.3 - Start of scripts for the document:
     * Added new methods getLine() to SyntaxDocument
     * SyntaxDocument getIndexOf methods deprecated, use getMatchers instead
