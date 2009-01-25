@@ -27,6 +27,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
+import jsyntaxpane.actions.gui.ComboCompletionDialog;
 import jsyntaxpane.util.Configuration;
 
 /**
@@ -36,7 +37,7 @@ import jsyntaxpane.util.Configuration;
  * 
  * @author Ayman Al-Sairafi
  */
-public class ComboCompletionAction extends TextAction implements SyntaxAction {
+public class ComboCompletionAction extends DefaultSyntaxAction {
 
     Map<String, String> completions;
     ComboCompletionDialog dlg;
@@ -46,6 +47,7 @@ public class ComboCompletionAction extends TextAction implements SyntaxAction {
         super("COMBO_COMPLETION");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent target = getTextComponent(e);
         if (target != null && target.getDocument() instanceof SyntaxDocument) {

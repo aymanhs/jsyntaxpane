@@ -16,23 +16,30 @@ package jsyntaxpane.actions;
 import java.awt.event.ActionEvent;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
+import jsyntaxpane.util.Configuration;
 
 /**
- * This action performs SmartIndentation each time VK_ENTER is pressed
- * SmartIndentation is inserting the same amount of spaces as
- * the line above.  May not be too smart, but good enough.
+ * Finder class.  This class contains the general Find, Find Next,
+ * Find Previous, and the Find Marker Actions.
+ * 
+ * Note that all Actions are subclasses of this class because all actions
+ * require the find text to be shared among them.  This is the best approach
+ * to have all Action classes share this same data.
+ *
+ * @author Ayman Al-Sairafi
  */
-public class SmartIndent extends TextAction {
+public class FindReplaceAction extends DefaultSyntaxAction {
 
-    public SmartIndent() {
-        super("SMART_INDENT");
+    public FindReplaceAction() {
+        super("FIND_REPLACE");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent target = getTextComponent(e);
         if (target != null) {
-            String line = ActionUtils.getLine(target);
-            target.replaceSelection("\n" + ActionUtils.getIndent(line));
+            DocumentSearchData dsd = DocumentSearchData.getFromEditor(target);
+            dsd.showDialog(target);
         }
     }
 }

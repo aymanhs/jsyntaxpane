@@ -14,6 +14,7 @@
 package jsyntaxpane;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.awt.Font;
@@ -23,28 +24,24 @@ import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
-import javax.swing.text.TextAction;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import jsyntaxpane.actions.SyntaxAction;
@@ -69,13 +66,12 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     public static final String CONFIG_MENU_ICONS = "PopupMenuIcons";
     public static final String PROPERTY_KEYMAP_JSYNTAXPANE = "jsyntaxpane";
     public static final Pattern EQUALS_REGEX = Pattern.compile("\\s*=\\s*");
-    public static Font DEFAULT_FONT;
+    private static Font DEFAULT_FONT;
     private static Set<String> CONTENT_TYPES = new HashSet<String>();
     private static boolean initialized = false;
     private Lexer lexer;
     private static final Logger LOG = Logger.getLogger(DefaultSyntaxKit.class.getName());
     private List<SyntaxComponent> editorComponents = new ArrayList<SyntaxComponent>();
-    private Map<String, SyntaxAction> editorActions = new HashMap<String, SyntaxAction>();
     private JPopupMenu popupMenu;
     private MouseListener popupListener;
     /**
@@ -137,6 +133,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         popupMenu = new JPopupMenu();
         String menuIconsLocation = CONFIG.getPrefixProperty(kitName,
                 CONFIG_MENU_ICONS, "/META-INF/images/");
+        JMenu stack = null;
         for (String menu : menuItems) {
             String[] menudata = EQUALS_REGEX.split(menu);
             //
@@ -144,8 +141,19 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
             // create the Popup menu
             if (menuText.equals("-")) {
-                JComponent sep = new JSeparator();
-                popupMenu.add(sep);
+                popupMenu.addSeparator();
+            } else if (menuText.startsWith(">")) {
+                JMenu sub = new JMenu(menuText.substring(1));
+                popupMenu.add(sub);
+                stack = sub;
+            } else if (menuText.startsWith("<")) {
+                Container parent = stack.getParent();
+                if (parent instanceof JMenu) {
+                    JMenu jMenu = (JMenu) parent;
+                    stack = jMenu;
+                } else {
+                    stack = null;
+                }
             } else {
                 JMenuItem menuItem;
                 menuItem = new JMenuItem();
@@ -169,7 +177,11 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
                         menuItem.setIcon(i);
                     }
                 }
-                popupMenu.add(menuItem);
+                if (stack == null) {
+                    popupMenu.add(menuItem);
+                } else {
+                    stack.add(menuItem);
+                }
             }
         }
         popupListener = new MouseAdapter() {
@@ -221,14 +233,10 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             c.deinstall(editorPane);
         }
         editorComponents.clear();
-//        for (Object key : editorActions.values()) {
-//            editorPane.getActionMap().remove(key);
-//        }
 
         // All the Actions were added directly to the editorPane, so we can remove
         // all of them with one call.  The Parents (defaults) will be intact
         editorPane.getActionMap().clear();
-        editorActions.clear();
 
         if (popupListener != null) {
             editorPane.removeMouseListener(popupListener);
@@ -253,36 +261,21 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             String[] values = Configuration.COMMA_SEPARATOR.split(
                     actionsConf.getProperty(actionName));
             String actionClass = values[0];
-            SyntaxAction action = editorActions.get(actionClass);
-            if (action == null) {
-                action = createAction(actionClass);
-                action.config(CONFIG, prefix, actionName);
-                // Add the action to the component also
-                Action a = editorPane.getActionMap().get(actionName);
-
-                if (a == null) {
-                    editorPane.getActionMap().put(actionName, action.getAction(actionName));
+            SyntaxAction action = createAction(actionClass);
+            action.config(CONFIG, prefix, actionName);
+            // Add the action to the component also
+            editorPane.getActionMap().put(actionName, action);
+            // Now bind all the keys to the Action we have:
+            for (int i = 1; i < values.length; i++) {
+                String keyStrokeString = values[i];
+                KeyStroke ks = KeyStroke.getKeyStroke(keyStrokeString);
+                // KeyEvent.VK_QUOTEDBL
+                if (ks == null) {
+                    throw new IllegalArgumentException("Invalid KeyStroke: " +
+                            keyStrokeString);
                 }
-            } else {
-                // action class is already created, we just need to add to editorPane's actionMap
-                Action a = editorPane.getActionMap().get(actionName);
-                if (a == null) {
-                    editorPane.getActionMap().put(actionName, action.getAction(actionName));
-                }
+                km_new.addActionForKeyStroke(ks, action);
             }
-            String keyStrokeString = values[1];
-            KeyStroke ks = KeyStroke.getKeyStroke(keyStrokeString);
-            // KeyEvent.VK_QUOTEDBL
-            if (ks == null) {
-                throw new IllegalArgumentException("Invalid KeyStroke: " +
-                        keyStrokeString);
-            }
-            TextAction ta = action.getAction(actionName);
-            if (ta == null) {
-                throw new IllegalArgumentException("Invalid ActionName: " +
-                        actionName);
-            }
-            km_new.addActionForKeyStroke(ks, ta);
         }
         editorPane.setKeymap(km_new);
     }
@@ -292,7 +285,6 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         try {
             Class clazz = Class.forName(actionClassName);
             action = (SyntaxAction) clazz.newInstance();
-            editorActions.put(actionClassName, action);
         } catch (InstantiationException ex) {
             throw new IllegalArgumentException("Cannot create action class: " +
                     actionClassName, ex);
@@ -332,16 +324,20 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     public static void initKit() {
         // attempt to find a suitable default font
         CONFIG = new Configuration(JarServiceProvider.readProperties("jsyntaxpane.config"));
-
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        String[] fonts = ge.getAvailableFontFamilyNames();
-        Arrays.sort(fonts);
-        if (Arrays.binarySearch(fonts, "Courier new") >= 0) {
-            DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 12);
-        } else if (Arrays.binarySearch(fonts, "Courier") >= 0) {
-            DEFAULT_FONT = new Font("Courier", Font.PLAIN, 12);
-        } else if (Arrays.binarySearch(fonts, "Monospaced") >= 0) {
-            DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 13);
+        String defaultFont = CONFIG.getProperty("DefaultOnt");
+        if (defaultFont != null) {
+            DEFAULT_FONT = Font.decode(defaultFont);
+        } else {
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            String[] fonts = ge.getAvailableFontFamilyNames();
+            Arrays.sort(fonts);
+            if (Arrays.binarySearch(fonts, "Courier new") >= 0) {
+                DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 12);
+            } else if (Arrays.binarySearch(fonts, "Courier") >= 0) {
+                DEFAULT_FONT = new Font("Courier", Font.PLAIN, 12);
+            } else if (Arrays.binarySearch(fonts, "Monospaced") >= 0) {
+                DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 13);
+            }
         }
 
         // read the Default Kits and their associated types

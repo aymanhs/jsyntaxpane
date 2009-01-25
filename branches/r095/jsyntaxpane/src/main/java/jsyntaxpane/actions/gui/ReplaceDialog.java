@@ -11,8 +11,9 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.  
  */
-package jsyntaxpane.actions;
+package jsyntaxpane.actions.gui;
 
+import jsyntaxpane.actions.*;
 import jsyntaxpane.components.Markers;
 import java.awt.Color;
 import java.awt.HeadlessException;
@@ -22,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.JTextComponent;
+import jsyntaxpane.util.SwingUtils;
 
 /**
  * A Find and Replace Dialog.  The dialog will also act as a listener to
@@ -33,18 +35,24 @@ import javax.swing.text.JTextComponent;
 public class ReplaceDialog extends javax.swing.JDialog implements CaretListener {
 
     private JTextComponent textComponent;
-    private FindReplaceActions finder;
+    private DocumentSearchData dsd;
     private static Markers.SimpleMarker SEARCH_MARKER = new Markers.SimpleMarker(Color.YELLOW);
 
-    /** Creates new form FindDialog */
+    /**
+     * Creates new form FindDialog
+     * @param text
+     * @param dsd DocumentSerachData
+     */
     public ReplaceDialog(JTextComponent text,
-            FindReplaceActions finderActions) {
+            DocumentSearchData dsd) {
         super(ActionUtils.getFrameFor(text), false);
         initComponents();
         textComponent = text;
-        finder = finderActions;
+        this.dsd = dsd;
         textComponent.addCaretListener(this);
         setLocationRelativeTo(text.getRootPane());
+        getRootPane().setDefaultButton(jBtnNext);
+        SwingUtils.addEscapeListener(this);
     }
 
     /**
@@ -54,7 +62,7 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
     public void updateHighlights() {
         Markers.removeMarkers(textComponent, SEARCH_MARKER);
         if (jTglHighlight.isSelected()) {
-            Markers.markAll(textComponent, finder.getPattern(), SEARCH_MARKER);
+            Markers.markAll(textComponent, dsd.getPattern(), SEARCH_MARKER);
         }
     }
 
@@ -79,11 +87,11 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
         String regex = (String) jCmbFind.getSelectedItem();
         if (regex != null && regex.length() > 0) {
             Pattern pattern = Pattern.compile(regex, flag);
-            finder.setWrap(jChkWrap.isSelected());
-            finder.setPattern(pattern);
+            dsd.setWrap(jChkWrap.isSelected());
+            dsd.setPattern(pattern);
             ActionUtils.insertIntoCombo(jCmbFind, regex);
         } else {
-            finder.setPattern(null);
+            dsd.setPattern(null);
         }
     }
 
@@ -221,7 +229,7 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
     private void jBtnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnNextActionPerformed
         try {
             updateFinder();
-            finder.doFindNext(textComponent);
+            dsd.doFindNext(textComponent);
             textComponent.requestFocusInWindow();
         } catch (PatternSyntaxException ex) {
             showRegexpError(ex);
@@ -233,7 +241,7 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
             updateFinder();
             String replacement = (String) jCmbReplace.getSelectedItem();
             ActionUtils.insertIntoCombo(jCmbFind, replacement);
-            finder.replaceAll(textComponent, replacement);
+            dsd.doReplaceAll(textComponent, replacement);
             textComponent.requestFocusInWindow();
         } catch (PatternSyntaxException ex) {
             showRegexpError(ex);
@@ -259,6 +267,7 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
     private javax.swing.JToggleButton jTglHighlight;
     // End of variables declaration//GEN-END:variables
 
+    @Override
     public void caretUpdate(CaretEvent e) {
         updateHighlights();
     }

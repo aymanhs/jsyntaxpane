@@ -21,7 +21,7 @@ import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
 import jsyntaxpane.util.Configuration;
 
-public class JUnindentAction extends TextAction implements SyntaxAction {
+public class JUnindentAction extends DefaultSyntaxAction {
 
     /**
      * creates new JUnindentAction.
@@ -33,6 +33,7 @@ public class JUnindentAction extends TextAction implements SyntaxAction {
 
     /**
      * {@inheritDoc}
+     * @param e
      */
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -58,12 +59,5 @@ public class JUnindentAction extends TextAction implements SyntaxAction {
                 target.replaceSelection("}");
             }
         }
-    }
-
-    public void config(Configuration config, String prefix, String name) {
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 }

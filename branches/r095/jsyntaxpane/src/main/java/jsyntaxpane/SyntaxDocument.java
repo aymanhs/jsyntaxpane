@@ -195,6 +195,7 @@ public class SyntaxDocument extends PlainDocument {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public boolean hasPrevious() {
             if (tokens == null) {
                 return false;
@@ -271,6 +272,36 @@ public class SyntaxDocument extends PlainDocument {
             tok = tokens.get(ndx);
         }
         return tok;
+    }
+
+    /**
+     * Return the token following the current token, or null
+     * <b>This is an expensive operation, so do not use it to update the gui</b>
+     * @param tok
+     * @return
+     */
+    public Token getNextToken(Token tok) {
+        int n = tokens.indexOf(tok);
+        if ((n >= 0) && (n < (tokens.size() - 1))) {
+            return tokens.get(n + 1);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return the token prior to the given token, or null
+     * <b>This is an expensive operation, so do not use it to update the gui</b>
+     * @param tok
+     * @return
+     */
+    public Token getPrevToken(Token tok) {
+        int n = tokens.indexOf(tok);
+        if ((n > 0) && (!tokens.isEmpty())) {
+            return tokens.get(n - 1);
+        } else {
+            return null;
+        }
     }
 
     /**

@@ -37,12 +37,12 @@ public class SyntaxView extends PlainView {
     public static final String PROPERTY_RIGHT_MARGIN_COLUMN = "RightMarginColumn";
     public static final String PROPERTY_SINGLE_COLOR_SELECT = "SingleColorSelect";
     public static final String PROPERTY_TEXTAA = "TextAA";
+    private static Object textAAHint = RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
     private static final Logger log = Logger.getLogger(SyntaxView.class.getName());
     private SyntaxStyle DEFAULT_STYLE = SyntaxStyles.getInstance().getStyle(TokenType.DEFAULT);
     private final boolean singleColorSelect;
     private final int rightMarginColumn;
     private final Color rightMarginColor;
-    private final Object textAAHint;
 
     /**
      * Construct a new view using the given configuration and prefix given
@@ -66,9 +66,7 @@ public class SyntaxView extends PlainView {
     @Override
     protected int drawUnselectedText(Graphics graphics, int x, int y, int p0,
             int p1) {
-        Graphics2D graphics2D = (Graphics2D) graphics;
-        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                textAAHint);
+        setRenderingHits((Graphics2D) graphics);
         Font saveFont = graphics.getFont();
         Color saveColor = graphics.getColor();
         SyntaxDocument doc = (SyntaxDocument) getDocument();
@@ -141,6 +139,16 @@ public class SyntaxView extends PlainView {
         } else {
             return drawUnselectedText(graphics, x, y, p0, p1);
         }
+    }
+
+    /**
+     * Sets the Rendering Hints o nthe Graphics.  This is used so that
+     * any painters can set the Rendering Hits to match the view.
+     * @param g2d
+     */
+    public static void setRenderingHits(Graphics2D g2d) {
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                textAAHint);
     }
 
     @Override

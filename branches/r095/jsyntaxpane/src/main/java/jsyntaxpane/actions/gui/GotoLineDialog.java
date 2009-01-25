@@ -11,15 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jsyntaxpane.actions;
+package jsyntaxpane.actions.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import javax.swing.JComponent;
+import jsyntaxpane.actions.*;
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
+import jsyntaxpane.util.SwingUtils;
 
 /**
  * A simple dialog to prompt for a line number and go to it
@@ -27,28 +24,21 @@ import javax.swing.text.JTextComponent;
  */
 public class GotoLineDialog extends javax.swing.JDialog {
 
+    private static final String PROPERTY_KEY = "GOTOLINE_DIALOG";
     private JTextComponent text;
-    /**
-     * This ActionListener listens to ESC key and closes the dialog
-     */
-    ActionListener escListener = new ActionListener() {
-
-        public void actionPerformed(ActionEvent e) {
-            setVisible(false);
-        }
-    };
 
     /** 
      * Creates new form GotoLineDialog
      * @param text
      */
-    public GotoLineDialog(JTextComponent text) {
+    private GotoLineDialog(JTextComponent text) {
         super(ActionUtils.getFrameFor(text), false);
         initComponents();
         this.text = text;
         setLocationRelativeTo(text.getRootPane());
-        getRootPane().registerKeyboardAction(escListener, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        getRootPane().setDefaultButton(jBtnOk);
+        text.getDocument().putProperty(PROPERTY_KEY, this);
+        SwingUtils.addEscapeListener(this);
     }
 
     /** This method is called from within the constructor to
@@ -137,4 +127,19 @@ public class GotoLineDialog extends javax.swing.JDialog {
     private javax.swing.JButton jBtnOk;
     private javax.swing.JComboBox jCmbLineNumbers;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * Create or return the GotoLine dialog for a given ext component
+     * @param text
+     */
+    public static void showForEditor(JTextComponent text) {
+        GotoLineDialog dlg = null;
+        if ((text == null) || (text.getDocument().getProperty(PROPERTY_KEY) == null)) {
+            dlg = new GotoLineDialog(text);
+        } else {
+            dlg = (GotoLineDialog) text.getDocument().getProperty(PROPERTY_KEY);
+        }
+        dlg.jCmbLineNumbers.requestFocusInWindow();
+        dlg.setVisible(true);
+    }
 }

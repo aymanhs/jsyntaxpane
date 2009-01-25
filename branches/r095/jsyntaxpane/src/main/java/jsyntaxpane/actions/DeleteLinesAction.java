@@ -27,14 +27,13 @@ import jsyntaxpane.util.Configuration;
  * This Action deletes the current line, or all the highlighted lines.
  * @author Ayman Al-Sairafi
  */
-public class DeleteLinesAction extends TextAction implements SyntaxAction {
+public class DeleteLinesAction extends DefaultSyntaxAction {
 
     public DeleteLinesAction() {
         super("DELETE_LINES");
     }
 
-
-
+    @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent target = getTextComponent(e);
         if (target != null) {
@@ -47,13 +46,6 @@ public class DeleteLinesAction extends TextAction implements SyntaxAction {
                 Logger.getLogger(DeleteLinesAction.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }
-
-    public void config(Configuration config, String prefix, String name) {
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 
 }
