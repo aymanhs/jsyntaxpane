@@ -15,6 +15,7 @@ package jsyntaxpane.actions.gui;
 
 import java.awt.Font;
 import java.awt.event.KeyEvent;
+import java.util.List;
 import java.util.Vector;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -33,7 +34,7 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
      * The current filter, to avoid refiltering the items
      */
     public String escapeChars = ";(= \t\n";
-    public String[] items;
+    public List<String> items;
 
     /** Creates new form ComboCompletionDialog
      * @param parent
@@ -41,26 +42,29 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
      * @param items
      */
     public ComboCompletionDialog(java.awt.Frame parent, boolean modal,
-            String[] items) {
+            List<String> items) {
         super(parent, modal);
         initComponents();
         this.items = items;
-        jLstItems.setListData(items);
         jTxtItem.getDocument().addDocumentListener(new DocumentListener() {
 
+            @Override
             public void insertUpdate(DocumentEvent e) {
                 refilterList();
             }
 
+            @Override
             public void removeUpdate(DocumentEvent e) {
                 refilterList();
             }
 
+            @Override
             public void changedUpdate(DocumentEvent e) {
                 refilterList();
             }
         });
         // This will allow the textfield to receive TAB keys
+        refilterList();
         jTxtItem.setFocusTraversalKeysEnabled(false);
     }
 

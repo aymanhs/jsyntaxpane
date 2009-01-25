@@ -33,6 +33,7 @@ import java.util.logging.Logger;
  * @author subwiz
  */
 public class JarServiceProvider {
+    public static final String SERVICES_ROOT = "META-INF/services/";
 
     private static final Logger LOG = Logger.getLogger(JarServiceProvider.class.getName());
 
@@ -53,7 +54,7 @@ public class JarServiceProvider {
         ArrayList<Object> l = new ArrayList<Object>();
         ClassLoader cl = JarServiceProvider.class.getClassLoader();
         cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-        String serviceFile = "META-INF/services/" + cls.getName();
+        String serviceFile = SERVICES_ROOT + cls.getName();
         Enumeration<URL> e = cl.getResources(serviceFile);
         while (e.hasMoreElements()) {
             URL u = e.nextElement();
@@ -114,7 +115,7 @@ public class JarServiceProvider {
         if (cl != null) {
             InputStream is = null;
             try {
-                String serviceFile = "META-INF/services/" +
+                String serviceFile = SERVICES_ROOT +
                         name.toLowerCase() + ".properties";
                 URL loc = cl.getResource(serviceFile);
                 if (loc != null) {
@@ -161,10 +162,17 @@ public class JarServiceProvider {
         try {
             ClassLoader cl = JarServiceProvider.class.getClassLoader();
             cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-            URL loc = cl.getResource(url);
+            URL loc = cl.getResource(SERVICES_ROOT + url);
+            if(loc == null) {
+                throw new IllegalArgumentException("Invalid url: " + url);
+            }
             is = loc.openStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            lines.add(br.readLine());
+            for(String line = br.readLine(); line != null; line = br.readLine()) {
+                // Trim and unescape some control chars
+                line = line.trim().replace("\\n", "\n").replace("\\t", "\t");
+                lines.add(line);
+            }
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
         } finally {

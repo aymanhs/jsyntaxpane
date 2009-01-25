@@ -18,6 +18,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,11 +30,13 @@ import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
 import jsyntaxpane.actions.gui.ComboCompletionDialog;
 import jsyntaxpane.util.Configuration;
+import jsyntaxpane.util.JarServiceProvider;
 
 /**
  * ComboBox like Completion Action:
- * This will display a list of items to choose from, its can be used similar to
- * IntelliSense
+ * This will display a list of items to choose from, it can be used similar to
+ * IntelliSense.  The List is obtained from a plain text file, each line being
+ * an item in the list.
  * 
  * @author Ayman Al-Sairafi
  */
@@ -41,7 +44,7 @@ public class ComboCompletionAction extends DefaultSyntaxAction {
 
     Map<String, String> completions;
     ComboCompletionDialog dlg;
-    private String[] items;
+    private List<String> items;
 
     public ComboCompletionAction() {
         super("COMBO_COMPLETION");
@@ -95,15 +98,17 @@ public class ComboCompletionAction extends DefaultSyntaxAction {
     /**
      * The completions will for now reside on another properties style file
      * referenced by prefix.Completions.File
-     * 
+     *
      * @param config
      * @param prefix
      * @param name
      */
+    @Override
     public void config(Configuration config, String prefix, String name) {
         // for now we will use just one list for anything.  This can be modified
         // by having a map from TokenType to String[] or something....
-        items = config.getPrefixPropertyList(prefix, name + ".Items");
+        String itemsUrl = config.getPrefixProperty(prefix, name + ".Items.URL", null);
+        items = JarServiceProvider.readLines(itemsUrl);
     }
 
     public TextAction getAction(String key) {
