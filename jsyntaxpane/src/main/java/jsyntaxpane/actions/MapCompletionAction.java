@@ -34,6 +34,7 @@ public class MapCompletionAction extends TextAction implements SyntaxAction {
         super("MAP_COMPLETION");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent target = getTextComponent(e);
         if (target != null && target.getDocument() instanceof SyntaxDocument) {

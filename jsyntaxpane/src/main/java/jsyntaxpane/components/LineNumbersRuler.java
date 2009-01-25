@@ -25,8 +25,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
-import jsyntaxpane.actions.GotoLineDialog;
 import jsyntaxpane.actions.ActionUtils;
+import jsyntaxpane.actions.gui.GotoLineDialog;
 import jsyntaxpane.util.Configuration;
 
 /**
@@ -52,7 +52,6 @@ public class LineNumbersRuler extends JComponent
     private int y_offset = DEFAULT_Y_OFFSET;
     private int charHeight;
     private int charWidth;
-    private GotoLineDialog gotoLineDialog = null;
     private MouseListener mouseListener = null;
 
     /**
@@ -128,6 +127,7 @@ public class LineNumbersRuler extends JComponent
         return null;
     }
 
+    @Override
     public void config(Configuration config, String prefix) {
         r_margin = config.getPrefixInteger(prefix,
                 PROPERTY_RIGHT_MARGIN, DEFAULT_R_MARGIN);
@@ -145,6 +145,7 @@ public class LineNumbersRuler extends JComponent
         setBackground(back);
     }
 
+    @Override
     public void install(JEditorPane editor) {
         this.pane = editor;
         charHeight = pane.getFontMetrics(pane.getFont()).getHeight();
@@ -159,12 +160,11 @@ public class LineNumbersRuler extends JComponent
             sp.setRowHeaderView(this);
             this.pane.getDocument().addDocumentListener(this);
             updateSize();
-            gotoLineDialog = new GotoLineDialog(pane);
             mouseListener = new MouseAdapter() {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    gotoLineDialog.setVisible(true);
+                    GotoLineDialog.showForEditor(pane);
                 }
             };
             addMouseListener(mouseListener);
@@ -172,6 +172,7 @@ public class LineNumbersRuler extends JComponent
         status = Status.INSTALLING;
     }
 
+    @Override
     public void deinstall(JEditorPane editor) {
         removeMouseListener(mouseListener);
         status = Status.DEINSTALLING;
@@ -182,6 +183,7 @@ public class LineNumbersRuler extends JComponent
         }
     }
 
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("document")) {
             if (evt.getOldValue() instanceof SyntaxDocument) {
@@ -198,14 +200,17 @@ public class LineNumbersRuler extends JComponent
         }
     }
 
+    @Override
     public void insertUpdate(DocumentEvent e) {
         updateSize();
     }
 
+    @Override
     public void removeUpdate(DocumentEvent e) {
         updateSize();
     }
 
+    @Override
     public void changedUpdate(DocumentEvent e) {
         updateSize();
     }

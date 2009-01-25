@@ -31,12 +31,13 @@ import jsyntaxpane.util.Configuration;
  * tab is inserted.
  * If the trimmed current line ends with '}', then the line is unindented
  */
-public class JavaIndentAction extends TextAction implements SyntaxAction {
+public class JavaIndentAction extends DefaultSyntaxAction {
 
     public JavaIndentAction() {
         super("JAVA_INDENT");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent target = getTextComponent(e);
         if (target != null) {
@@ -44,7 +45,7 @@ public class JavaIndentAction extends TextAction implements SyntaxAction {
             String prefix = ActionUtils.getIndent(line);
             Integer tabSize = (Integer) target.getDocument().getProperty(PlainDocument.tabSizeAttribute);
             if (line.trim().endsWith("{")) {
-                prefix += ActionUtils.SPACES.substring(0, tabSize);
+                prefix += ActionUtils.getTab(target);
             }
             SyntaxDocument sDoc = ActionUtils.getSyntaxDocument(target);
             if (sDoc != null && line.trim().equals("}")) {
@@ -54,7 +55,7 @@ public class JavaIndentAction extends TextAction implements SyntaxAction {
                 if (end >= sDoc.getLength()) {
                     end--;
                 }
-                if (line.startsWith(ActionUtils.SPACES.substring(0, tabSize))) {
+                if (line.startsWith(ActionUtils.getTab(target))) {
                     try {
                         sDoc.replace(start, end - start, line.substring(tabSize) + "\n", null);
                     } catch (BadLocationException ex) {
@@ -67,12 +68,5 @@ public class JavaIndentAction extends TextAction implements SyntaxAction {
                 target.replaceSelection("\n" + prefix);
             }
         }
-    }
-
-    public void config(Configuration config, String prefix, String name) {
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 }

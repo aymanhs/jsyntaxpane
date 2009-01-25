@@ -28,7 +28,7 @@ import jsyntaxpane.util.Configuration;
  * 
  * @author Ayman Al-Sairafi
  */
-public class ToggleCommentsAction extends TextAction implements SyntaxAction {
+public class ToggleCommentsAction extends DefaultSyntaxAction {
 
     protected String lineCommentStart = "// ";
     protected Pattern lineCommentPattern = null;
@@ -67,14 +67,11 @@ public class ToggleCommentsAction extends TextAction implements SyntaxAction {
         }
     }
 
+    @Override
     public void config(Configuration config, String prefix, String name) {
         // we need to escape the chars
         lineCommentStart = config.getPrefixProperty(prefix,
                 name + ".LineComments", "// ").replace("\"", "");
         lineCommentPattern = Pattern.compile("(^" + lineCommentStart + ")(.*)");
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 }

@@ -53,38 +53,36 @@ public class JarServiceProvider {
         ArrayList<Object> l = new ArrayList<Object>();
         ClassLoader cl = JarServiceProvider.class.getClassLoader();
         cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-        if (cl != null) {
-            String serviceFile = "META-INF/services/" + cls.getName();
-            Enumeration<URL> e = cl.getResources(serviceFile);
-            while (e.hasMoreElements()) {
-                URL u = e.nextElement();
-                InputStream is = u.openStream();
-                BufferedReader br = null;
-                try {
-                    br = new BufferedReader(
-                            new InputStreamReader(is, Charset.forName("UTF-8")));
-                    String str = null;
-                    while ((str = br.readLine()) != null) {
-                        int commentStartIdx = str.indexOf("#");
-                        if (commentStartIdx != -1) {
-                            str = str.substring(0, commentStartIdx);
-                        }
-                        str = str.trim();
-                        if (str.length() == 0) {
-                            continue;
-                        }
-                        try {
-                            Object obj = cl.loadClass(str).newInstance();
-                            l.add(obj);
-                        } catch (Exception ex) {
-                            LOG.warning("Could not load: " + str);
-                            LOG.warning(ex.getMessage());
-                        }
+        String serviceFile = "META-INF/services/" + cls.getName();
+        Enumeration<URL> e = cl.getResources(serviceFile);
+        while (e.hasMoreElements()) {
+            URL u = e.nextElement();
+            InputStream is = u.openStream();
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(
+                        new InputStreamReader(is, Charset.forName("UTF-8")));
+                String str = null;
+                while ((str = br.readLine()) != null) {
+                    int commentStartIdx = str.indexOf("#");
+                    if (commentStartIdx != -1) {
+                        str = str.substring(0, commentStartIdx);
                     }
-                } finally {
-                    if (br != null) {
-                        br.close();
+                    str = str.trim();
+                    if (str.length() == 0) {
+                        continue;
                     }
+                    try {
+                        Object obj = cl.loadClass(str).newInstance();
+                        l.add(obj);
+                    } catch (Exception ex) {
+                        LOG.warning("Could not load: " + str);
+                        LOG.warning(ex.getMessage());
+                    }
+                }
+            } finally {
+                if (br != null) {
+                    br.close();
                 }
             }
         }
@@ -155,5 +153,30 @@ public class JarServiceProvider {
             }
         }
         return map;
+    }
+
+    public static List<String> readLines(String url) {
+        InputStream is = null;
+        List<String> lines = new ArrayList<String>();
+        try {
+            ClassLoader cl = JarServiceProvider.class.getClassLoader();
+            cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
+            URL loc = cl.getResource(url);
+            is = loc.openStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            lines.add(br.readLine());
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
+            return lines;
+        }
+
     }
 }

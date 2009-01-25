@@ -26,12 +26,13 @@ import jsyntaxpane.util.Configuration;
  *
  * The pairs are hard-coded here.
  */
-public class PairAction extends TextAction implements SyntaxAction {
+public class PairAction extends DefaultSyntaxAction {
 
     public PairAction() {
         super("PAIR_ACTION");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent target = getTextComponent(e);
         if (target != null) {
@@ -42,16 +43,9 @@ public class PairAction extends TextAction implements SyntaxAction {
                 target.replaceSelection(left + selected + right);
             } else {
                 target.replaceSelection(left + right);
+                target.setCaretPosition(target.getCaretPosition() - right.length());
             }
-            target.setCaretPosition(target.getCaretPosition() - 1);
         }
-    }
-
-    public void config(Configuration config, String prefix, String name) {
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 
     private static Map<String, String> PAIRS = new HashMap<String, String>(4);

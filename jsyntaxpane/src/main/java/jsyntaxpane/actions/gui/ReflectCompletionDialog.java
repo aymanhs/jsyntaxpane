@@ -11,19 +11,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jsyntaxpane.actions;
+package jsyntaxpane.actions.gui;
 
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
+import jsyntaxpane.util.ReflectUtils;
 
 /**
  *
  * @author Ayman Al-Sairafi
  */
-public class ComboCompletionDialog extends javax.swing.JDialog {
+public class ReflectCompletionDialog extends javax.swing.JDialog {
 
     /**
      * The result returned to the caller
@@ -33,29 +47,28 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
      * The current filter, to avoid refiltering the items
      */
     public String escapeChars = ";(= \t\n";
-    public String[] items;
+    public List<? extends Member> items;
 
-    /** Creates new form ComboCompletionDialog
+    /**
+     * Creates new form ReflectCompletionDialog
      * @param parent
-     * @param modal
-     * @param items
      */
-    public ComboCompletionDialog(java.awt.Frame parent, boolean modal,
-            String[] items) {
-        super(parent, modal);
+    public ReflectCompletionDialog(Window parent) {
+        super(parent, ModalityType.APPLICATION_MODAL);
         initComponents();
-        this.items = items;
-        jLstItems.setListData(items);
         jTxtItem.getDocument().addDocumentListener(new DocumentListener() {
 
+            @Override
             public void insertUpdate(DocumentEvent e) {
                 refilterList();
             }
 
+            @Override
             public void removeUpdate(DocumentEvent e) {
                 refilterList();
             }
 
+            @Override
             public void changedUpdate(DocumentEvent e) {
                 refilterList();
             }
@@ -74,13 +87,17 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         jTxtItem.setText(abbrev);
     }
 
+    public void setCompletionFor(String name) {
+        lblCompletionsFor.setText(name);
+    }
+
     private void refilterList() {
         String prefix = jTxtItem.getText();
-        Vector<String> filtered = new Vector<String>();
+        Vector<Member> filtered = new Vector<Member>();
         Object selected = jLstItems.getSelectedValue();
-        for (String s : items) {
-            if (s.startsWith(prefix)) {
-                filtered.add(s);
+        for (Member m : items) {
+            if (m.getName().startsWith(prefix)) {
+                filtered.add(m);
             }
         }
         jLstItems.setListData(filtered);
@@ -103,8 +120,10 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         jTxtItem = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jLstItems = new javax.swing.JList();
+        lblCompletionsFor = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setName("CompletionDialog"); // NOI18N
         setResizable(false);
         setUndecorated(true);
 
@@ -116,22 +135,29 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         });
 
         jLstItems.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jLstItems.setCellRenderer(new IntelliListRenderer());
         jLstItems.setFocusable(false);
         jScrollPane1.setViewportView(jLstItems);
+
+        lblCompletionsFor.setText("Class Name");
+        lblCompletionsFor.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTxtItem, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
+            .addComponent(jTxtItem, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE)
+            .addComponent(lblCompletionsFor, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jTxtItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
+                .addComponent(lblCompletionsFor))
         );
 
         pack();
@@ -163,7 +189,16 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
 
         if (escapeChars.indexOf(evt.getKeyChar()) >= 0) {
             if (jLstItems.getSelectedIndex() >= 0) {
-                result = jLstItems.getSelectedValue().toString();
+                Object selected = jLstItems.getSelectedValue();
+                if (selected instanceof Method) {
+                    result = ReflectUtils.getJavaCallString((Method) selected);
+                } else if (selected instanceof Constructor) {
+                    result = ReflectUtils.getJavaCallString((Constructor) selected);
+                } else if (selected instanceof Field) {
+                    result = ((Field)selected).getName();
+                } else {
+                    result = selected.toString();
+                }
             } else {
                 result = jTxtItem.getText();
             }
@@ -185,9 +220,46 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         return result == null ? "" : result;
     }
 
+    /**
+     * Set the items to display
+     * @param items
+     */
+    public void setItems(List<? extends Member> items) {
+        this.items = items;
+    }
+
+    /**
+     * Display the dialog for the given text component
+     * @param target
+     * @param initialText
+     */
+    public void displayFor(JTextComponent target, String initialText) {
+        try {
+            int dot = target.getCaretPosition();
+            Window window = SwingUtilities.getWindowAncestor(target);
+            Rectangle rt = target.modelToView(dot);
+            Point loc = new Point(rt.x, rt.y);
+            // convert the location from Text Componet coordinates to
+            // Frame coordinates...
+            loc = SwingUtilities.convertPoint(target, loc, window);
+            // and then to Screen coordinates
+            SwingUtilities.convertPointToScreen(loc, window);
+            setLocationRelativeTo(window);
+            setLocation(loc);
+        } catch (BadLocationException ex) {
+            Logger.getLogger(ReflectCompletionDialog.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            setFonts(target.getFont());
+            setText(initialText);
+            refilterList();
+            setVisible(true);
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList jLstItems;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTxtItem;
+    private javax.swing.JLabel lblCompletionsFor;
     // End of variables declaration//GEN-END:variables
+
 }

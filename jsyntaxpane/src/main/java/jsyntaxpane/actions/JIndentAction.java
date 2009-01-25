@@ -19,7 +19,7 @@ import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.util.Configuration;
 
-public class JIndentAction extends TextAction implements SyntaxAction {
+public class JIndentAction extends DefaultSyntaxAction {
 
     /**
      * creates new JIndentAction.
@@ -43,25 +43,16 @@ public class JIndentAction extends TextAction implements SyntaxAction {
             String line = ActionUtils.getLine(target);
             String lineToPos = line.substring(0, pos - start);
             String prefix = ActionUtils.getIndent(line);
-            int tabSize = ActionUtils.getTabSize(target);
             if (lineToPos.trim().endsWith("{")) {
-                prefix += ActionUtils.SPACES.substring(0, tabSize);
+                prefix += ActionUtils.getTab(target);
             } else {
                 String noComment = sDoc.getUncommentedText(start, pos); // skip EOL comments
 
                 if (noComment.trim().endsWith("{")) {
-                    prefix += ActionUtils.SPACES.substring(0, tabSize);
+                    prefix += ActionUtils.getTab(target);
                 }
             }
             target.replaceSelection("\n" + prefix);
         }
-    }
-
-
-    public void config(Configuration config, String prefix, String name) {
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 }

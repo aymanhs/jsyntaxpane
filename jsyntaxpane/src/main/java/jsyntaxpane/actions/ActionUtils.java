@@ -18,6 +18,7 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComboBox;
@@ -344,7 +345,7 @@ public class ActionUtils {
         String[] lines = toInsert.split("\n");
         if (lines.length > 1) {
             // multi line strings will need to be indented
-            String tabToSpaces = SPACES.substring(0, getTabSize(target));
+            String tabToSpaces = getTab(target);
             String currentLine = getLineAt(target, dot);
             String currentIndent = getIndent(currentLine);
             StringBuilder sb = new StringBuilder(toInsert.length());
@@ -378,8 +379,29 @@ public class ActionUtils {
             doc.insertString(dot, toInsert, null);
         }
     }
+
+    /**
+     * Return a string with number of spaces equal to the tab-stop of the TextComponent
+     * @param target
+     * @return
+     */
+    public static String getTab(JTextComponent target) {
+        return SPACES.substring(0, getTabSize(target));
+    }
+
+    /**
+     * Create and send a KeyPress KeyEvent to the component given
+     * @param target Editor to get the action
+     * @param v_key from KeyEvent.V_ constants
+     * @param modifiers from KeyEvent.*MASK constants
+     */
+    public static void sendKeyPress(JTextComponent target, int v_key, int modifiers) {
+        KeyEvent ke = new KeyEvent(target, KeyEvent.KEY_PRESSED, System.currentTimeMillis(),
+                modifiers, v_key, KeyEvent.CHAR_UNDEFINED);
+        target.dispatchEvent(ke);
+    }
     // This is used internally to avoid NPE if we have no Strings
-    static String[] EMPTY_STRING_ARRAY = new String[0];
+    final static String[] EMPTY_STRING_ARRAY = new String[0];
     // This is used to quickly create Strings of at most 16 spaces (using substring)
-    static String SPACES = "                ";
+    final static String SPACES = "                ";
 }

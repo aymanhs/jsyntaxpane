@@ -13,29 +13,23 @@
  */
 package jsyntaxpane.actions;
 
-import java.awt.event.ActionEvent;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
-import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.util.Configuration;
 
 /**
- * Undo action
+ * The DefaultSyntaxAction.  You can extend this class or implement the interface
+ * SyntaxAction to create your own actions.
+ * 
+ * @author Ayman Al-Sairafi
  */
-public class UndoAction extends DefaultSyntaxAction {
+abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAction {
 
-    public UndoAction() {
-        super("UNDO");
+    public DefaultSyntaxAction(String actionName) {
+        super(actionName);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null) {
-            if (target.getDocument() instanceof SyntaxDocument) {
-                SyntaxDocument sDoc = (SyntaxDocument) target.getDocument();
-                sDoc.doUndo();
-            }
-        }
+    public void config(Configuration config, String prefix, String name) {
     }
+
 }

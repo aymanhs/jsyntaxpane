@@ -27,12 +27,13 @@ import jsyntaxpane.util.Configuration;
  * This Action duplicates the current line, or all the highlighted lines.
  * @author Ayman Al-Sairafi
  */
-public class DuplicateLinesAction extends TextAction implements SyntaxAction {
+public class DuplicateLinesAction extends DefaultSyntaxAction {
 
     public DuplicateLinesAction() {
         super("DUPLICATE_LINES");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent target = getTextComponent(e);
         if (target != null) {
@@ -48,10 +49,4 @@ public class DuplicateLinesAction extends TextAction implements SyntaxAction {
         }
     }
 
-    public void config(Configuration config, String prefix, String name) {
-    }
-
-    public TextAction getAction(String key) {
-        return this;
-    }
 }

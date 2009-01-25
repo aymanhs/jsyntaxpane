@@ -59,10 +59,7 @@ public class IndentAction extends DefaultEditorKit.InsertTabAction
         }
     }
 
+    @Override
     public void config(Configuration config, String prefix, String name) {
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 }
