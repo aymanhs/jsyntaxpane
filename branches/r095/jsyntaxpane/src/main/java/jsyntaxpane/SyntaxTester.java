@@ -14,8 +14,11 @@
 package jsyntaxpane;
 
 import java.awt.event.ItemEvent;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.text.BadLocationException;
 import jsyntaxpane.actions.ActionUtils;
 import jsyntaxpane.actions.CaretMonitor;
 
@@ -137,19 +140,17 @@ public class SyntaxTester extends javax.swing.JFrame {
 
             // save the state of the current JEditorPane, as it's Document is about
             // to be replaced.
-            String t = jEdtTest.getText();
+            String oldText = jEdtTest.getText();
 
             // install a new DefaultSyntaxKit on the JEditorPane for the requested language.
             jEdtTest.setContentType(lang);
-
-            // restore the state of the JEditorPane - note that installing a new
-            // EditorKit causes the Document to be recreated.
-            SyntaxDocument sDoc = (SyntaxDocument) jEdtTest.getDocument();
-            jEdtTest.setText(t);
-            sDoc.clearUndos();
-            // Workaround: Set the caret to the top so that line numbers are
-            // painted correctly
-            jEdtTest.setCaretPosition(0);
+            try {
+                // setText should not be called (read the JavaDocs).  Better use the read
+                // method and create a new document.
+                jEdtTest.read(new StringReader(oldText), lang);
+            } catch (IOException ex) {
+                Logger.getLogger(SyntaxTester.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_jCmbLangsItemStateChanged
 

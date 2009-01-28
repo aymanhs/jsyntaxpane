@@ -43,6 +43,7 @@ public class SyntaxView extends PlainView {
     private final boolean singleColorSelect;
     private final int rightMarginColumn;
     private final Color rightMarginColor;
+    private final SyntaxStyles styles;
 
     /**
      * Construct a new view using the given configuration and prefix given
@@ -61,6 +62,7 @@ public class SyntaxView extends PlainView {
         String textaa = config.getPrefixProperty(prefix, PROPERTY_TEXTAA,
                 "DEFAULT");
         textAAHint = TEXT_AA_HINT_NAMES.get(textaa);
+        styles = SyntaxStyles.read(config, prefix);
     }
 
     @Override
@@ -108,7 +110,7 @@ public class SyntaxView extends PlainView {
                     l = p1 - s;
                 }
                 doc.getText(s, l, segment);
-                x = SyntaxStyles.getInstance().drawText(segment, x, y, graphics, this, t);
+                x = styles.drawText(segment, x, y, graphics, this, t);
                 start = t.end();
             }
             // now for any remaining text not tokenized:

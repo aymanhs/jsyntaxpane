@@ -33,8 +33,8 @@ import java.util.logging.Logger;
  * @author subwiz
  */
 public class JarServiceProvider {
-    public static final String SERVICES_ROOT = "META-INF/services/";
 
+    public static final String SERVICES_ROOT = "META-INF/services/";
     private static final Logger LOG = Logger.getLogger(JarServiceProvider.class.getName());
 
     /**
@@ -156,19 +156,27 @@ public class JarServiceProvider {
         return map;
     }
 
+    /**
+     * Read the given URL and returns a List of Strings for each input line
+     * Each line will not have the line terminator.
+     *
+     * @param url location of file to read, relative to /META-INF/services
+     * @return List of Strings for each line read.
+     * @throws IllegalArgumentException if URL is invalid
+     */
     public static List<String> readLines(String url) {
         InputStream is = null;
         List<String> lines = new ArrayList<String>();
+        ClassLoader cl = JarServiceProvider.class.getClassLoader();
+        cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
+        URL loc = cl.getResource(SERVICES_ROOT + url);
+        if (loc == null) {
+            throw new IllegalArgumentException("Invalid url: " + url);
+        }
         try {
-            ClassLoader cl = JarServiceProvider.class.getClassLoader();
-            cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-            URL loc = cl.getResource(SERVICES_ROOT + url);
-            if(loc == null) {
-                throw new IllegalArgumentException("Invalid url: " + url);
-            }
             is = loc.openStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            for(String line = br.readLine(); line != null; line = br.readLine()) {
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
                 // Trim and unescape some control chars
                 line = line.trim().replace("\\n", "\n").replace("\\t", "\t");
                 lines.add(line);

@@ -14,7 +14,6 @@
 package jsyntaxpane;
 
 import java.io.CharArrayReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -80,16 +79,8 @@ public class SyntaxDocument extends PlainDocument {
         try {
             Segment seg = new Segment();
             getText(0, getLength(), seg);
-            CharArrayReader reader = new CharArrayReader(seg.array, seg.offset, seg.count);
-            lexer.yyreset(reader);
-            Token token;
-            while ((token = lexer.yylex()) != null) {
-                toks.add(token);
-            }
+            lexer.parse(seg, 0, toks);
         } catch (BadLocationException ex) {
-            log.log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            // This will not be thrown from the Lexer
             log.log(Level.SEVERE, null, ex);
         } finally {
             if (log.isLoggable(Level.FINEST)) {

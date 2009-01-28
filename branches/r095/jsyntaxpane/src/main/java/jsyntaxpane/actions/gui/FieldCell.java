@@ -16,13 +16,8 @@ package jsyntaxpane.actions.gui;
 import java.awt.Color;
 import java.awt.Image;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.ImageIcon;
+import java.util.Map;
 import javax.swing.JList;
-import jsyntaxpane.util.ReflectUtils;
 
 class FieldCell extends MemberCell {
 
@@ -43,22 +38,23 @@ class FieldCell extends MemberCell {
         return "";
     }
 
+    @Override
     protected String getRightText() {
         return field.getType().getSimpleName();
     }
 
     @Override
     protected Image getIcon() {
-        URL loc = this.getClass().getResource(METHOD_ICON_LOC);
-        if (loc == null) {
-            Logger.getLogger(this.getClass().getName()).log(Level.WARNING,
-                    "Unable to get icon at: " + METHOD_ICON_LOC);
-            return null;
-        } else {
-            Image i = new ImageIcon(loc).getImage();
-            return i;
+        int type = field.getModifiers() & 0xf; // only get public/private/protected/static
+        if(icons == null) {
+            icons = readIcons(FIELD_ICON_LOC);
         }
+        if(icons.get(type) == null) {
+            System.out.println("Unable to get icon for type: " + field.getModifiers());
+        }
+        return icons.get(type);
     }
 
-    public static final String METHOD_ICON_LOC = "/META-INF/images/completions/field.png";
+    private static Map<Integer, Image> icons = null;
+    public static final String FIELD_ICON_LOC = "/META-INF/images/completions/field";
 }
