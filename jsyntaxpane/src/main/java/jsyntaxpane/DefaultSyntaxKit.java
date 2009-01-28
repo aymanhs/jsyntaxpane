@@ -15,12 +15,9 @@ package jsyntaxpane;
 
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +70,6 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     private static final Logger LOG = Logger.getLogger(DefaultSyntaxKit.class.getName());
     private List<SyntaxComponent> editorComponents = new ArrayList<SyntaxComponent>();
     private JPopupMenu popupMenu;
-    private MouseListener popupListener;
     /**
      * Main Configuration of JSyntaxPane
      */
@@ -184,16 +180,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
                 }
             }
         }
-        popupListener = new MouseAdapter() {
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-        };
-        editorPane.addMouseListener(popupListener);
+        editorPane.setComponentPopupMenu(popupMenu);
     }
 
     @Override
@@ -237,10 +224,6 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         // All the Actions were added directly to the editorPane, so we can remove
         // all of them with one call.  The Parents (defaults) will be intact
         editorPane.getActionMap().clear();
-
-        if (popupListener != null) {
-            editorPane.removeMouseListener(popupListener);
-        }
     }
 
     /**

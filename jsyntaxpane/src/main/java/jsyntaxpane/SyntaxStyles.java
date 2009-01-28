@@ -22,17 +22,23 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
+import jsyntaxpane.util.Configuration;
 import jsyntaxpane.util.JarServiceProvider;
 
 /**
- * The STyles to use for each TokenType.  The defaults are created here, and
+ * The Styles to use for each TokenType.  The defaults are created here, and
  * then the resource META-INF/services/syntaxstyles.properties is read and
  * merged.  You can also pass a properties instance and merge your prefered
- * styles into the default styles
+ * styles into the default styles.
+ *
+ * Text is drawn by forwarding the drawText request to the SyntaxStyle for the
+ * that matches the given TokenType
  * 
- * @author Ayman
+ * @author Ayman Al-Sairafi
  */
 public class SyntaxStyles {
+
+    public static final String STYLE_PROPERTY_KEY = ".Style.";
 
     /**
      * You can call the mergeStyles method with a Properties file to customize
@@ -55,7 +61,6 @@ public class SyntaxStyles {
     Map<TokenType, SyntaxStyle> styles;
     private static SyntaxStyles instance = createInstance();
     private static final Logger LOG = Logger.getLogger(SyntaxStyles.class.getName());
-    
     private static SyntaxStyle DEFAULT_STYLE = new SyntaxStyle(Color.BLACK, Font.PLAIN);
 
     private SyntaxStyles() {
@@ -72,8 +77,29 @@ public class SyntaxStyles {
         return syntaxstyles;
     }
 
+    /**
+     * Returns the Default Singleton
+     * @return
+     */
     public static SyntaxStyles getInstance() {
         return instance;
+    }
+
+    public static SyntaxStyles read(Configuration config, String prefix) {
+        SyntaxStyles ss = createInstance();
+        for (String k : config.stringPropertyNames()) {
+            if (k.startsWith(prefix + STYLE_PROPERTY_KEY)) {
+                String type = k.substring(prefix.length() + STYLE_PROPERTY_KEY.length());
+                try {
+                    ss.put(TokenType.valueOf(type), new SyntaxStyle(config.getProperty(k)));
+                } catch (IllegalArgumentException e) {
+                    Logger.getLogger(SyntaxStyles.class.getName()).warning(
+                            String.format("Invalid Style [%s] in property key: \"%s\"" +
+                            ". this style will be ignored", type, k));
+                }
+            }
+        }
+        return ss;
     }
 
     public void put(TokenType type, SyntaxStyle style) {
@@ -81,25 +107,6 @@ public class SyntaxStyles {
             styles = new HashMap<TokenType, SyntaxStyle>();
         }
         styles.put(type, style);
-    }
-
-    /**
-     * Set the graphics font and others to the style for the given token
-     * @param g
-     * @param type
-     * @deprecated 
-     */
-    @Deprecated
-    public void setGraphicsStyle(Graphics g, TokenType type) {
-        Font c = g.getFont();
-        SyntaxStyle ss = styles.get(type);
-        if (ss != null) {
-            g.setFont(g.getFont().deriveFont(ss.getFontStyle()));
-            g.setColor(ss.getColor());
-        } else {
-            g.setFont(g.getFont().deriveFont(Font.PLAIN));
-            g.setColor(Color.BLACK);
-        }
     }
 
     /**

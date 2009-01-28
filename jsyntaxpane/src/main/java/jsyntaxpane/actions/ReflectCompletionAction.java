@@ -106,12 +106,12 @@ public class ReflectCompletionAction extends DefaultSyntaxAction {
                         aClass = findClass(prevStr);
                         ReflectUtils.addStaticFields(aClass, members);
                         ReflectUtils.addStaticMethods(aClass, members);
-                        dlg.setCompletionFor("static methods of " + aClass);
+                        dlg.setCompletionFor("static members of " + aClass);
                     } else {
                         System.out.println("prev: " + prevStr);
                         aClass = JTextPane.class;
                         ReflectUtils.addMethods(aClass, members);
-                        dlg.setCompletionFor("methods of " + aClass);
+                        dlg.setCompletionFor("members of " + aClass);
                     }
                 }
             }
@@ -132,8 +132,8 @@ public class ReflectCompletionAction extends DefaultSyntaxAction {
 
     private Class findClass(String shortName) {
         Class c = null;
-        for (String prefix : paths) {
-            c = getClass(prefix + shortName);
+        for (String pack : packages) {
+            c = getClass(pack + shortName);
             if (c != null) {
                 break;
             }
@@ -141,8 +141,9 @@ public class ReflectCompletionAction extends DefaultSyntaxAction {
         return c;
     }
     
-    static final String[] paths = new String[]{
+    static final String[] packages = new String[]{
         "java.lang.",
-        "java.util."
+        "java.util.",
+        "jsyntaxpane."
     };
 }

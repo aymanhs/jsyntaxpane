@@ -14,7 +14,7 @@
 
 package jsyntaxpane.lexers;
 
-import jsyntaxpane.DefaultLexer;
+
 import jsyntaxpane.Token;
 import jsyntaxpane.TokenType;
 
@@ -22,7 +22,7 @@ import jsyntaxpane.TokenType;
 
 %public
 %class DOSBatchLexer
-%extends DefaultLexer
+%extends DefaultJFlexLexer
 %final
 %unicode
 %char
@@ -39,18 +39,17 @@ import jsyntaxpane.TokenType;
         super();
     }
 
-    private Token token(TokenType type) {
-        return new Token(type, yychar, yylength());
+    @Override
+    public int yychar() {
+        return yychar;
     }
 %}
 
-StartComment = rem
-WhiteSpace = [ \t]
+StartComment = "rem"
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
-KeyCharacter = [a-zA-Z0-9._ ]
 
-Comment = "rem" {InputCharacter}* {LineTerminator}?
+Comment = {StartComment} {InputCharacter}* {LineTerminator}?
 
 %%
 

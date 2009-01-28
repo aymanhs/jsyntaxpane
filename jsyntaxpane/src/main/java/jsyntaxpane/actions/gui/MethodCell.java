@@ -16,10 +16,7 @@ package jsyntaxpane.actions.gui;
 import java.awt.Color;
 import java.awt.Image;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.ImageIcon;
+import java.util.Map;
 import javax.swing.JList;
 import jsyntaxpane.util.ReflectUtils;
 
@@ -42,23 +39,20 @@ class MethodCell extends MemberCell {
         return ReflectUtils.getParamsString(method.getParameterTypes());
     }
 
+    @Override
     protected String getRightText() {
         return method.getReturnType().getSimpleName();
     }
 
     @Override
     protected Image getIcon() {
-        URL loc = this.getClass().getResource(METHOD_ICON_LOC);
-        if (loc == null) {
-            Logger.getLogger(this.getClass().getName()).log(Level.WARNING,
-                    "Unable to get icon at: " + METHOD_ICON_LOC);
-            return null;
-        } else {
-            Image i = new ImageIcon(loc).getImage();
-            return i;
+        int type = method.getModifiers() & 0xf; // only get public/private/protected/static
+        if(icons == null) {
+            icons = readIcons(METHOD_ICON_LOC);
         }
+        return icons.get(type);
     }
 
-    private static Image[] icons = null;
-    public static final String METHOD_ICON_LOC = "/META-INF/images/completions/method.png";
+    private static Map<Integer, Image> icons = null;
+    public static final String METHOD_ICON_LOC = "/META-INF/images/completions/method";
 }
