@@ -524,7 +524,7 @@ public class SyntaxDocument extends PlainDocument {
         Iterator<Token> iter = getTokens(aStart, anEnd);
         while (iter.hasNext()) {
             Token t = iter.next();
-            if (TokenType.COMMENT != t.type && TokenType.COMMENT2 != t.type) {
+            if (!TokenType.isComment(t)) {
                 result.append(t.getText(this));
             }
         }
