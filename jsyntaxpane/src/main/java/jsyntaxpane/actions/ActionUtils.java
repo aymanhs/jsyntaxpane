@@ -274,6 +274,14 @@ public class ActionUtils {
         combo.setSelectedIndex(0);
     }
 
+    public static void insertMagicString(JTextComponent target, String result) {
+        try {
+            insertMagicString(target, target.getCaretPosition(), result);
+        } catch (BadLocationException ex) {
+            Logger.getLogger(ActionUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     /**
      * Repeat the string source repeat times.
      * If repeats == 0 then empty String is returned

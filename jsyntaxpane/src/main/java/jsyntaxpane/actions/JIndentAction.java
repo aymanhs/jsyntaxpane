@@ -16,11 +16,15 @@ package jsyntaxpane.actions;
 import java.awt.event.ActionEvent;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
+import jsyntaxpane.Token;
+import jsyntaxpane.TokenType;
 
 public class JIndentAction extends DefaultSyntaxAction {
 
     /**
      * creates new JIndentAction.
+     * This class should be mapped to VK_ENTER.  It performs proper indentation
+     * for Java Type languages and automatically inserts "*" in multi-line comments
      * Initial Code contributed by ser... AT mail.ru
      */
     public JIndentAction() {
@@ -41,7 +45,16 @@ public class JIndentAction extends DefaultSyntaxAction {
             String line = ActionUtils.getLine(target);
             String lineToPos = line.substring(0, pos - start);
             String prefix = ActionUtils.getIndent(line);
-            if (lineToPos.trim().endsWith("{")) {
+            Token t = sDoc.getTokenAt(pos);
+            if (TokenType.isComment(t)) {
+                if (line.trim().endsWith("*/")) {
+                    prefix = prefix.substring(0, prefix.length() - 1);
+                } else if (line.trim().startsWith("*")) {
+                    prefix += "* ";
+                } else if (line.trim().startsWith("/*")) {
+                    prefix += " * ";
+                }
+            } else if (lineToPos.trim().endsWith("{")) {
                 prefix += ActionUtils.getTab(target);
             } else {
                 String noComment = sDoc.getUncommentedText(start, pos); // skip EOL comments

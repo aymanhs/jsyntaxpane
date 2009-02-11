@@ -15,38 +15,38 @@ package jsyntaxpane.actions.gui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JPanel;
 
-class IntelliListRenderer extends DefaultListCellRenderer {
+class MembersListRenderer extends DefaultListCellRenderer {
 
-    static final Color evensColor = new Color(15663086);
+    static final Color evensColor = new Color(0xeeffee);
+    private ReflectCompletionDialog dlg;
+
+    public MembersListRenderer(ReflectCompletionDialog dlg) {
+        this.dlg = dlg;
+    }
 
     @Override
-    public Component getListCellRendererComponent(final JList list, Object value, final int index, final boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(final JList list, Object value, final int index,
+            final boolean isSelected, boolean cellHasFocus) {
         Color back = (index % 2 == 1) ? list.getBackground() : evensColor;
         if (value instanceof Method) {
             final Method method = (Method) value;
-            return new MethodCell(list, isSelected, back, method);
+            return new MethodCell(list, isSelected, back, method, dlg.getTheClass());
         } else if (value instanceof Field) {
             Field field = (Field) value;
-            return new FieldCell(list, isSelected, back, field);
+            return new FieldCell(list, isSelected, back, field, dlg.getTheClass());
+        } else if (value instanceof Constructor) {
+            Constructor cons = (Constructor) value;
+            return new ConstructorCell(list, isSelected, back, cons, dlg.getTheClass());
+        } else {
+            Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            comp.setBackground(back);
+            return comp;
         }
-        JLabel lbl = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if (index % 2 == 1 && (!isSelected)) {
-            lbl.setBackground(evensColor);
-        }
-        if (value instanceof String) {
-            String string = (String) value;
-            if (string.contains("byte")) {
-                lbl.setFont(getFont().deriveFont(Font.ITALIC | Font.BOLD));
-            }
-        }
-        return lbl;
     }
 }

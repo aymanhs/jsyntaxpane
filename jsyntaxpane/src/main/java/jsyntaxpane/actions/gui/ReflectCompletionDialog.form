@@ -26,8 +26,8 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Component id="jTxtItem" alignment="0" pref="437" max="32767" attributes="0"/>
-          <Component id="jScrollPane1" alignment="1" pref="437" max="32767" attributes="0"/>
-          <Component id="lblCompletionsFor" alignment="0" pref="437" max="32767" attributes="0"/>
+          <Component id="jScrollPane1" alignment="0" pref="437" max="32767" attributes="0"/>
+          <Component id="jCmbClassName" alignment="0" pref="437" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -35,9 +35,9 @@
           <Group type="102" alignment="0" attributes="0">
               <Component id="jTxtItem" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="0" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="162" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" pref="156" max="32767" attributes="0"/>
               <EmptySpace min="-2" pref="0" max="-2" attributes="0"/>
-              <Component id="lblCompletionsFor" min="-2" max="-2" attributes="0"/>
+              <Component id="jCmbClassName" min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -64,22 +64,29 @@
           <Properties>
             <Property name="selectionMode" type="int" value="0"/>
             <Property name="cellRenderer" type="javax.swing.ListCellRenderer" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="new IntelliListRenderer()" type="code"/>
+              <Connection code="new jsyntaxpane.actions.gui.MembersListRenderer(this)" type="code"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
       </SubComponents>
     </Container>
-    <Component class="javax.swing.JLabel" name="lblCompletionsFor">
+    <Component class="javax.swing.JComboBox" name="jCmbClassName">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Class Name"/>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-            <EtchetBorder/>
-          </Border>
+        <Property name="editable" type="boolean" value="true"/>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="2">
+            <StringItem index="0" value="Object"/>
+            <StringItem index="1" value="String"/>
+          </StringArray>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCmbClassNameItemStateChanged"/>
+      </Events>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="ReflectCompletionDialog_jCmbClassName"/>
+      </AuxValues>
     </Component>
   </SubComponents>
 </Form>
