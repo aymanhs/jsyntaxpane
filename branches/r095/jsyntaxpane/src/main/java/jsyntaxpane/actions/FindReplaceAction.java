@@ -15,8 +15,7 @@ package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.TextAction;
-import jsyntaxpane.util.Configuration;
+import jsyntaxpane.SyntaxDocument;
 
 /**
  * Finder class.  This class contains the general Find, Find Next,
@@ -35,11 +34,9 @@ public class FindReplaceAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null) {
-            DocumentSearchData dsd = DocumentSearchData.getFromEditor(target);
-            dsd.showDialog(target);
-        }
+    public void actionPerformed(JTextComponent target, SyntaxDocument sdoc,
+            int dot, ActionEvent e) {
+        DocumentSearchData dsd = DocumentSearchData.getFromEditor(target);
+        dsd.showDialog(target);
     }
 }

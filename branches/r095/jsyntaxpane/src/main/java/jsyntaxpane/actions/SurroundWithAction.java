@@ -15,6 +15,7 @@ package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
 import javax.swing.text.JTextComponent;
+import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.util.Configuration;
 
 /**
@@ -33,26 +34,23 @@ public class SurroundWithAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
         String[] selection;
-        if (target != null) {
-            selection = ActionUtils.getSelectedLines(target);
-            String lineIndent = (selection.length == 0) ?
-                "" : ActionUtils.getIndent(selection[0]);
-            StringBuilder repl = new StringBuilder();
-            appendWithIndent(repl, getPrefix(), lineIndent);
-            String tab = ActionUtils.getTab(target);
-            for (String line : selection) {
-                if(indent) {
-                    repl.append(tab);
-                }
-                repl.append(line);
-                repl.append("\n");
+        selection = ActionUtils.getSelectedLines(target);
+        String lineIndent = (selection.length == 0) ? "" : ActionUtils.getIndent(selection[0]);
+        StringBuilder repl = new StringBuilder();
+        appendWithIndent(repl, getPrefix(), lineIndent);
+        String tab = ActionUtils.getTab(target);
+        for (String line : selection) {
+            if (indent) {
+                repl.append(tab);
             }
-            appendWithIndent(repl, getPostfix(), lineIndent);
-            target.replaceSelection(repl.toString());
+            repl.append(line);
+            repl.append("\n");
         }
+        appendWithIndent(repl, getPostfix(), lineIndent);
+        target.replaceSelection(repl.toString());
     }
 
     @Override
@@ -75,7 +73,7 @@ public class SurroundWithAction extends DefaultSyntaxAction {
         for (int i = 0; i < lines.length(); i++) {
             sb.append(lines.charAt(i));
             // add indentation to everythin except the last line
-            if (lines.charAt(i) == '\n'  && i <lines.length() - 1) {
+            if (lines.charAt(i) == '\n' && i < lines.length() - 1) {
                 sb.append(indent);
             }
         }

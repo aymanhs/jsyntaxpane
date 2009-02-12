@@ -38,7 +38,7 @@ import jsyntaxpane.util.JarServiceProvider;
  */
 public class SyntaxStyles {
 
-    public static final String STYLE_PROPERTY_KEY = "Style";
+    public static final String STYLE_PROPERTY_KEY = "Style.";
 
     /**
      * You can call the mergeStyles method with a Properties file to customize
@@ -89,13 +89,11 @@ public class SyntaxStyles {
         SyntaxStyles ss = createInstance();
         Configuration styleConf = config.subConfig(prefix, STYLE_PROPERTY_KEY);
         for (String k : styleConf.stringPropertyNames()) {
-            String type = k.substring(prefix.length() + STYLE_PROPERTY_KEY.length());
             try {
-                ss.put(TokenType.valueOf(type), new SyntaxStyle(config.getProperty(k)));
+                ss.put(TokenType.valueOf(k), new SyntaxStyle(styleConf.getProperty(k)));
             } catch (IllegalArgumentException e) {
                 Logger.getLogger(SyntaxStyles.class.getName()).warning(
-                        String.format("Invalid Style [%s] in property key: \"%s\"" +
-                        ". this style will be ignored", type, k));
+                        String.format("Invalid Token Type [%s] for Style of ", k, prefix));
             }
         }
         return ss;

@@ -11,25 +11,18 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.  
  */
-package jsyntaxpane.actions;
+package jsyntaxpane.syntaxkits;
 
-import jsyntaxpane.actions.gui.GotoLineDialog;
-import java.awt.event.ActionEvent;
-import javax.swing.text.JTextComponent;
-import jsyntaxpane.SyntaxDocument;
+import jsyntaxpane.DefaultSyntaxKit;
+import jsyntaxpane.lexers.XHTMLLexer;
 
 /**
- * This actions displays the GotoLine dialog
+ *
+ * @author Ayman Al-Sairafi
  */
-public class GotoLineAction extends DefaultSyntaxAction {
+public class XHTMLSyntaxKit extends DefaultSyntaxKit {
 
-    public GotoLineAction() {
-        super("GOTO_LINE");
-    }
-
-    @Override
-    public void actionPerformed(JTextComponent target, SyntaxDocument sdoc,
-            int dot, ActionEvent e) {
-        GotoLineDialog.showForEditor(target);
+    public XHTMLSyntaxKit() {
+        super(new XHTMLLexer());
     }
 }

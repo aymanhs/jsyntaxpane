@@ -30,18 +30,16 @@ public class XmlTagCompleteAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        int dot = target.getCaretPosition();
-        SyntaxDocument sdoc = ActionUtils.getSyntaxDocument(target);
-        Token tok = sdoc.getTokenAt(dot);
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        Token tok = sDoc.getTokenAt(dot);
         while (tok != null && tok.type != TokenType.TYPE) {
-            tok = sdoc.getPrevToken(tok);
+            tok = sDoc.getPrevToken(tok);
         }
         if (tok == null) {
             target.replaceSelection(">");
         } else {
-            CharSequence tag = tok.getText(sdoc);
+            CharSequence tag = tok.getText(sDoc);
             int savepos = target.getSelectionStart();
             target.replaceSelection("></" + tag.subSequence(1, tag.length()) + ">");
             target.setCaretPosition(savepos + 1);

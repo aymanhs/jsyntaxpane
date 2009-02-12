@@ -61,6 +61,7 @@ public class PairsMarker implements CaretListener, SyntaxComponent {
         Markers.removeMarkers(pane, marker);
     }
 
+    @Override
     public void config(Configuration config, String prefix) {
         Color markerColor = new Color(config.getPrefixInteger(prefix,
                 PROPERTY_COLOR,
@@ -68,11 +69,13 @@ public class PairsMarker implements CaretListener, SyntaxComponent {
         this.marker = new Markers.SimpleMarker(markerColor);
     }
 
+    @Override
     public void install(JEditorPane editor) {
         pane = editor;
         pane.addCaretListener(this);
     }
 
+    @Override
     public void deinstall(JEditorPane editor) {
         pane.removeCaretListener(this);
         removeMarkers();

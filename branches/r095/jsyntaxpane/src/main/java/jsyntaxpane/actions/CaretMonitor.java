@@ -58,6 +58,7 @@ public class CaretMonitor implements CaretListener {
         text.addCaretListener(this);
     }
 
+    @Override
     public void caretUpdate(CaretEvent evt) {
         if (text.getDocument() instanceof SyntaxDocument) {
             try {

@@ -29,13 +29,8 @@ public class UndoAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null) {
-            if (target.getDocument() instanceof SyntaxDocument) {
-                SyntaxDocument sDoc = (SyntaxDocument) target.getDocument();
-                sDoc.doUndo();
-            }
-        }
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        sDoc.doUndo();
     }
 }

@@ -28,7 +28,6 @@ import jsyntaxpane.SyntaxDocument;
  */
 public class ReflectCompletionAction extends DefaultSyntaxAction {
 
-    Map<String, String> completions;
     ReflectCompletionDialog dlg;
 
     public ReflectCompletionAction() {
@@ -36,14 +35,11 @@ public class ReflectCompletionAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null && target.getDocument() instanceof SyntaxDocument) {
-            SyntaxDocument sDoc = (SyntaxDocument) target.getDocument();
-            if (dlg == null) {
-                dlg = new ReflectCompletionDialog(target);
-            }
-            dlg.displayFor(target);
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        if (dlg == null) {
+            dlg = new ReflectCompletionDialog(target);
         }
+        dlg.displayFor(target);
     }
 }

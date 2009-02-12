@@ -16,7 +16,6 @@ package jsyntaxpane.actions;
 import java.awt.event.ActionEvent;
 import java.util.Map;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
 import jsyntaxpane.util.Configuration;
@@ -26,7 +25,7 @@ import jsyntaxpane.util.JarServiceProvider;
  * Completion Actions:
  * All completions are based on a simple String to String Map.
  */
-public class MapCompletionAction extends TextAction implements SyntaxAction {
+public class MapCompletionAction extends DefaultSyntaxAction {
 
     Map<String, String> completions;
 
@@ -35,23 +34,19 @@ public class MapCompletionAction extends TextAction implements SyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null && target.getDocument() instanceof SyntaxDocument) {
-            SyntaxDocument sDoc = (SyntaxDocument) target.getDocument();
-            int dot = target.getCaretPosition();
-            Token token = sDoc.getTokenAt(dot);
-            if (token != null) {
-                String abbriv = ActionUtils.getTokenStringAt(sDoc, dot);
-                if (completions.containsKey(abbriv)) {
-                    String completed = completions.get(abbriv);
-                    if (completed.indexOf('|') >= 0) {
-                        int ofst = completed.length() - completed.indexOf('|') - 1;
-                        sDoc.replaceToken(token, completed.replace("|", ""));
-                        target.setCaretPosition(target.getCaretPosition() - ofst);
-                    } else {
-                        sDoc.replaceToken(token, completed);
-                    }
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        Token token = sDoc.getTokenAt(dot);
+        if (token != null) {
+            String abbriv = ActionUtils.getTokenStringAt(sDoc, dot);
+            if (completions.containsKey(abbriv)) {
+                String completed = completions.get(abbriv);
+                if (completed.indexOf('|') >= 0) {
+                    int ofst = completed.length() - completed.indexOf('|') - 1;
+                    sDoc.replaceToken(token, completed.replace("|", ""));
+                    target.setCaretPosition(target.getCaretPosition() - ofst);
+                } else {
+                    sDoc.replaceToken(token, completed);
                 }
             }
         }
@@ -65,14 +60,11 @@ public class MapCompletionAction extends TextAction implements SyntaxAction {
      * @param prefix
      * @param name 
      */
+    @Override
     public void config(Configuration config, String prefix, String name) {
         String completionsFile = config.getPrefixProperty(prefix, "Completions.File", "NONE");
-        if(completionsFile != null) {
+        if (completionsFile != null) {
             completions = JarServiceProvider.readStringsMap(completionsFile);
         }
-    }
-
-    public TextAction getAction(String key) {
-        return this;
     }
 }

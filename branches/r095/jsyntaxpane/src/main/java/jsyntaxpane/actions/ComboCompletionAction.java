@@ -51,47 +51,46 @@ public class ComboCompletionAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null && target.getDocument() instanceof SyntaxDocument) {
-            SyntaxDocument sDoc = (SyntaxDocument) target.getDocument();
-            int dot = target.getCaretPosition();
-            Token token = sDoc.getTokenAt(dot);
-            String abbrev = "";
-            try {
-                if (token != null) {
-                    abbrev = token.getText(sDoc).toString();
-                    sDoc.remove(token.start, token.length);
-                    dot = token.start;
-                }
-                Window window = SwingUtilities.getWindowAncestor(target);
-                if (dlg == null) {
-                    if (window instanceof Frame) {
-                        Frame frame = (Frame) window;
-                        dlg = new ComboCompletionDialog(frame, true, items);
-                    } else {
-                        dlg = new ComboCompletionDialog(null, true, items);
-                    }
-                }
-                dlg.setLocationRelativeTo(window);
-                Point p = window.getLocation();
-                // Get location of Dot in rt
-                Rectangle rt = target.modelToView(dot);
-                Point loc = new Point(rt.x, rt.y);
-                // convert the location from Text Componet coordinates to
-                // Frame coordinates...
-                loc = SwingUtilities.convertPoint(target, loc, window);
-                // and then to Screen coordinates
-                SwingUtilities.convertPointToScreen(loc, window);
-                dlg.setLocation(loc);
-                dlg.setFonts(target.getFont());
-                dlg.setText(abbrev);
-                dlg.setVisible(true);
-                String res = dlg.getResult();
-                ActionUtils.insertMagicString(target, dot, res);
-            } catch (BadLocationException ex) {
-                Logger.getLogger(ComboCompletionAction.class.getName()).log(Level.SEVERE, null, ex);
+    public void actionPerformed(JTextComponent target, SyntaxDocument sdoc,
+            int dot, ActionEvent e) {
+        if (sdoc == null) {
+            return;
+        }
+        Token token = sdoc.getTokenAt(dot);
+        String abbrev = "";
+        try {
+            if (token != null) {
+                abbrev = token.getText(sdoc).toString();
+                sdoc.remove(token.start, token.length);
+                dot = token.start;
             }
+            Window window = SwingUtilities.getWindowAncestor(target);
+            if (dlg == null) {
+                if (window instanceof Frame) {
+                    Frame frame = (Frame) window;
+                    dlg = new ComboCompletionDialog(frame, true, items);
+                } else {
+                    dlg = new ComboCompletionDialog(null, true, items);
+                }
+            }
+            dlg.setLocationRelativeTo(window);
+            Point p = window.getLocation();
+            // Get location of Dot in rt
+            Rectangle rt = target.modelToView(dot);
+            Point loc = new Point(rt.x, rt.y);
+            // convert the location from Text Componet coordinates to
+            // Frame coordinates...
+            loc = SwingUtilities.convertPoint(target, loc, window);
+            // and then to Screen coordinates
+            SwingUtilities.convertPointToScreen(loc, window);
+            dlg.setLocation(loc);
+            dlg.setFonts(target.getFont());
+            dlg.setText(abbrev);
+            dlg.setVisible(true);
+            String res = dlg.getResult();
+            ActionUtils.insertMagicString(target, dot, res);
+        } catch (BadLocationException ex) {
+            Logger.getLogger(ComboCompletionAction.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
