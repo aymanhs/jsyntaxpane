@@ -36,34 +36,31 @@ public class JIndentAction extends DefaultSyntaxAction {
      * @param e 
      */
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null) {
-            SyntaxDocument sDoc = ActionUtils.getSyntaxDocument(target);
-            int pos = target.getCaretPosition();
-            int start = sDoc.getParagraphElement(pos).getStartOffset();
-            String line = ActionUtils.getLine(target);
-            String lineToPos = line.substring(0, pos - start);
-            String prefix = ActionUtils.getIndent(line);
-            Token t = sDoc.getTokenAt(pos);
-            if (TokenType.isComment(t)) {
-                if (line.trim().endsWith("*/")) {
-                    prefix = prefix.substring(0, prefix.length() - 1);
-                } else if (line.trim().startsWith("*")) {
-                    prefix += "* ";
-                } else if (line.trim().startsWith("/*")) {
-                    prefix += " * ";
-                }
-            } else if (lineToPos.trim().endsWith("{")) {
-                prefix += ActionUtils.getTab(target);
-            } else {
-                String noComment = sDoc.getUncommentedText(start, pos); // skip EOL comments
-
-                if (noComment.trim().endsWith("{")) {
-                    prefix += ActionUtils.getTab(target);
-                }
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        int pos = target.getCaretPosition();
+        int start = sDoc.getParagraphElement(pos).getStartOffset();
+        String line = ActionUtils.getLine(target);
+        String lineToPos = line.substring(0, pos - start);
+        String prefix = ActionUtils.getIndent(line);
+        Token t = sDoc.getTokenAt(pos);
+        if (TokenType.isComment(t)) {
+            if (line.trim().endsWith("*/")) {
+                prefix = prefix.substring(0, prefix.length() - 1);
+            } else if (line.trim().startsWith("*")) {
+                prefix += "* ";
+            } else if (line.trim().startsWith("/*")) {
+                prefix += " * ";
             }
-            target.replaceSelection("\n" + prefix);
+        } else if (lineToPos.trim().endsWith("{")) {
+            prefix += ActionUtils.getTab(target);
+        } else {
+            String noComment = sDoc.getUncommentedText(start, pos); // skip EOL comments
+
+            if (noComment.trim().endsWith("{")) {
+                prefix += ActionUtils.getTab(target);
+            }
         }
+        target.replaceSelection("\n" + prefix);
     }
 }

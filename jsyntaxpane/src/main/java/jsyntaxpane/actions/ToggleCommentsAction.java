@@ -46,25 +46,23 @@ public class ToggleCommentsAction extends DefaultSyntaxAction {
      * @param e 
      */
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null && target.getDocument() instanceof SyntaxDocument) {
-            String[] lines = ActionUtils.getSelectedLines(target);
-            int start = target.getSelectionStart();
-            StringBuffer toggled = new StringBuffer();
-            for (int i = 0; i < lines.length; i++) {
-                Matcher m = lineCommentPattern.matcher(lines[i]);
-                if (m.find()) {
-                    toggled.append(m.replaceFirst("$2"));
-                } else {
-                    toggled.append(lineCommentStart);
-                    toggled.append(lines[i]);
-                }
-                toggled.append('\n');
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        String[] lines = ActionUtils.getSelectedLines(target);
+        int start = target.getSelectionStart();
+        StringBuffer toggled = new StringBuffer();
+        for (int i = 0; i < lines.length; i++) {
+            Matcher m = lineCommentPattern.matcher(lines[i]);
+            if (m.find()) {
+                toggled.append(m.replaceFirst("$2"));
+            } else {
+                toggled.append(lineCommentStart);
+                toggled.append(lines[i]);
             }
-            target.replaceSelection(toggled.toString());
-            target.select(start, start + toggled.length());
+            toggled.append('\n');
         }
+        target.replaceSelection(toggled.toString());
+        target.select(start, start + toggled.length());
     }
 
     @Override

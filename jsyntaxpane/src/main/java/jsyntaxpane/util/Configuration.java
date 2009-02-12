@@ -37,6 +37,26 @@ public class Configuration extends Properties {
     }
 
     /**
+     * Get a <b>required</b> paramater from the configuration.  If the parameter is not
+     * found, then
+     * @param prefix
+     * @param key
+     * @return
+     * @throws IllegalArgumentException if key is not found
+     */
+    public String getPrefixProperty(String prefix, String key) {
+        String v = super.getProperty(prefix + "." + key);
+        if(v != null) {
+            return v;
+        }
+        v = super.getProperty(key);
+        if(v == null) {
+            throw new IllegalArgumentException("Required property key not found: " + key);
+        }
+        return v;
+    }
+
+    /**
      * Gets the String value for the key prefix.key, or key, or default
      * @param prefix
      * @param key

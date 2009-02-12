@@ -15,6 +15,7 @@ package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
 import javax.swing.text.JTextComponent;
+import jsyntaxpane.SyntaxDocument;
 
 /**
  * This is usually mapped to Shift-TAB to unindent the selection.  The
@@ -28,25 +29,23 @@ public class UnindentAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
         String indent = ActionUtils.getTab(target);
-        if (target != null) {
-            String[] lines = ActionUtils.getSelectedLines(target);
-            int start = target.getSelectionStart();
-            StringBuilder sb = new StringBuilder();
-            for (String line : lines) {
-                if (line.startsWith(indent)) {
-                    sb.append(line.substring(indent.length()));
-                } else if (line.startsWith("\t")) {
-                    sb.append(line.substring(1));
-                } else {
-                    sb.append(line);
-                }
-                sb.append('\n');
+        String[] lines = ActionUtils.getSelectedLines(target);
+        int start = target.getSelectionStart();
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            if (line.startsWith(indent)) {
+                sb.append(line.substring(indent.length()));
+            } else if (line.startsWith("\t")) {
+                sb.append(line.substring(1));
+            } else {
+                sb.append(line);
             }
-            target.replaceSelection(sb.toString());
-            target.select(start, start + sb.length());
+            sb.append('\n');
         }
+        target.replaceSelection(sb.toString());
+        target.select(start, start + sb.length());
     }
 }

@@ -13,7 +13,10 @@
  */
 package jsyntaxpane.actions;
 
+import java.awt.event.ActionEvent;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
+import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.util.Configuration;
 
 /**
@@ -32,4 +35,27 @@ abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAc
     public void config(Configuration config, String prefix, String name) {
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JTextComponent text = getTextComponent(e);
+        SyntaxDocument sdoc = ActionUtils.getSyntaxDocument(text);
+        if(text != null) {
+            actionPerformed(text, sdoc, text.getCaretPosition(), e);
+        }
+    }
+
+    /**
+     * Convenience method that will be called if the Action is performed on a
+     * JTextComponent.  SyntaxActions should generally override this method.
+     * @param target (non-null JTextComponent from Action.getSource
+     * @param sDoc (SyntaxDOcument of the text component, could be null)
+     * @param dot (position of caret at text document)
+     * @param e actual ActionEvent passed to actionPerformed
+     */
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    public static final String ACTION_PREFIX = "Action.";
 }

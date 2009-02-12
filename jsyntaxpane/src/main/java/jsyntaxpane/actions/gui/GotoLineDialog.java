@@ -102,9 +102,8 @@ public class GotoLineDialog extends javax.swing.JDialog {
         if (line != null) {
             try {
                 int lineNr = Integer.parseInt(line.toString());
-                int pos = ActionUtils.getDocumentPosition(text, lineNr, 0);
                 ActionUtils.insertIntoCombo(jCmbLineNumbers, line);
-                text.setCaretPosition(pos);
+                ActionUtils.setCaretPosition(text, lineNr, 0);
                 setVisible(false);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid Number: " + line,

@@ -11,6 +11,7 @@ import javax.script.ScriptException;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
+import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.util.Configuration;
 
 /**
@@ -28,23 +29,21 @@ public class ScriptRunnerAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        JTextComponent target = getTextComponent(e);
-        if (target != null) {
-            try {
-                ScriptEngine eng = getEngine(target);
-                if (eng != null) {
-                    getEngine(target).eval(target.getText());
-                }
-            } catch (ScriptException ex) {
-                JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(target),
-                        "Error executing script:\n" + ex.getMessage(),
-                        "Script Error",
-                        JOptionPane.ERROR_MESSAGE);
-                ActionUtils.setCaretPosition(target,
-                        ex.getLineNumber(),
-                        ex.getColumnNumber());
+    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+            int dot, ActionEvent e) {
+        try {
+            ScriptEngine eng = getEngine(target);
+            if (eng != null) {
+                getEngine(target).eval(target.getText());
             }
+        } catch (ScriptException ex) {
+            JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(target),
+                    "Error executing script:\n" + ex.getMessage(),
+                    "Script Error",
+                    JOptionPane.ERROR_MESSAGE);
+            ActionUtils.setCaretPosition(target,
+                    ex.getLineNumber(),
+                    ex.getColumnNumber());
         }
     }
 
@@ -75,7 +74,7 @@ public class ScriptRunnerAction extends DefaultSyntaxAction {
     public void config(Configuration config, String prefix, String name) {
         scriptExtension = config.getPrefixProperty(prefix, name + ".ScriptExtension", null);
     }
-
+    
     protected static ScriptEngineManager sem;
     private ScriptEngine engine;
     private String scriptExtension;

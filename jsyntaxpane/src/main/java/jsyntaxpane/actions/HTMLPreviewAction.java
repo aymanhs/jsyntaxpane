@@ -15,22 +15,33 @@ package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
-import jsyntaxpane.util.Configuration;
+import jsyntaxpane.actions.gui.HTMLPreviewFrame;
 
 /**
- * Redo action
+ * Show an HTML Preview window.
+ * This will automatically update on changes to the underlying document.
+ * 
  */
-public class RedoAction extends DefaultSyntaxAction {
+public class HTMLPreviewAction extends DefaultSyntaxAction {
 
-    public RedoAction() {
-        super("REDO");
+
+    public HTMLPreviewAction() {
+        super("HTML_PREVIEW");
     }
 
     @Override
     public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
             int dot, ActionEvent e) {
-        sDoc.doRedo();
+        // have the document property
+        Object obj = sDoc.getProperty("html-preview-window");
+        if(obj == null) {
+            HTMLPreviewFrame dlg = new HTMLPreviewFrame(sDoc);
+            sDoc.putProperty("html-preview-window", dlg);
+            dlg.setVisible(true);
+        } else {
+            HTMLPreviewFrame dlg = (HTMLPreviewFrame) obj;
+            dlg.setVisible(enabled);
+        }
     }
 }

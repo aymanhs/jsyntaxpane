@@ -69,10 +69,7 @@ public class XmlPrettifyAction extends DefaultSyntaxAction {
             showErrorMessage(target,
                     String.format("XML error: %s\nat(%d, %d)",
                     ex.getMessage(), ex.getLineNumber(), ex.getColumnNumber()));
-            int pos = ActionUtils.getDocumentPosition(target,
-                    ex.getLineNumber(),
-                    ex.getColumnNumber() - 1); // columns are off by one, for some reason.
-            target.setCaretPosition(pos);
+            ActionUtils.setCaretPosition(target, ex.getLineNumber(), ex.getColumnNumber() - 1);
         } catch (TransformerException ex) {
             showErrorMessage(target, ex.getMessageAndLocation());
         } catch (SAXException ex) {
