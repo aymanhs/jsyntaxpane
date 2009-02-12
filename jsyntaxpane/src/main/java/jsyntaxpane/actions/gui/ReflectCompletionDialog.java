@@ -285,7 +285,6 @@ public class ReflectCompletionDialog extends javax.swing.JDialog {
     /**
      * Display the dialog.
      * @param target text component (its Window will be the parent)
-     * @param initialText (initial text / class to set).
      */
     public void displayFor(JTextComponent target) {
         try {

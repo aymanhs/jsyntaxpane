@@ -389,6 +389,17 @@ public class ActionUtils {
     }
 
     /**
+     * Sets the caret position of the given target to the given line and column
+     * @param target
+     * @param line the first being 1
+     * @param column the first being 1
+     */
+    public static void setCaretPosition(JTextComponent target, int line, int column) {
+        int p = getDocumentPosition(target, line, column);
+        target.setCaretPosition(p);
+    }
+
+    /**
      * Return a string with number of spaces equal to the tab-stop of the TextComponent
      * @param target
      * @return
