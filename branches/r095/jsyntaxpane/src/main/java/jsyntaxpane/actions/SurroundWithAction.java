@@ -54,10 +54,10 @@ public class SurroundWithAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void config(Configuration config, String prefix, String name) {
-        this.prefix = config.getPrefixProperty(prefix, name + ".prefix", "");
-        this.postfix = config.getPrefixProperty(prefix, name + ".postfix", "");
-        this.indent = config.getPrefixBoolean(prefix, name + ".indent", true);
+    public void config(Configuration config, String name) {
+        this.prefix = config.getString(name + ".prefix", "");
+        this.postfix = config.getString(name + ".postfix", "");
+        this.indent = config.getBoolean(name + ".indent", true);
     }
 
     public String getPrefix() {

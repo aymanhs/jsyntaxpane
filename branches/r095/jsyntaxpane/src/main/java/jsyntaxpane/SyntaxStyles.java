@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import jsyntaxpane.util.Configuration;
@@ -39,6 +40,7 @@ import jsyntaxpane.util.JarServiceProvider;
 public class SyntaxStyles {
 
     public static final String STYLE_PROPERTY_KEY = "Style.";
+    public static final Pattern STYLE_PATTERN = Pattern.compile("Style\\.(\\w+)");
 
     /**
      * You can call the mergeStyles method with a Properties file to customize
@@ -85,15 +87,17 @@ public class SyntaxStyles {
         return instance;
     }
 
-    public static SyntaxStyles read(Configuration config, String prefix) {
+    public static SyntaxStyles read(Configuration config) {
         SyntaxStyles ss = createInstance();
-        Configuration styleConf = config.subConfig(prefix, STYLE_PROPERTY_KEY);
-        for (String k : styleConf.stringPropertyNames()) {
+        // Configuration styleConf = config.subConfig(STYLE_PROPERTY_KEY);
+
+        for (Configuration.StringKeyMatcher m : config.getKeys(STYLE_PATTERN)) {
+            String type = m.group1;
             try {
-                ss.put(TokenType.valueOf(k), new SyntaxStyle(styleConf.getProperty(k)));
+                ss.put(TokenType.valueOf(type), new SyntaxStyle(m.value));
             } catch (IllegalArgumentException e) {
                 Logger.getLogger(SyntaxStyles.class.getName()).warning(
-                        String.format("Invalid Token Type [%s] for Style of ", k, prefix));
+                        String.format("Invalid Token Type [%s] for Style of ", type));
             }
         }
         return ss;
@@ -112,7 +116,7 @@ public class SyntaxStyles {
      * @return
      */
     public SyntaxStyle getStyle(TokenType type) {
-        if (styles.containsKey(type)) {
+        if (styles != null && styles.containsKey(type)) {
             return styles.get(type);
         } else {
             return DEFAULT_STYLE;

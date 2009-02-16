@@ -71,8 +71,8 @@ public class ScriptRunnerAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void config(Configuration config, String prefix, String name) {
-        scriptExtension = config.getPrefixProperty(prefix, name + ".ScriptExtension", null);
+    public void config(Configuration config, String name) {
+        scriptExtension = config.getString(name + ".ScriptExtension", null);
     }
     
     protected static ScriptEngineManager sem;

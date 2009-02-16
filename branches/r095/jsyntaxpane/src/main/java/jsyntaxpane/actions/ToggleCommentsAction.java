@@ -14,12 +14,9 @@
 package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.security.KeyStore;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.util.Configuration;
 
@@ -66,10 +63,9 @@ public class ToggleCommentsAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void config(Configuration config, String prefix, String name) {
+    public void config(Configuration config, String name) {
         // we need to escape the chars
-        lineCommentStart = config.getPrefixProperty(prefix,
-                name + ".LineComments", "// ").replace("\"", "");
+        lineCommentStart = config.getString(name + ".LineComments", "// ").replace("\"", "");
         lineCommentPattern = Pattern.compile("(^" + lineCommentStart + ")(.*)");
     }
 }

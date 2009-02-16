@@ -98,8 +98,8 @@ public class SimpleRegexLexer implements Lexer, Comparator<Token> {
         return this;
     }
 
-    public SimpleRegexLexer config(Configuration conf, String prefix) {
-        Configuration patternsConf = conf.subConfig(prefix, "RegexPattern");
+    public SimpleRegexLexer config(Configuration conf) {
+        Configuration patternsConf = conf.subConfig("RegexPattern");
         putPatterns(patternsConf);
         return this;
     }

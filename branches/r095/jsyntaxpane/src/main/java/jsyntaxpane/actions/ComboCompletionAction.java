@@ -99,14 +99,13 @@ public class ComboCompletionAction extends DefaultSyntaxAction {
      * referenced by prefix.Completions.File
      *
      * @param config
-     * @param prefix
      * @param name
      */
     @Override
-    public void config(Configuration config, String prefix, String name) {
+    public void config(Configuration config, String name) {
         // for now we will use just one list for anything.  This can be modified
         // by having a map from TokenType to String[] or something....
-        String itemsUrl = config.getPrefixProperty(prefix, name + ".Items.URL", null);
+        String itemsUrl = config.getString(name + ".Items.URL");
         items = JarServiceProvider.readLines(itemsUrl);
     }
 

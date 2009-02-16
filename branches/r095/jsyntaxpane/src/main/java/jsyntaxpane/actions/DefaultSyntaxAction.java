@@ -32,7 +32,7 @@ abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAc
     }
 
     @Override
-    public void config(Configuration config, String prefix, String name) {
+    public void config(Configuration config, String name) {
     }
 
     @Override

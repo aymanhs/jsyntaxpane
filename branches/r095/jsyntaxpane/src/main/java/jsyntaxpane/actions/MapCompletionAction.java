@@ -57,12 +57,11 @@ public class MapCompletionAction extends DefaultSyntaxAction {
      * referenced by prefix.Completions.File
      * 
      * @param config
-     * @param prefix
      * @param name 
      */
     @Override
-    public void config(Configuration config, String prefix, String name) {
-        String completionsFile = config.getPrefixProperty(prefix, "Completions.File", "NONE");
+    public void config(Configuration config, String name) {
+        String completionsFile = config.getString("Completions.File", "NONE");
         if (completionsFile != null) {
             completions = JarServiceProvider.readStringsMap(completionsFile);
         }

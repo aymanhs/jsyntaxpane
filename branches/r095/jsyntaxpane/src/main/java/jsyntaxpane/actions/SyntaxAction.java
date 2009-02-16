@@ -35,10 +35,9 @@ public interface SyntaxAction extends Action {
     /**
      * Configure the actions in this class
      * @param config
-     * @param prefix
      * @param name Name of the action, will be obtained from the property Key as the
      * text following the Action.
      */
-    public void config(Configuration config, String prefix, String name);
+    public void config(Configuration config, String name);
 
 }

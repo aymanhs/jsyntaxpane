@@ -63,6 +63,7 @@ public class LineNumbersRuler extends JComponent
      * the component or DE-INSTALLING it
      */
     static enum Status {
+
         INSTALLING,
         DEINSTALLING
     }
@@ -132,20 +133,13 @@ public class LineNumbersRuler extends JComponent
     }
 
     @Override
-    public void config(Configuration config, String prefix) {
-        r_margin = config.getPrefixInteger(prefix,
-                PROPERTY_RIGHT_MARGIN, DEFAULT_R_MARGIN);
-        l_margin = config.getPrefixInteger(prefix,
-                PROPERTY_LEFT_MARGIN, DEFAULT_L_MARGIN);
-        y_offset = config.getPrefixInteger(prefix, PROPERTY_Y_OFFSET,
-                DEFAULT_Y_OFFSET);
-        Color foreground = config.getPrefixColor(prefix,
-                PROPERTY_FOREGROUND,
-                Color.BLACK);
+    public void config(Configuration config) {
+        r_margin = config.getInteger(PROPERTY_RIGHT_MARGIN, DEFAULT_R_MARGIN);
+        l_margin = config.getInteger(PROPERTY_LEFT_MARGIN, DEFAULT_L_MARGIN);
+        y_offset = config.getInteger(PROPERTY_Y_OFFSET, DEFAULT_Y_OFFSET);
+        Color foreground = config.getColor(PROPERTY_FOREGROUND, Color.BLACK);
         setForeground(foreground);
-        Color back = config.getPrefixColor(prefix,
-                PROPERTY_BACKGROUND,
-                Color.WHITE);
+        Color back = config.getColor(PROPERTY_BACKGROUND, Color.WHITE);
         setBackground(back);
     }
 
