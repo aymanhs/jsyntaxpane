@@ -72,7 +72,7 @@ public class ScriptRunnerAction extends DefaultSyntaxAction {
 
     @Override
     public void config(Configuration config, String name) {
-        scriptExtension = config.getString(name + ".ScriptExtension", null);
+        scriptExtension = config.getString(name + ".ScriptExtension");
     }
     
     protected static ScriptEngineManager sem;

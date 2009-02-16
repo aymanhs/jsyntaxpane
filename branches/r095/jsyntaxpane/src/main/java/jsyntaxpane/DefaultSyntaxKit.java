@@ -44,6 +44,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
+import jsyntaxpane.actions.DefaultSyntaxAction;
 import jsyntaxpane.actions.SyntaxAction;
 import jsyntaxpane.components.SyntaxComponent;
 import jsyntaxpane.util.Configuration;
@@ -289,7 +290,9 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             String actionClass = values[0];
             String actionName = m.group1;
             SyntaxAction action = createAction(actionClass);
-            action.config(getConfig(), actionName);
+            // The configuration keys will need to be prefixed by Action
+            // to make it more readable in the COnfiguration files.
+            action.config(getConfig(), DefaultSyntaxAction.ACTION_PREFIX + actionName);
             // Add the action to the component also
             editorPane.getActionMap().put(actionName, action);
             // Now bind all the keys to the Action we have:
