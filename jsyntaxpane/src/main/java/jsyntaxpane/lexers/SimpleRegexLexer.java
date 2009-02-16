@@ -98,12 +98,6 @@ public class SimpleRegexLexer implements Lexer, Comparator<Token> {
         return this;
     }
 
-    public SimpleRegexLexer config(Configuration conf) {
-        Configuration patternsConf = conf.subConfig("RegexPattern");
-        putPatterns(patternsConf);
-        return this;
-    }
-
     /**
      * This comparator is used to have longer tokens becoming LESS than
      * shorter tokens.  This is needed so the first in a Token tree is

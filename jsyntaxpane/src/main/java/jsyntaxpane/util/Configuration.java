@@ -42,9 +42,9 @@ public class Configuration implements Map<String, String> {
      */
     Configuration parent;
     /**
-     * Our name for the configuration
+     * Our Class for the configuration
      */
-    String name;
+    Class clazz;
     /**
      * The properties we have, excluding the parents defaults
      */
@@ -54,21 +54,21 @@ public class Configuration implements Map<String, String> {
      * Creates a new COnfiguration that uses parent as its parent
      * Configuration.
      *
-     * @param name
+     * @param theClass
      * @param parent
      */
-    public Configuration(String name, Configuration parent) {
-        this(name);
+    public Configuration(Class theClass, Configuration parent) {
+        this(theClass);
         this.parent = parent;
     }
 
     /**
      * Creates an empty Configuration
-     * @param name
+     * @param theClass
      */
-    public Configuration(String name) {
+    public Configuration(Class theClass) {
         super();
-        this.name = name;
+        this.clazz = theClass;
     }
 
     /**
@@ -76,6 +76,11 @@ public class Configuration implements Map<String, String> {
      * is found, null is returned.
      * If the Regex ${key} is found, then it is replaced by the value of that
      * key within this (or parent's) map.
+     * Special COnstructs in ${}:
+     * <li><code>class_path</code> will be replaced by the name of the
+     * Configuration (usually ClassName) with "." replaced by "/", and then
+     * converted to all lowercase</li>
+     * <li><code>class_simpleName</code></li> is replaced by class.SimpleName
      * @param key
      * @return
      */
@@ -94,10 +99,17 @@ public class Configuration implements Map<String, String> {
             while (m.find()) {
                 String p_key = m.group(1);
                 String p_value = getString(p_key);
-                if (p_value == null) {
-                    Logger.getLogger(this.getClass().getName()).warning(
-                            "no value for ${" + p_key +
-                            "} is defined");
+                if (p_key.equals("class_path")) {
+                    p_value = clazz.getName().replace(".", "/").toLowerCase();
+                } else if (p_key.equals("class_simpleName")) {
+                    p_value = clazz.getSimpleName();
+                } else {
+                    p_value = getString(p_key);
+                    if (p_value == null) {
+                        Logger.getLogger(this.getClass().getName()).warning(
+                                "no value for ${" + p_key +
+                                "} is defined");
+                    }
                 }
                 m.appendReplacement(sb, p_value);
             }
@@ -225,36 +237,6 @@ public class Configuration implements Map<String, String> {
         return propNames;
     }
 
-    /**
-     * Return a sub configuration from this instance that has keys of parent(s)
-     * and this configuration starting with prefix.  The parents keys are added
-     * first, from older parent then the current are added.  This way the
-     * defaults of parents can be overwritten by younger children.
-     *
-     * @param keyPrefix
-     * @return
-     */
-    public Configuration subConfig(String keyPrefix) {
-        Configuration sub = new Configuration(name + "." + keyPrefix);
-        addToSubConf(sub, keyPrefix);
-        return sub;
-    }
-
-    private void addToSubConf(Configuration subConf, String prefix) {
-        if (parent != null) {
-            parent.addToSubConf(subConf, prefix);
-        }
-        if (props == null) {
-            return;
-        }
-        int prefixLen = prefix.length();
-        for (String k : props.keySet()) {
-            if (k.startsWith(prefix)) {
-                subConf.put(k.substring(prefixLen), props.get(k));
-            }
-        }
-    }
-
     @Override
     public String put(String key, String value) {
         if (props == null) {
@@ -337,7 +319,7 @@ public class Configuration implements Map<String, String> {
 
     @Override
     public String toString() {
-        return "Configuration " + name + " for " + parent;
+        return "Configuration " + clazz + " for " + parent;
     }
 
     /**

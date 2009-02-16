@@ -477,7 +477,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     public static synchronized Configuration getConfig(Class<? extends DefaultSyntaxKit> kit) {
         if (CONFIGS == null) {
             CONFIGS = new WeakHashMap<Class<? extends DefaultSyntaxKit>, Configuration>();
-            Configuration defaultConfig = new Configuration(DefaultSyntaxKit.class.getName());
+            Configuration defaultConfig = new Configuration(DefaultSyntaxKit.class);
             loadConfig(defaultConfig, DefaultSyntaxKit.class);
             CONFIGS.put(DefaultSyntaxKit.class, defaultConfig);
         }
@@ -488,7 +488,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             // recursive call until we read the Super duper DefaultSyntaxKit
             Class superKit = kit.getSuperclass();
             Configuration defaults = CONFIGS.get(superKit);
-            Configuration mine = new Configuration(kit.getName(), defaults);
+            Configuration mine = new Configuration(kit, defaults);
             loadConfig(mine, kit);
             CONFIGS.put(kit, mine);
             return mine;
