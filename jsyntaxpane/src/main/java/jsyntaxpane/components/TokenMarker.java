@@ -38,7 +38,7 @@ public class TokenMarker implements SyntaxComponent, CaretListener {
     public static final String DEFAULT_TOKENTYPES = "IDENTIFIER, TYPE, TYPE2, TYPE3";
     public static final String PROPERTY_COLOR = "TokenMarker.Color";
     public static final String PROPERTY_TOKENTYPES = "TokenMarker.TokenTypes";
-    private static final int DEFAULT_COLOR = 16772710;
+    private static final Color DEFAULT_COLOR = new Color(0xFFEE66);
     private JEditorPane pane;
     private Set<TokenType> tokenTypes = new HashSet<TokenType>();
     private Markers.SimpleMarker marker;
@@ -95,11 +95,11 @@ public class TokenMarker implements SyntaxComponent, CaretListener {
     }
 
     @Override
-    public void config(Configuration config, String prefix) {
-        Color markerColor = new Color(config.getPrefixInteger(prefix,
-                PROPERTY_COLOR, DEFAULT_COLOR));
+    public void config(Configuration config) {
+        Color markerColor = config.getColor(
+                PROPERTY_COLOR, DEFAULT_COLOR);
         this.marker = new Markers.SimpleMarker(markerColor);
-        String types = config.getPrefixProperty(prefix,
+        String types = config.getString(
                 PROPERTY_TOKENTYPES, DEFAULT_TOKENTYPES);
 
         for (String type : types.split("\\s*,\\s*")) {
@@ -107,7 +107,7 @@ public class TokenMarker implements SyntaxComponent, CaretListener {
                 TokenType tt = TokenType.valueOf(type);
                 tokenTypes.add(tt);
             } catch (IllegalArgumentException e) {
-                LOG.warning("Error in setting up TokenMarker for " + prefix +
+                LOG.warning("Error in setting up TokenMarker " +
                         " - Invalid TokenType: " + type);
             }
 

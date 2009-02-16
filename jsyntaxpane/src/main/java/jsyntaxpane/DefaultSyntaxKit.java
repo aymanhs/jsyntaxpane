@@ -66,9 +66,10 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     public static final String CONFIG_MENU_ICONS = "PopupMenuIcons";
     public static final String PROPERTY_KEYMAP_JSYNTAXPANE = "jsyntaxpane";
     public static final Pattern EQUALS_REGEX = Pattern.compile("\\s*=\\s*");
+    private static final Pattern ACTION_KEY_PATTERN = Pattern.compile("Action\\.(\\w+)");
     private static Font DEFAULT_FONT;
     private static Set<String> CONTENT_TYPES = new HashSet<String>();
-    private static boolean initialized = false;
+    private static Boolean initialized = false;
     private Lexer lexer;
     private static final Logger LOG = Logger.getLogger(DefaultSyntaxKit.class.getName());
     private Map<JEditorPane, List<SyntaxComponent>> editorComponents =
@@ -76,13 +77,16 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     private Map<JEditorPane, JPopupMenu> popupMenu =
             new WeakHashMap<JEditorPane, JPopupMenu>();
     /**
-     * Main Configuration of JSyntaxPane
+     * Main Configuration of JSyntaxPane EditorKits
      */
-    private static Configuration CONFIG;
+    private static Map<Class <? extends DefaultSyntaxKit>, Configuration> CONFIGS;
 
 
     static {
-        initKit();
+        // we only need to initialize once.
+        if (!initialized) {
+            initKit();
+        }
     }
 
     /**
@@ -96,12 +100,11 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     /**
      * Adds UI components to the pane
-     * @param kitName
      * @param editorPane
      */
-    public void addComponents(String kitName, JEditorPane editorPane) {
+    public void addComponents(JEditorPane editorPane) {
         // install the components to the editor:
-        String[] components = CONFIG.getPrefixPropertyList(kitName, CONFIG_COMPONENTS);
+        String[] components = getConfig().getPropertyList(CONFIG_COMPONENTS);
         for (String c : components) {
             installComponent(editorPane, c);
         }
@@ -110,10 +113,9 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     public void installComponent(JEditorPane pane, String classname) {
         try {
             @SuppressWarnings(value = "unchecked")
-            String kitName = this.getClass().getSimpleName();
             Class compClass = Class.forName(classname);
             SyntaxComponent comp = (SyntaxComponent) compClass.newInstance();
-            comp.config(CONFIG, kitName);
+            comp.config(getConfig());
             comp.install(pane);
             if (editorComponents.get(pane) == null) {
                 editorComponents.put(pane, new ArrayList<SyntaxComponent>());
@@ -162,16 +164,15 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     /**
      * Adds a popup menu to the editorPane if needed.
      * 
-     * @param kitName
      * @param editorPane
      */
-    public void addPopupMenu(String kitName, JEditorPane editorPane) {
-        String[] menuItems = CONFIG.getPrefixPropertyList(kitName, CONFIG_MENU);
+    public void addPopupMenu(JEditorPane editorPane) {
+        String[] menuItems = getConfig().getPropertyList(CONFIG_MENU);
         if (menuItems == null || menuItems.length == 0) {
             return;
         }
         popupMenu.put(editorPane, new JPopupMenu());
-        String menuIconsLocation = CONFIG.getPrefixProperty(kitName,
+        String menuIconsLocation = getConfig().getString(
                 CONFIG_MENU_ICONS, "/META-INF/images/");
         JMenu stack = null;
         for (String menu : menuItems) {
@@ -234,7 +235,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     @Override
     public View create(Element element) {
-        return new SyntaxView(element, CONFIG, this.getClass().getSimpleName());
+        return new SyntaxView(element, getConfig());
     }
 
     /**
@@ -247,15 +248,15 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     @Override
     public void install(JEditorPane editorPane) {
         super.install(editorPane);
-        String kitName = this.getClass().getSimpleName();
         editorPane.setFont(DEFAULT_FONT);
-        Color caretColor = CONFIG.getPrefixColor(kitName, CONFIG_CARETCOLOR, Color.BLACK);
+        Configuration conf = getConfig();
+        Color caretColor = conf.getColor(CONFIG_CARETCOLOR, Color.BLACK);
         editorPane.setCaretColor(caretColor);
-        Color selectionColor = CONFIG.getPrefixColor(kitName, CONFIG_SELECTION, new Color(0x99ccff));
+        Color selectionColor = getConfig().getColor(CONFIG_SELECTION, new Color(0x99ccff));
         editorPane.setSelectionColor(selectionColor);
-        addActions(kitName, editorPane);
-        addComponents(kitName, editorPane);
-        addPopupMenu(kitName, editorPane);
+        addActions(editorPane);
+        addComponents(editorPane);
+        addPopupMenu(editorPane);
     }
 
     @Override
@@ -272,24 +273,23 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     /**
      * Add keyboard actions to this control using the Configuration we have
-     * @param prefix
      * @param editorPane
      */
-    public void addActions(String prefix, JEditorPane editorPane) {
+    public void addActions(JEditorPane editorPane) {
         // look at all keys that either start with prefix.Action, or
         // that start with Action.
 
         Keymap km_parent = JTextComponent.getKeymap(JTextComponent.DEFAULT_KEYMAP);
         Keymap km_new = JTextComponent.addKeymap(PROPERTY_KEYMAP_JSYNTAXPANE, km_parent);
 
-        Configuration actionsConf = CONFIG.subConfig(prefix, "Action.");
 
-        for (String actionName : actionsConf.stringPropertyNames()) {
+        for (Configuration.StringKeyMatcher m : getConfig().getKeys(ACTION_KEY_PATTERN)) {
             String[] values = Configuration.COMMA_SEPARATOR.split(
-                    actionsConf.getProperty(actionName));
+                    m.value);
             String actionClass = values[0];
+            String actionName = m.group1;
             SyntaxAction action = createAction(actionClass);
-            action.config(CONFIG, prefix, actionName);
+            action.config(getConfig(), actionName);
             // Add the action to the component also
             editorPane.getActionMap().put(actionName, action);
             // Now bind all the keys to the Action we have:
@@ -348,17 +348,16 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
      * you can simply call the editor.setCOntentType("text/java") on the 
      * control and you will be done.
      */
-    public static void initKit() {
+    public synchronized static void initKit() {
         // attempt to find a suitable default font
-        CONFIG = new Configuration(JarServiceProvider.readProperties("jsyntaxpane.config"));
-        String defaultFont = CONFIG.getProperty("DefaultOnt");
+        String defaultFont = getConfig(DefaultSyntaxKit.class).getString("DefaultFont");
         if (defaultFont != null) {
             DEFAULT_FONT = Font.decode(defaultFont);
         } else {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             String[] fonts = ge.getAvailableFontFamilyNames();
             Arrays.sort(fonts);
-            if (Arrays.binarySearch(fonts, "Courier new") >= 0) {
+            if (Arrays.binarySearch(fonts, "Courier New") >= 0) {
                 DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 12);
             } else if (Arrays.binarySearch(fonts, "Courier") >= 0) {
                 DEFAULT_FONT = new Font("Courier", Font.PLAIN, 12);
@@ -368,12 +367,11 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         }
 
         // read the Default Kits and their associated types
-        Properties kitsForTypes = JarServiceProvider.readProperties("jsyntaxpane.kitsfortypes");
+        Properties kitsForTypes = JarServiceProvider.readProperties("jsyntaxpane/kitsfortypes");
         for (String type : kitsForTypes.stringPropertyNames()) {
             String classname = kitsForTypes.getProperty(type);
             registerContentType(type, classname);
         }
-
         initialized = true;
     }
 
@@ -395,7 +393,8 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             // then the class is invalid
             Object kit = c.newInstance();
             if (!(kit instanceof EditorKit)) {
-                throw new IllegalArgumentException("Cannot register class: " + classname + ". It does not extend EditorKit");
+                throw new IllegalArgumentException("Cannot register class: " + classname +
+                        ". It does not extend EditorKit");
             }
             JEditorPane.registerEditorKitForContentType(type, classname);
             CONTENT_TYPES.add(type);
@@ -412,7 +411,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     /**
      * Return all the content types supported by this library.  This will be the
-     * content types in the file WEB-INF/services/resources/jsyntaxpane.kitsfortypes
+     * content types in the file WEB-INF/services/resources/jsyntaxpane/kitsfortypes
      * @return sorted array of all registered content types
      */
     public static String[] getContentTypes() {
@@ -422,23 +421,12 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     }
 
     /**
-     * returns the current config
-     * @return
-     */
-    public static Configuration getConfig() {
-        if (!initialized) {
-            initKit();
-        }
-        return CONFIG;
-    }
-
-    /**
-     * Merges the given properties with the defaults, which are read from the
-     * Jar file
+     * Merges the given properties with the configurations for this Object
+     * 
      * @param config
      */
-    public static void setConfig(Properties config) {
-        DefaultSyntaxKit.CONFIG.putAll(config);
+    public void setConfig(Properties config) {
+        getConfig().putAll(config);
     }
 
     /**
@@ -447,11 +435,11 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
      * @param key
      * @param value
      */
-    public static void setProperty(String key, String value) {
+    public void setProperty(String key, String value) {
         if (!initialized) {
             initKit();
         }
-        CONFIG.put(key, value);
+        getConfig().put(key, value);
     }
 
     /**
@@ -461,10 +449,56 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
      * @param key
      * @return value for given key
      */
-    public static String getProperty(String key) {
+    public String getProperty(String key) {
         if (!initialized) {
             initKit();
         }
-        return CONFIG.getProperty(key);
+        return getConfig().getString(key);
+    }
+
+    /**
+     * Get the configuration for this Object
+     * @return
+     */
+    public Configuration getConfig() {
+        return getConfig(this.getClass());
+    }
+
+    /**
+     * Return the Configurations object for a Kit.  Perfrom lazy creation of a
+     * Configuration object if nothing is created.
+     * 
+     * @param kit
+     * @return
+     */
+    public static synchronized Configuration getConfig(Class<? extends DefaultSyntaxKit> kit) {
+        if (CONFIGS == null) {
+            CONFIGS = new WeakHashMap<Class<? extends DefaultSyntaxKit>, Configuration>();
+            Configuration defaultConfig = new Configuration(DefaultSyntaxKit.class.getName());
+            loadConfig(defaultConfig, DefaultSyntaxKit.class);
+            CONFIGS.put(DefaultSyntaxKit.class, defaultConfig);
+        }
+
+        if (CONFIGS.containsKey(kit)) {
+            return CONFIGS.get(kit);
+        } else {
+            // recursive call until we read the Super duper DefaultSyntaxKit
+            Class superKit = kit.getSuperclass();
+            Configuration defaults = CONFIGS.get(superKit);
+            Configuration mine = new Configuration(kit.getName(), defaults);
+            loadConfig(mine, kit);
+            CONFIGS.put(kit, mine);
+            return mine;
+        }
+    }
+
+    private static void loadConfig(Configuration conf, Class<? extends EditorKit> kit) {
+        String url = kit.getName().replace(".", "/") + "/config";
+        Properties p = JarServiceProvider.readProperties(url);
+        if (p.size() == 0) {
+            LOG.warning("unable to load configuration for: " + kit + " from: " + url);
+        } else {
+            conf.putAll(p);
+        }
     }
 }

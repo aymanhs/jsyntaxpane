@@ -50,19 +50,18 @@ public class SyntaxView extends PlainView {
      * 
      * @param element
      * @param config
-     * @param prefix
      */
-    public SyntaxView(Element element, Configuration config, String prefix) {
+    public SyntaxView(Element element, Configuration config) {
         super(element);
-        singleColorSelect = config.getPrefixBoolean(prefix, PROPERTY_SINGLE_COLOR_SELECT, false);
-        rightMarginColor = new Color(config.getPrefixInteger(prefix, PROPERTY_RIGHT_MARGIN_COLOR,
+        singleColorSelect = config.getBoolean(PROPERTY_SINGLE_COLOR_SELECT, false);
+        rightMarginColor = new Color(config.getInteger(PROPERTY_RIGHT_MARGIN_COLOR,
                 0xFF7777));
-        rightMarginColumn = config.getPrefixInteger(prefix, PROPERTY_RIGHT_MARGIN_COLUMN,
+        rightMarginColumn = config.getInteger(PROPERTY_RIGHT_MARGIN_COLUMN,
                 0);
-        String textaa = config.getPrefixProperty(prefix, PROPERTY_TEXTAA,
+        String textaa = config.getString(PROPERTY_TEXTAA,
                 "DEFAULT");
         textAAHint = TEXT_AA_HINT_NAMES.get(textaa);
-        styles = SyntaxStyles.read(config, prefix);
+        styles = SyntaxStyles.read(config);
     }
 
     @Override

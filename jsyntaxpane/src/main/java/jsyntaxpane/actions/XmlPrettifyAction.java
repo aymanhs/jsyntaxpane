@@ -87,7 +87,8 @@ public class XmlPrettifyAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void config(Configuration config, String prefix, String name) {
+    public void config(Configuration config, String name) {
+        // FIXME: add config keys for these params
         try {
             TransformerFactory tfactory = TransformerFactory.newInstance();
             transformer = tfactory.newTransformer();

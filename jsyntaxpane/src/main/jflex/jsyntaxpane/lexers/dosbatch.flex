@@ -28,7 +28,7 @@ import jsyntaxpane.TokenType;
 %char
 %type Token
 %ignorecase
-
+%state ECHO_TEXT
 
 %{
     /**
@@ -53,11 +53,9 @@ Comment = {StartComment} {InputCharacter}* {LineTerminator}?
 
 %%
 
-<YYINITIAL> 
-{
+<YYINITIAL> {
   /* DOS keywords */
   "@"                           |
-  "echo"                        |
   "goto"                        |
   "call"                        |
   "exit"                        |
@@ -70,6 +68,15 @@ Comment = {StartComment} {InputCharacter}* {LineTerminator}?
   "cd"                          |
   "set"                         |
   "errorlevel"                  { return token(TokenType.KEYWORD); }
+
+  "%" [:jletter:] [:jletterdigit:]* "%"           {  return token(TokenType.STRING2); }
+
+  "%" [:digit:]+                {  return token(TokenType.KEYWORD2); }
+
+  "echo"       {
+                 yybegin(ECHO_TEXT);
+                 return token(TokenType.KEYWORD);
+               }
 
   /* DOS commands */
   "append"     |
@@ -96,7 +103,7 @@ Comment = {StartComment} {InputCharacter}* {LineTerminator}?
   "diskcomp"   |
   "diskcopy"   |
   "doskey"     |
-  "echo"       |
+  "exist"      |
   "endlocal"   |
   "erase"      |
   "fc"         |
@@ -142,13 +149,22 @@ Comment = {StartComment} {InputCharacter}* {LineTerminator}?
   "vol"        |
   "xcopy"      { return token(TokenType.KEYWORD); }
 
+  [:jletterdigit:]+ { return token(TokenType.IDENTIFIER);  }
 
   /* labels */
-  ":" [a-zA-Z][a-zA-Z0-9_]*     { return token(TokenType.TYPE); }
+  ":" [a-zA-Z][a-zA-Z0-9_]*     { return token(TokenType.TYPE3); }
 
   /* comments */
   {Comment}                      { return token(TokenType.COMMENT); }
   . | {LineTerminator}           { /* skip */ }
 }
 
+<ECHO_TEXT> {
+  "%" [:jletter:] [:jletterdigit:]* "%"           {  return token(TokenType.STRING2); }
+
+  "%" [:digit:]+                {  return token(TokenType.KEYWORD2); }
+
+  . *                    { return token(TokenType.STRING); }
+  {LineTerminator}       { yybegin(YYINITIAL) ; }
+}
 <<EOF>>                          { return null; }

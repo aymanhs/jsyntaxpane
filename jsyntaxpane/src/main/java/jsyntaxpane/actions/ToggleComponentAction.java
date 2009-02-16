@@ -36,8 +36,8 @@ public class ToggleComponentAction extends DefaultSyntaxAction {
     }
 
     @Override
-    public void config(Configuration config, String prefix, String name) {
-        componentName = config.getPrefixProperty(prefix, name + ".Component");
+    public void config(Configuration config, String name) {
+        componentName = config.getString(name + ".Component");
     }
 
     @Override
