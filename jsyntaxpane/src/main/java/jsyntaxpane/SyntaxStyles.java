@@ -49,14 +49,15 @@ public class SyntaxStyles {
      * @param styles
      */
     public void mergeStyles(Properties styles) {
-        for (String token : styles.stringPropertyNames()) {
-            String stv = styles.getProperty(token);
+        for (Map.Entry e : styles.entrySet()) {
+            String tokenType = e.getKey().toString();
+            String style = e.getValue().toString();
             try {
-                TokenType tt = TokenType.valueOf(token);
-                SyntaxStyle tokenStyle = new SyntaxStyle(stv);
+                TokenType tt = TokenType.valueOf(tokenType);
+                SyntaxStyle tokenStyle = new SyntaxStyle(style);
                 put(tt, tokenStyle);
             } catch (IllegalArgumentException ex) {
-                LOG.warning("illegal token type or style for: " + token);
+                LOG.warning("illegal token type or style for: " + tokenType);
             }
         }
     }

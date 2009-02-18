@@ -19,7 +19,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.util.HashMap;
+import java.awt.Toolkit;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
@@ -36,8 +36,6 @@ public class SyntaxView extends PlainView {
     public static final String PROPERTY_RIGHT_MARGIN_COLOR = "RightMarginColor";
     public static final String PROPERTY_RIGHT_MARGIN_COLUMN = "RightMarginColumn";
     public static final String PROPERTY_SINGLE_COLOR_SELECT = "SingleColorSelect";
-    public static final String PROPERTY_TEXTAA = "TextAA";
-    private static Object textAAHint = RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
     private static final Logger log = Logger.getLogger(SyntaxView.class.getName());
     private SyntaxStyle DEFAULT_STYLE = SyntaxStyles.getInstance().getStyle(TokenType.DEFAULT);
     private final boolean singleColorSelect;
@@ -58,9 +56,6 @@ public class SyntaxView extends PlainView {
                 0xFF7777));
         rightMarginColumn = config.getInteger(PROPERTY_RIGHT_MARGIN_COLUMN,
                 0);
-        String textaa = config.getString(PROPERTY_TEXTAA,
-                "DEFAULT");
-        textAAHint = TEXT_AA_HINT_NAMES.get(textaa);
         styles = SyntaxStyles.read(config);
     }
 
@@ -148,8 +143,7 @@ public class SyntaxView extends PlainView {
      * @param g2d
      */
     public static void setRenderingHits(Graphics2D g2d) {
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                textAAHint);
+        g2d.addRenderingHints(sysHints);
     }
 
     @Override
@@ -163,18 +157,17 @@ public class SyntaxView extends PlainView {
     /**
      * The values for the string key for Text Anti-Aliasing
      */
-    private static Map<String, Object> TEXT_AA_HINT_NAMES =
-            new HashMap<String, Object>();
-
+    private static RenderingHints sysHints;
 
     static {
-        TEXT_AA_HINT_NAMES.put("DEFAULT", RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT);
-        TEXT_AA_HINT_NAMES.put("GASP", RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
-        TEXT_AA_HINT_NAMES.put("HBGR", RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HBGR);
-        TEXT_AA_HINT_NAMES.put("HRGB", RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-        TEXT_AA_HINT_NAMES.put("VBGR", RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_VBGR);
-        TEXT_AA_HINT_NAMES.put("VRGB", RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_VBGR);
-        TEXT_AA_HINT_NAMES.put("OFF", RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-        TEXT_AA_HINT_NAMES.put("ON", RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        sysHints = null;
+        try {
+            Toolkit toolkit = Toolkit.getDefaultToolkit();
+            @SuppressWarnings("unchecked")
+            Map<RenderingHints.Key,?> map = (Map<RenderingHints.Key,?>)
+                    toolkit.getDesktopProperty("awt.font.desktophints");
+            sysHints = new RenderingHints(map);
+        } catch (Throwable t) {
+        }
     }
 }
