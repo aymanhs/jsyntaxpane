@@ -249,7 +249,13 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     @Override
     public void install(JEditorPane editorPane) {
         super.install(editorPane);
-        editorPane.setFont(DEFAULT_FONT);
+        // get our font
+        String fontName = getProperty("DefaultFont");
+        Font font = DEFAULT_FONT;
+        if(fontName != null) {
+            font = Font.decode(fontName);
+        }
+        editorPane.setFont(font);
         Configuration conf = getConfig();
         Color caretColor = conf.getColor(CONFIG_CARETCOLOR, Color.BLACK);
         editorPane.setCaretColor(caretColor);
@@ -371,8 +377,9 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
         // read the Default Kits and their associated types
         Properties kitsForTypes = JarServiceProvider.readProperties("jsyntaxpane/kitsfortypes");
-        for (String type : kitsForTypes.stringPropertyNames()) {
-            String classname = kitsForTypes.getProperty(type);
+        for (Map.Entry e : kitsForTypes.entrySet()) {
+            String type = e.getKey().toString();
+            String classname = e.getValue().toString();
             registerContentType(type, classname);
         }
         initialized = true;
@@ -439,9 +446,6 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
      * @param value
      */
     public void setProperty(String key, String value) {
-        if (!initialized) {
-            initKit();
-        }
         getConfig().put(key, value);
     }
 
@@ -453,9 +457,6 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
      * @return value for given key
      */
     public String getProperty(String key) {
-        if (!initialized) {
-            initKit();
-        }
         return getConfig().getString(key);
     }
 
