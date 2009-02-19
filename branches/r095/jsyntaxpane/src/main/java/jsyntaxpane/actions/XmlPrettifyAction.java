@@ -64,7 +64,7 @@ public class XmlPrettifyAction extends DefaultSyntaxAction {
             Document doc = docBuilder.parse(src);
             //Setup indenting to "pretty print"
             transformer.transform(new DOMSource(doc), new StreamResult(out));
-            target.read(new StringReader(out.toString()), null);
+            target.setText(out.toString());
         } catch (SAXParseException ex) {
             showErrorMessage(target,
                     String.format("XML error: %s\nat(%d, %d)",
@@ -88,14 +88,17 @@ public class XmlPrettifyAction extends DefaultSyntaxAction {
 
     @Override
     public void config(Configuration config, String name) {
-        // FIXME: add config keys for these params
         try {
             TransformerFactory tfactory = TransformerFactory.newInstance();
             transformer = tfactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-//            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            String indentOption = config.getString(name + ".Indent", "yes");
+            transformer.setOutputProperty(OutputKeys.INDENT, indentOption);
+            String standAlone = config.getString(name + ".StandAlone", "yes");
+            transformer.setOutputProperty(OutputKeys.STANDALONE, standAlone);
+            String omitDeclaration = config.getString(name + ".OmitDeclaration", "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, omitDeclaration);
+            String indentAmount = config.getString(name + ".IndentAmount", "4");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", indentAmount);
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
             docBuilderFactory.setIgnoringElementContentWhitespace(true);
             docBuilder = docBuilderFactory.newDocumentBuilder();
