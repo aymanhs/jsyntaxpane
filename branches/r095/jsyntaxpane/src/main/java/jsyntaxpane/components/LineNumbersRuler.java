@@ -58,15 +58,6 @@ public class LineNumbersRuler extends JComponent
     private int charWidth;
     private MouseListener mouseListener = null;
 
-    /**
-     * The status is used to have proper propertyCHange support.  We need to know if we are INSTALLING
-     * the component or DE-INSTALLING it
-     */
-    static enum Status {
-
-        INSTALLING,
-        DEINSTALLING
-    }
     private Status status;
 
     public LineNumbersRuler() {

@@ -14,6 +14,8 @@
 package jsyntaxpane.components;
 
 import java.awt.Color;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import jsyntaxpane.actions.*;
 import javax.swing.JEditorPane;
 import javax.swing.event.CaretEvent;
@@ -29,11 +31,12 @@ import jsyntaxpane.util.Configuration;
  *
  * @author Ayman Al-Sairafi
  */
-public class PairsMarker implements CaretListener, SyntaxComponent {
+public class PairsMarker implements CaretListener, SyntaxComponent, PropertyChangeListener {
 
     public static final String PROPERTY_COLOR = "PairMarker.Color";
     private JTextComponent pane;
     private Markers.SimpleMarker marker;
+    private Status status;
 
     public PairsMarker() {
     }
@@ -71,11 +74,24 @@ public class PairsMarker implements CaretListener, SyntaxComponent {
     public void install(JEditorPane editor) {
         pane = editor;
         pane.addCaretListener(this);
+        status = Status.INSTALLING;
     }
 
     @Override
     public void deinstall(JEditorPane editor) {
+        status = Status.DEINSTALLING;
         pane.removeCaretListener(this);
         removeMarkers();
     }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("document")) {
+                pane.removeCaretListener(this);
+            if (status.equals(Status.INSTALLING)) {
+                pane.addCaretListener(this);
+                removeMarkers();
+            }
+        }
+    }    
 }

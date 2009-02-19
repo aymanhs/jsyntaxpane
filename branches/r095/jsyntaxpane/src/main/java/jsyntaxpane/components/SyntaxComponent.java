@@ -42,4 +42,14 @@ public interface SyntaxComponent {
      * @param editor
      */
     public void deinstall(JEditorPane editor);
+
+    /**
+     * The status is used to have proper propertyCHange support.  We need to know if we are INSTALLING
+     * the component or DE-INSTALLING it
+     */
+    static enum Status {
+
+        INSTALLING,
+        DEINSTALLING
+    }
 }

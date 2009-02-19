@@ -13,8 +13,10 @@
  */
 package jsyntaxpane.components;
 
+import java.beans.PropertyChangeEvent;
 import jsyntaxpane.actions.*;
 import java.awt.Color;
+import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,7 +35,7 @@ import jsyntaxpane.util.Configuration;
  * 
  * @author Ayman Al-Sairafi
  */
-public class TokenMarker implements SyntaxComponent, CaretListener {
+public class TokenMarker implements SyntaxComponent, CaretListener, PropertyChangeListener {
 
     public static final String DEFAULT_TOKENTYPES = "IDENTIFIER, TYPE, TYPE2, TYPE3";
     public static final String PROPERTY_COLOR = "TokenMarker.Color";
@@ -42,6 +44,7 @@ public class TokenMarker implements SyntaxComponent, CaretListener {
     private JEditorPane pane;
     private Set<TokenType> tokenTypes = new HashSet<TokenType>();
     private Markers.SimpleMarker marker;
+    private Status status;
 
     /**
      * Constructs a new Token highlighter
@@ -119,12 +122,25 @@ public class TokenMarker implements SyntaxComponent, CaretListener {
         this.pane = editor;
         pane.addCaretListener(this);
         markTokenAt(editor.getCaretPosition());
+        status = Status.INSTALLING;
     }
 
     @Override
     public void deinstall(JEditorPane editor) {
+        status = Status.DEINSTALLING;
         removeMarkers();
         pane.removeCaretListener(this);
     }
     private static final Logger LOG = Logger.getLogger(TokenMarker.class.getName());
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("document")) {
+                pane.removeCaretListener(this);
+            if (status.equals(Status.INSTALLING)) {
+                pane.addCaretListener(this);
+                removeMarkers();
+            }
+        }
+    }
 }
