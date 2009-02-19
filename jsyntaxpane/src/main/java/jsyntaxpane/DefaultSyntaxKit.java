@@ -268,6 +268,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     @Override
     public void deinstall(JEditorPane editorPane) {
+        List<SyntaxComponent> l = editorComponents.get(editorPane);
         for (SyntaxComponent c : editorComponents.get(editorPane)) {
             c.deinstall(editorPane);
         }
@@ -409,7 +410,8 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             JEditorPane.registerEditorKitForContentType(type, classname);
             CONTENT_TYPES.add(type);
         } catch (InstantiationException ex) {
-            throw new IllegalArgumentException("Cannot register class: " + classname, ex);
+            throw new IllegalArgumentException("Cannot register class: " + classname +
+                    ". Ensure it has Default Constructor.", ex);
         } catch (IllegalAccessException ex) {
             throw new IllegalArgumentException("Cannot register class: " + classname, ex);
         } catch (ClassNotFoundException ex) {
@@ -488,7 +490,8 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         } else {
             // recursive call until we read the Super duper DefaultSyntaxKit
             Class superKit = kit.getSuperclass();
-            Configuration defaults = CONFIGS.get(superKit);
+            @SuppressWarnings("unchecked")
+            Configuration defaults = getConfig(superKit);
             Configuration mine = new Configuration(kit, defaults);
             loadConfig(mine, kit);
             CONFIGS.put(kit, mine);
@@ -500,7 +503,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         String url = kit.getName().replace(".", "/") + "/config";
         Properties p = JarServiceProvider.readProperties(url);
         if (p.size() == 0) {
-            LOG.warning("unable to load configuration for: " + kit + " from: " + url);
+            LOG.info("unable to load configuration for: " + kit + " from: " + url + ".properties");
         } else {
             conf.putAll(p);
         }
