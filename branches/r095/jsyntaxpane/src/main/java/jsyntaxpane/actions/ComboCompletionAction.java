@@ -13,17 +13,9 @@
  */
 package jsyntaxpane.actions;
 
-import java.awt.Frame;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
@@ -58,40 +50,14 @@ public class ComboCompletionAction extends DefaultSyntaxAction {
         }
         Token token = sdoc.getTokenAt(dot);
         String abbrev = "";
-        try {
-            if (token != null) {
-                abbrev = token.getText(sdoc).toString();
-                sdoc.remove(token.start, token.length);
-                dot = token.start;
-            }
-            Window window = SwingUtilities.getWindowAncestor(target);
-            if (dlg == null) {
-                if (window instanceof Frame) {
-                    Frame frame = (Frame) window;
-                    dlg = new ComboCompletionDialog(frame, true, items);
-                } else {
-                    dlg = new ComboCompletionDialog(null, true, items);
-                }
-            }
-            dlg.setLocationRelativeTo(window);
-            Point p = window.getLocation();
-            // Get location of Dot in rt
-            Rectangle rt = target.modelToView(dot);
-            Point loc = new Point(rt.x, rt.y);
-            // convert the location from Text Componet coordinates to
-            // Frame coordinates...
-            loc = SwingUtilities.convertPoint(target, loc, window);
-            // and then to Screen coordinates
-            SwingUtilities.convertPointToScreen(loc, window);
-            dlg.setLocation(loc);
-            dlg.setFonts(target.getFont());
-            dlg.setText(abbrev);
-            dlg.setVisible(true);
-            String res = dlg.getResult();
-            ActionUtils.insertMagicString(target, dot, res);
-        } catch (BadLocationException ex) {
-            Logger.getLogger(ComboCompletionAction.class.getName()).log(Level.SEVERE, null, ex);
+        if (token != null) {
+            abbrev = token.getString(sdoc);
+            target.select(token.start, token.end());
         }
+        if (dlg == null) {
+            dlg = new ComboCompletionDialog(target);
+        }
+        dlg.displayFor(abbrev, items);
     }
 
     /**

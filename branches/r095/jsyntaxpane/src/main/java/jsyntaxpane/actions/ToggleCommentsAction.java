@@ -35,7 +35,7 @@ public class ToggleCommentsAction extends DefaultSyntaxAction {
      * Initial Code contributed by ser... AT mail.ru
      */
     public ToggleCommentsAction() {
-        super("TOGGLE");
+        super("toggle-comment");
     }
 
     /**

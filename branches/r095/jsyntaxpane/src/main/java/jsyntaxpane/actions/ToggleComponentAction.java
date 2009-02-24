@@ -32,12 +32,18 @@ public class ToggleComponentAction extends DefaultSyntaxAction {
     private String componentName;
 
     public ToggleComponentAction() {
-        super("TOGGLE_COMPONENT");
+        super("toggle-component");
+        putValue(SELECTED_KEY, Boolean.TRUE);
     }
 
     @Override
     public void config(Configuration config, String name) {
         componentName = config.getString(name + ".Component");
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString() + "(" + componentName + ")";
     }
 
     @Override
@@ -46,7 +52,8 @@ public class ToggleComponentAction extends DefaultSyntaxAction {
         if (target instanceof JEditorPane) {
             JEditorPane jEditorPane = (JEditorPane) target;
             DefaultSyntaxKit kit = (DefaultSyntaxKit) jEditorPane.getEditorKit();
-            kit.toggleComponent(jEditorPane, componentName);
+            boolean status = kit.toggleComponent(jEditorPane, componentName);
+            putValue(SELECTED_KEY, status);
         }
     }
 }

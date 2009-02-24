@@ -60,6 +60,12 @@ public class SurroundWithAction extends DefaultSyntaxAction {
         this.indent = config.getBoolean(name + ".indent", true);
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s (prefix: '%s', postfix:'%s')", 
+                super.toString(), getPrefix(), getPostfix());
+    }
+
     public String getPrefix() {
         return prefix;
     }
