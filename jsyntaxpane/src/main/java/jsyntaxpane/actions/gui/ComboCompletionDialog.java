@@ -14,11 +14,21 @@
 package jsyntaxpane.actions.gui;
 
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
+import jsyntaxpane.actions.ActionUtils;
+import jsyntaxpane.util.StringUtils;
 
 /**
  *
@@ -31,21 +41,19 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
      */
     private String result = null;
     /**
-     * The current filter, to avoid refiltering the items
+     * Our target component
      */
+    private JTextComponent target;
     public String escapeChars = ";(= \t\n";
     public List<String> items;
 
-    /** Creates new form ComboCompletionDialog
-     * @param parent
-     * @param modal
-     * @param items
+    /**
+     * Creates new form ComboCompletionDialog
+     * @param target
      */
-    public ComboCompletionDialog(java.awt.Frame parent, boolean modal,
-            List<String> items) {
-        super(parent, modal);
+    public ComboCompletionDialog(JTextComponent target) {
+        super(ActionUtils.getFrameFor(target), true);
         initComponents();
-        this.items = items;
         jTxtItem.getDocument().addDocumentListener(new DocumentListener() {
 
             @Override
@@ -64,18 +72,45 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
             }
         });
         // This will allow the textfield to receive TAB keys
-        refilterList();
         jTxtItem.setFocusTraversalKeysEnabled(false);
+        this.target = target;
     }
 
-    public void setFonts(Font font) {
-        jTxtItem.setFont(font);
-        jLstItems.setFont(font);
-        doLayout();
-    }
-
-    public void setText(String abbrev) {
-        jTxtItem.setText(abbrev);
+    /**
+     * Display the Completion Dialog with initial abbrev and using the given items
+     * The dialog is responsible for showing itself and for updating the target
+     * with the text, depending on user actions.
+     *
+     * The dialog will be aligned to the selectionStart of the target component
+     * and when a selection is made, replaceSelection will be called on dialog
+     *
+     * @param abbrev
+     * @param items
+     */
+    public void displayFor(String abbrev, List<String> items) {
+        this.items = items;
+        try {
+            Window window = SwingUtilities.getWindowAncestor(target);
+            Rectangle rt = target.modelToView(target.getSelectionStart());
+            Point loc = new Point(rt.x, rt.y);
+            setLocationRelativeTo(window);
+            // convert the location from Text Componet coordinates to
+            // Frame coordinates...
+            loc = SwingUtilities.convertPoint(target, loc, window);
+            // and then to Screen coordinates
+            SwingUtilities.convertPointToScreen(loc, window);
+            setLocation(loc);
+        } catch (BadLocationException ex) {
+            Logger.getLogger(ComboCompletionDialog.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            Font font = target.getFont();
+            jTxtItem.setFont(font);
+            jLstItems.setFont(font);
+            doLayout();
+            jTxtItem.setText(abbrev);
+            refilterList();
+            setVisible(true);
+        }
     }
 
     private void refilterList() {
@@ -83,7 +118,7 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         Vector<String> filtered = new Vector<String>();
         Object selected = jLstItems.getSelectedValue();
         for (String s : items) {
-            if (s.startsWith(prefix)) {
+            if (StringUtils.camelCaseMatch(s, prefix)) {
                 filtered.add(s);
             }
         }
@@ -147,6 +182,7 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         switch (evt.getKeyCode()) {
             case KeyEvent.VK_ESCAPE:
                 result = jTxtItem.getText();
+                target.replaceSelection(result);
                 setVisible(false);
                 return;
             case KeyEvent.VK_DOWN:
@@ -177,17 +213,10 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
             if (pressed != '\n') {
                 result += (pressed == '\t') ? ' ' : pressed;
             }
+            target.replaceSelection(result);
             setVisible(false);
         }
     }//GEN-LAST:event_jTxtItemKeyPressed
-
-    /**
-     * Gets the selected text shown on the dialog.
-     * @return the selected text, or empty string if nothing is selected
-     */
-    public String getResult() {
-        return result == null ? "" : result;
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList jLstItems;

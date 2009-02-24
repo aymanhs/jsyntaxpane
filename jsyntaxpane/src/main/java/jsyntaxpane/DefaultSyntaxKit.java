@@ -30,7 +30,10 @@ import java.util.WeakHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JEditorPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -40,8 +43,6 @@ import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.Keymap;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import jsyntaxpane.actions.DefaultSyntaxAction;
@@ -66,8 +67,9 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     public static final String CONFIG_MENU = "PopupMenu";
     public static final String CONFIG_MENU_ICONS = "PopupMenuIcons";
     public static final String PROPERTY_KEYMAP_JSYNTAXPANE = "jsyntaxpane";
-    public static final Pattern EQUALS_REGEX = Pattern.compile("\\s*=\\s*");
-    private static final Pattern ACTION_KEY_PATTERN = Pattern.compile("Action\\.(\\w+)");
+    public static final String SMALL_ICONS_LOC_PREFIX = "/META-INF/images/";
+    private static final Pattern ACTION_KEY_PATTERN = Pattern.compile("Action\\.((\\w|-)+)");
+    private static final Pattern DEFAULT_ACTION_PATTERN = Pattern.compile("(DefaultAction.((\\w|-)+)).*");
     private static Font DEFAULT_FONT;
     private static Set<String> CONTENT_TYPES = new HashSet<String>();
     private static Boolean initialized = false;
@@ -80,7 +82,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     /**
      * Main Configuration of JSyntaxPane EditorKits
      */
-    private static Map<Class <? extends DefaultSyntaxKit>, Configuration> CONFIGS;
+    private static Map<Class<? extends DefaultSyntaxKit>, Configuration> CONFIGS;
 
 
     static {
@@ -173,22 +175,17 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             return;
         }
         popupMenu.put(editorPane, new JPopupMenu());
-        String menuIconsLocation = getConfig().getString(
-                CONFIG_MENU_ICONS, "/META-INF/images/");
         JMenu stack = null;
-        for (String menu : menuItems) {
-            String[] menudata = EQUALS_REGEX.split(menu);
-            //
-            String menuText = menudata[0];
+        for (String menuString : menuItems) {
 
             // create the Popup menu
-            if (menuText.equals("-")) {
+            if (menuString.equals("-")) {
                 popupMenu.get(editorPane).addSeparator();
-            } else if (menuText.startsWith(">")) {
-                JMenu sub = new JMenu(menuText.substring(1));
+            } else if (menuString.startsWith(">")) {
+                JMenu sub = new JMenu(menuString.substring(1));
                 popupMenu.get(editorPane).add(sub);
                 stack = sub;
-            } else if (menuText.startsWith("<")) {
+            } else if (menuString.startsWith("<")) {
                 Container parent = stack.getParent();
                 if (parent instanceof JMenu) {
                     JMenu jMenu = (JMenu) parent;
@@ -197,27 +194,15 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
                     stack = null;
                 }
             } else {
-                JMenuItem menuItem;
-                menuItem = new JMenuItem();
-                if (menudata.length < 2) {
-                    throw new IllegalArgumentException("Invalid menu item data: " + menu);
-                }
-                String menuAction = menudata[1].trim();
-                Action action = editorPane.getActionMap().get(menuAction);
+                Action action = editorPane.getActionMap().get(menuString);
                 if (action == null) {
-                    throw new IllegalArgumentException("Invalid action for menu item: " + menu);
+                    throw new IllegalArgumentException("Invalid action for menu item: " + menuString);
                 }
-                menuItem.setAction(action);
-                menuItem.setText(menuText);
-                if (menudata.length > 2) {
-                    URL loc = this.getClass().getResource(menuIconsLocation + menudata[2]);
-                    if (loc == null) {
-                        Logger.getLogger(this.getClass().getName()).log(Level.WARNING,
-                                "Unable to get icon at: " + menuIconsLocation + menudata[2]);
-                    } else {
-                        ImageIcon i = new ImageIcon(loc);
-                        menuItem.setIcon(i);
-                    }
+                JMenuItem menuItem;
+                if(action.getValue(Action.SELECTED_KEY) != null) {
+                    menuItem = new JCheckBoxMenuItem(action);
+                } else {
+                    menuItem = new JMenuItem(action);
                 }
                 if (stack == null) {
                     popupMenu.get(editorPane).add(menuItem);
@@ -252,7 +237,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         // get our font
         String fontName = getProperty("DefaultFont");
         Font font = DEFAULT_FONT;
-        if(fontName != null) {
+        if (fontName != null) {
             font = Font.decode(fontName);
         }
         editorPane.setFont(font);
@@ -281,15 +266,13 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     /**
      * Add keyboard actions to this control using the Configuration we have
+     * This is revised to properly use InputMap and ActionMap of the component
+     * instead of using the KeyMaps directly.
      * @param editorPane
      */
     public void addActions(JEditorPane editorPane) {
-        // look at all keys that either start with prefix.Action, or
-        // that start with Action.
-
-        Keymap km_parent = JTextComponent.getKeymap(JTextComponent.DEFAULT_KEYMAP);
-        Keymap km_new = JTextComponent.addKeymap(PROPERTY_KEYMAP_JSYNTAXPANE, km_parent);
-
+        InputMap imap = editorPane.getInputMap();
+        ActionMap amap = editorPane.getActionMap();
 
         for (Configuration.StringKeyMatcher m : getConfig().getKeys(ACTION_KEY_PATTERN)) {
             String[] values = Configuration.COMMA_SEPARATOR.split(
@@ -300,21 +283,61 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             // The configuration keys will need to be prefixed by Action
             // to make it more readable in the COnfiguration files.
             action.config(getConfig(), DefaultSyntaxAction.ACTION_PREFIX + actionName);
+            configActionProperties(action, actionName, m.key);
             // Add the action to the component also
-            editorPane.getActionMap().put(actionName, action);
-            // Now bind all the keys to the Action we have:
+            amap.put(actionName, action);
+            // Now bind all the keys to the Action we have using the InputMap
             for (int i = 1; i < values.length; i++) {
                 String keyStrokeString = values[i];
                 KeyStroke ks = KeyStroke.getKeyStroke(keyStrokeString);
-                // KeyEvent.VK_QUOTEDBL
+                // we may have more than value, but we will use the last one in
+                // the single value here.  This will display the key in the popup menus
+                // pretty neat.
+                action.putValue(Action.ACCELERATOR_KEY, ks);
                 if (ks == null) {
                     throw new IllegalArgumentException("Invalid KeyStroke: " +
                             keyStrokeString);
                 }
-                km_new.addActionForKeyStroke(ks, action);
+                imap.put(ks, actionName);
             }
         }
-        editorPane.setKeymap(km_new);
+
+        // Now configure the Default actions for better display in the popup menu
+        for (Configuration.StringKeyMatcher m : getConfig().getKeys(DEFAULT_ACTION_PATTERN)) {
+            String name = m.matcher.group(2);
+            Action action = editorPane.getActionMap().get(name);
+            configActionProperties(action, name, m.group1);
+            // The below commented block does find the keys for the default Actions
+            // using InputMap, however there are multiple bound keys for the
+            // default actions that displaying them in the menu will probably not
+            // be the most obvious binding
+            /*
+            for (KeyStroke key : imap.allKeys()) {
+                Object o = imap.get(key);
+                if(name.equals(o)) {
+                    action.putValue(Action.ACCELERATOR_KEY, key);
+                    break;
+                }
+            }
+            */
+        }
+    }
+
+    private void configActionProperties(Action action, String actionName, String configKey) {
+
+        // if we have an icon, then load it:
+        String iconLoc = getConfig().getString(configKey + ".SmallIcon", actionName + ".png");
+        URL loc = this.getClass().getResource(SMALL_ICONS_LOC_PREFIX + iconLoc);
+        if (loc != null) {
+            ImageIcon i = new ImageIcon(loc);
+            action.putValue(Action.SMALL_ICON, i);
+        }
+        // Set the menu text
+        String name = getProperty(configKey + ".MenuText");
+        action.putValue(Action.NAME, name);
+        // Set the menu tooltips
+        String shortDesc = getProperty(configKey + ".ToolTip");
+        action.putValue(Action.SHORT_DESCRIPTION, shortDesc);
     }
 
     private SyntaxAction createAction(String actionClassName) {

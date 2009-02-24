@@ -7,6 +7,8 @@ Version 0.9.5 - Java Reflection Completions additions
     * Kits for XHTML and Xpath added.  XHTML has a simple Preview Action.
     * Added Execute Script to JacaScript (can also be used for Groovy if Groovy
       Scripting support is installed properly).
+    * Hotkeys for actions are displayed in Popup Menus
+    * Word Completion action can also do CamelCase matches
 Version 0.9.4 - IntelliSense additions
     * Adding IntelliSense to Java with simple List of selectable keywords
     * Added Toggle Comment Actions using Control SLASH

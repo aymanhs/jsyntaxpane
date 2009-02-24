@@ -257,6 +257,35 @@ public class SyntaxDocument extends PlainDocument {
         return tok;
     }
 
+    public Token getWordAt(int offs, Pattern p) {
+        Token word = null;
+        try {
+            Element line = getParagraphElement(offs);
+            if (line == null) {
+                return word;
+            }
+            int lineStart = line.getStartOffset();
+            int lineEnd = Math.min(line.getEndOffset(), getLength());
+            Segment seg = new Segment();
+            getText(lineStart, lineEnd - lineStart, seg);
+            if (seg.count > 0) {
+                // we need to get the word using the words pattern p
+                Matcher m = p.matcher(seg);
+                int o = offs - lineStart;
+                while(m.find()) {
+                    if(m.start() <= o && o <= m.end()) {
+                        word = new Token(TokenType.DEFAULT, m.start() + lineStart, m.end() - m.start());
+                        break;
+                    }
+                }
+            }
+        } catch (BadLocationException ex) {
+            Logger.getLogger(SyntaxDocument.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            return word;
+        }
+    }
+
     /**
      * Return the token following the current token, or null
      * <b>This is an expensive operation, so do not use it to update the gui</b>
@@ -293,7 +322,7 @@ public class SyntaxDocument extends PlainDocument {
      * have the negative of t.pairValue.
      * This method properly handles nestings of same pairValues, but overlaps
      * are not checked.
-     * if The document does not contain a paired
+     * if The document does not contain a paired token, then null is returned.
      * @param t
      * @return the other pair's token, or null if nothing is found.
      */
@@ -348,50 +377,6 @@ public class SyntaxDocument extends PlainDocument {
     }
 
     /**
-     * Find the location of the given String in the document.  returns -1
-     * if the search string is not found starting at position <code>start</code>
-     * @param search The String to search for
-     * @param start The beginning index of search
-     * @return
-     * @deprecated use {@link getMatcher} instead
-     */
-    @Deprecated
-    public int getIndexOf(String search, int start) {
-        int flag = Pattern.LITERAL;
-        Pattern pattern = Pattern.compile(search, flag);
-        return getIndexOf(pattern, start);
-    }
-
-    /**
-     * Find the next position that matches <code>pattern</code> in the document.
-     * returns -1 if the pattern is not found.
-     * @param pattern the regex pattern to find
-     * @param start The beginning index of search
-     * @return
-     * @deprecated use {@link getMatcher} instead
-     */
-    @Deprecated
-    public int getIndexOf(Pattern pattern, int start) {
-        int ndx = -1;
-        if (pattern == null || getLength() == 0) {
-            return -1;
-        }
-        try {
-            Segment segment = new Segment();
-            getText(start, getLength() - start, segment);
-            Matcher m = pattern.matcher(segment);
-            if (m.find()) {
-                // remember that the index is relative to the document, so
-                // always add the start position to it
-                ndx = m.start() + start;
-            }
-        } catch (BadLocationException ex) {
-            log.log(Level.SEVERE, null, ex);
-        }
-        return ndx;
-    }
-
-    /**
      * Return a matcher that matches the given pattern on the entire document
      * @param pattern
      * @return matcher object
@@ -431,7 +416,16 @@ public class SyntaxDocument extends PlainDocument {
         if (getLength() == 0) {
             return null;
         }
+        if (start >= getLength()) {
+            return null;
+        }
         try {
+            if (start < 0) {
+                start = 0;
+            }
+            if (start + length > getLength()) {
+                length = getLength() - start;
+            }
             Segment seg = new Segment();
             getText(start, length, seg);
             matcher = pattern.matcher(seg);
@@ -461,7 +455,7 @@ public class SyntaxDocument extends PlainDocument {
         getText(e.getStartOffset(), e.getEndOffset() - e.getStartOffset(), seg);
         char last = seg.last();
         if (last == '\n' || last == '\r') {
-            return seg.subSequence(0, seg.length() - 1).toString();
+            seg.count--;
         }
         return seg.toString();
     }

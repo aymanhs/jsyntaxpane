@@ -21,11 +21,14 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JComboBox;
 import javax.swing.MutableComboBoxModel;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
 import jsyntaxpane.SyntaxDocument;
@@ -40,11 +43,10 @@ import jsyntaxpane.Token;
 public class ActionUtils {
 
     /**
-     * Perform Smart Indentation:  pos must be on a line: this method will
-     * use the previous lines indentation (number of spaces before any non-space
-     * character or end of line) and return that as the prefix
+     * Get the indentation of a line of text.  This is the subString from
+     * beginning of line to the first non-space char
      * @param line the line of text
-     * @return
+     * @return indentation of line.
      */
     public static String getIndent(String line) {
         if (line == null || line.length() == 0) {
@@ -389,6 +391,111 @@ public class ActionUtils {
     }
 
     /**
+     * Expand the string template and replaces the selection with the expansion
+     * of the template.  The template String may contain any of the following
+     * special tags.
+     * 
+     * The template contains the following special characters:
+     * <li>{@code ${tab}} replaced with the document's tab size, in spaces</li>
+     * <li>{@code ${cursor}} will be removed, and the cursor will be placed at
+     * that location</li>
+     * <li>{@code ${selection}} replaced with the selection, if any.  If there is
+     * no selection, then the {@code ${selection}} tag will be removed.
+     * <li>{@code ${p:any text}} will be replaced by {@code any text} and the
+     * set selection to {@code any text}
+     * 
+     * This method properly handles indentation as follows:
+     * The indentation of the whole block will match the indentation of the caret
+     * line, or the line with the beginning of the selection, if the selection is
+     * in whole line, i.e.e one or more lines of selected text. {@see selectLines()}
+     *
+     * To add indentation to a block, use the {@code ${tab}} tag.
+     * 
+     * @param target JEditorCOmponent to be affected
+     * @param template template string to use.
+     */
+    public static void insertTemplate(JTextComponent target, String template) {
+        // get some stuff we'll need:
+        String thisIndent = getIndent(getLineAt(target, target.getSelectionStart()));
+        boolean multiLine = selectLines(target);
+        String selection = target.getSelectedText();
+        selection = (selection == null) ? "" : selection;
+        // re-indnent the template
+        String expanded = reIndent(template, thisIndent);
+        if (multiLine) {
+            StringBuffer sb = new StringBuffer();
+            Matcher m = SELECT_TABULATE_PATTERN.matcher(expanded);
+            while (m.find()) {
+                String tab = m.group(1);
+                selection = reIndent(selection, tab);
+                m.appendReplacement(sb, selection);
+            }
+            m.appendTail(sb);
+            expanded = sb.toString();
+        } else {
+            expanded = expanded.replace("${selection}", selection);
+        }
+
+        int cursor = expanded.indexOf("${cursor}");
+        if (cursor >= 0) {
+            cursor += target.getSelectionStart();
+            expanded = expanded.replace("${cursor}", "");
+        }
+        // look for the ${p:*} tags:
+        Matcher pTagsMather = PTAGS_PATTERN.matcher(expanded);
+        StringBuffer sb = new StringBuffer();
+        boolean hasPTags = false;
+        int pTagStart = 0;
+        int pTagEnd = 0;
+        int pOfst = target.getSelectionStart();
+        while (pTagsMather.find()) {
+            pTagStart = pTagsMather.start() + pOfst;
+            pTagEnd = pTagStart + pTagsMather.end(1) - pTagsMather.start(1);
+            pTagsMather.appendReplacement(sb, pTagsMather.group(1));
+            hasPTags = true;
+            // the tag has extra 5 chars ${p:} that we did not insert into the expansion
+            pOfst -= 5;
+        }
+        expanded = pTagsMather.appendTail(sb).toString();
+        // now replace the string
+        target.replaceSelection(expanded);
+        if (cursor >= 0 && !hasPTags) {
+            target.setCaretPosition(cursor);
+        }
+        if (hasPTags) {
+            target.select(pTagStart, pTagEnd);
+        }
+    }
+
+    public static String reIndent(String src, String tab) {
+        return src.replaceAll("(?m)^", tab);
+    }
+
+    /**
+     * If the selection is multi lined, then the full lines are selected,
+     * otherwise, nothing is done.
+     * @param target
+     * @return true if the selection is multi-line, or a whole line
+     */
+    public static boolean selectLines(JTextComponent target) {
+        if (target.getSelectionStart() == target.getSelectionEnd()) {
+            return false;
+        }
+        PlainDocument pDoc = (PlainDocument) target.getDocument();
+        Element es = pDoc.getParagraphElement(target.getSelectionStart());
+        // if more than one line is selected, we need to subtract one from the end
+        // so that we do not select the line with the caret and no selection in it
+        Element ee = pDoc.getParagraphElement(target.getSelectionEnd() - 1);
+        if (es.equals(ee) && ee.getEndOffset() != target.getSelectionEnd()) {
+            return false;
+        }
+        int start = es.getStartOffset();
+        int end = ee.getEndOffset();
+        target.select(start, end - 1);
+        return true;
+    }
+
+    /**
      * Sets the caret position of the given target to the given line and column
      * @param target
      * @param line the first being 1
@@ -423,4 +530,12 @@ public class ActionUtils {
     final static String[] EMPTY_STRING_ARRAY = new String[0];
     // This is used to quickly create Strings of at most 16 spaces (using substring)
     final static String SPACES = "                ";
+    /**
+     * The Pattern to use for PTags in insertTemplate
+     */
+    static final Pattern PTAGS_PATTERN = Pattern.compile("\\$\\{p:([^}]*)\\}");
+    /**
+     * The Pattern to use for removing indentation of selection tag in insertTemplate
+     */
+    static final Pattern SELECT_TABULATE_PATTERN = Pattern.compile("(?m)(^\\s*)(\\$\\{selection\\})");
 }

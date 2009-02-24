@@ -57,5 +57,10 @@ abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAc
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
     public static final String ACTION_PREFIX = "Action.";
 }
