@@ -14,10 +14,15 @@
 package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
+import java.net.URL;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import javax.swing.ImageIcon;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.util.Configuration;
+import jsyntaxpane.util.ReflectUtils;
 
 /**
  * The DefaultSyntaxAction.  You can extend this class or implement the interface
@@ -27,19 +32,36 @@ import jsyntaxpane.util.Configuration;
  */
 abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAction {
 
+    String actionName;
+
     public DefaultSyntaxAction(String actionName) {
         super(actionName);
+        this.actionName = actionName;
     }
 
     @Override
     public void config(Configuration config, String name) {
+        // find setter methods for each property key:
+        actionName = name.substring(ACTION_PREFIX.length());
+        for (Configuration.StringKeyMatcher m : config.getKeys(
+                Pattern.compile(Pattern.quote(name) + "\\.((\\w|-)+)"))) {
+            Class<? extends DefaultSyntaxAction> myClass = this.getClass();
+            if(! ReflectUtils.callSetter(this, m.group1, m.value)) {
+                System.err.println("Invalid property " + m.group1 +
+                        " when configuring " + actionName);
+            }
+        }
+        // if we did not put an icon, try and find one using our name
+        if(getValue(SMALL_ICON) == null) {
+            setSmallIcon(actionName + ".png");
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         JTextComponent text = getTextComponent(e);
         SyntaxDocument sdoc = ActionUtils.getSyntaxDocument(text);
-        if(text != null) {
+        if (text != null) {
             actionPerformed(text, sdoc, text.getCaretPosition(), e);
         }
     }
@@ -59,8 +81,50 @@ abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAc
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName();
+        return "Action " + actionName + "of type " + this.getClass().getSimpleName();
     }
 
+    /**
+     * Configure the MenuText for the Action
+     * @param text
+     */
+    public final void setMenuText(String text) {
+        putValue(NAME, text);
+    }
+
+    /**
+     * Configure the ToolTip for the Action
+     * @param text
+     */
+    public final void setToolTip(String text) {
+        putValue(SHORT_DESCRIPTION, text);
+    }
+
+    /**
+     * Sets the Large Icon for this action from given url
+     *
+     * @param url
+     */
+    public final void setLargeIcon(String url) {
+        URL loc = this.getClass().getResource(LARGE_ICONS_LOC_PREFIX + url);
+        if (loc != null) {
+            ImageIcon i = new ImageIcon(loc);
+            putValue(LARGE_ICON_KEY, i);
+        }
+    }
+
+    /**
+     * Configure the SmallIcon for the Action
+     * @param url
+     */
+    public final void setSmallIcon(String url) {
+        URL loc = this.getClass().getResource(SMALL_ICONS_LOC_PREFIX + url);
+        if (loc != null) {
+            ImageIcon i = new ImageIcon(loc);
+            putValue(SMALL_ICON, i);
+        }
+    }
     public static final String ACTION_PREFIX = "Action.";
+    public static final String SMALL_ICONS_LOC_PREFIX = "/META-INF/images/small-icons/";
+    public static final String LARGE_ICONS_LOC_PREFIX = "/META-INF/images/large-icons/";
 }

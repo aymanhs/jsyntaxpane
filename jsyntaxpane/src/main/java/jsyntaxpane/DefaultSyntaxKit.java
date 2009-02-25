@@ -67,7 +67,6 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
     public static final String CONFIG_MENU = "PopupMenu";
     public static final String CONFIG_MENU_ICONS = "PopupMenuIcons";
     public static final String PROPERTY_KEYMAP_JSYNTAXPANE = "jsyntaxpane";
-    public static final String SMALL_ICONS_LOC_PREFIX = "/META-INF/images/";
     private static final Pattern ACTION_KEY_PATTERN = Pattern.compile("Action\\.((\\w|-)+)");
     private static final Pattern DEFAULT_ACTION_PATTERN = Pattern.compile("(DefaultAction.((\\w|-)+)).*");
     private static Font DEFAULT_FONT;
@@ -283,7 +282,6 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             // The configuration keys will need to be prefixed by Action
             // to make it more readable in the COnfiguration files.
             action.config(getConfig(), DefaultSyntaxAction.ACTION_PREFIX + actionName);
-            configActionProperties(action, actionName, m.key);
             // Add the action to the component also
             amap.put(actionName, action);
             // Now bind all the keys to the Action we have using the InputMap
@@ -327,7 +325,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
         // if we have an icon, then load it:
         String iconLoc = getConfig().getString(configKey + ".SmallIcon", actionName + ".png");
-        URL loc = this.getClass().getResource(SMALL_ICONS_LOC_PREFIX + iconLoc);
+        URL loc = this.getClass().getResource(DefaultSyntaxAction.SMALL_ICONS_LOC_PREFIX + iconLoc);
         if (loc != null) {
             ImageIcon i = new ImageIcon(loc);
             action.putValue(Action.SMALL_ICON, i);
@@ -337,7 +335,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         action.putValue(Action.NAME, name);
         // Set the menu tooltips
         String shortDesc = getProperty(configKey + ".ToolTip");
-        action.putValue(Action.SHORT_DESCRIPTION, shortDesc);
+        action.putValue(Action.SHORT_DESCRIPTION, shortDesc); 
     }
 
     private SyntaxAction createAction(String actionClassName) {

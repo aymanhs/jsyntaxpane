@@ -17,13 +17,20 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JTable;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
 
 /**
  * Reflection Utility methods
@@ -113,7 +120,7 @@ public class ReflectUtils {
      */
     public static String getJavaCallString(Constructor c) {
         StringBuilder call = new StringBuilder();
-        call.append(c.getName());
+        call.append(c.getDeclaringClass().getSimpleName());
         addParamsString(call, c.getParameterTypes());
         return call.toString();
     }
@@ -268,8 +275,61 @@ public class ReflectUtils {
         }
         return null;
     }
-    public static List<String> DEFAULT_PACKAGES;
 
+    /**
+     * Find a setter method for the give object's property and try to call it.
+     * No exceptions are thrown. You typically call this method because either
+     * you are sure no exceptions will be thrown, or to silently ignore
+     * any that may be thrown.
+     * This will also find a setter that accepts an interface that the value
+     * implements.
+     * <b>This is still not very effcient and should only be called if
+     * performance is not of an issue.</b>
+     * You can check the return value to see if the call was seuccessful or
+     * not.
+     * @param obj Object to receive the call
+     * @param property property name (without set. First letter will be
+     * capitalized)
+     * @param value Value of the property.
+     * @return
+     */
+    public static boolean callSetter(Object obj, String property, Object value) {
+        try {
+            Class<?> theClass = obj.getClass();
+            String setter = String.format("set%C%s",
+                    property.charAt(0), property.substring(1));
+            Class paramType = value.getClass();
+            while (paramType != null) {
+                Method m;
+                try {
+                    m = theClass.getMethod(setter, paramType);
+                    m.invoke(obj, value);
+                    return true;
+                } catch (NoSuchMethodException ex) {
+                    // try on the interfaces of this class
+                    for(Class iface:paramType.getInterfaces()) {
+                        try {
+                            m = theClass.getMethod(setter, iface);
+                            m.invoke(obj, value);
+                            return true;
+                        } catch (NoSuchMethodException ex1) {
+                        }
+                    }
+                    paramType = paramType.getSuperclass();
+                }
+            }
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
+        }
+        return false;
+    }
+    public static List<String> DEFAULT_PACKAGES;
 
     static {
         DEFAULT_PACKAGES = new ArrayList<String>(2);

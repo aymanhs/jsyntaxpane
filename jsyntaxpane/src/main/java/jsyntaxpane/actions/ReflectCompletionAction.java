@@ -15,9 +15,9 @@ package jsyntaxpane.actions;
 
 import jsyntaxpane.actions.gui.ReflectCompletionDialog;
 import java.awt.event.ActionEvent;
-import java.util.Map;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
+import jsyntaxpane.Token;
 
 /**
  * ComboBox like Completion Action:
@@ -37,6 +37,10 @@ public class ReflectCompletionAction extends DefaultSyntaxAction {
     @Override
     public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
             int dot, ActionEvent e) {
+        Token t = sDoc.getTokenAt(dot);
+        if(t != null) {
+            target.select(t.start, t.end());
+        }
         if (dlg == null) {
             dlg = new ReflectCompletionDialog(target);
         }
