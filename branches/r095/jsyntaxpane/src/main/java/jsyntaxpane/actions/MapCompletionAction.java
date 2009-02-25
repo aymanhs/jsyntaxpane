@@ -18,7 +18,6 @@ import java.util.Map;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
-import jsyntaxpane.util.Configuration;
 import jsyntaxpane.util.JarServiceProvider;
 
 /**
@@ -52,18 +51,7 @@ public class MapCompletionAction extends DefaultSyntaxAction {
         }
     }
 
-    /**
-     * The completions will for now reside on another properties style file
-     * referenced by prefix.Completions.File
-     * 
-     * @param config
-     * @param name 
-     */
-    @Override
-    public void config(Configuration config, String name) {
-        String completionsFile = config.getString("Completions.File", "NONE");
-        if (completionsFile != null) {
-            completions = JarServiceProvider.readStringsMap(completionsFile);
-        }
+    public void setCompletionsFile(String value) {
+        completions = JarServiceProvider.readStringsMap(value);
     }
 }

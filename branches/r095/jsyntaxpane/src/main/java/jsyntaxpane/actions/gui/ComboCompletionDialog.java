@@ -29,6 +29,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.actions.ActionUtils;
 import jsyntaxpane.util.StringUtils;
+import jsyntaxpane.util.SwingUtils;
 
 /**
  *
@@ -44,7 +45,7 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
      * Our target component
      */
     private JTextComponent target;
-    public String escapeChars = ";(= \t\n";
+    public String escapeChars = ";(= \t\n\r";
     public List<String> items;
 
     /**
@@ -74,6 +75,7 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         // This will allow the textfield to receive TAB keys
         jTxtItem.setFocusTraversalKeysEnabled(false);
         this.target = target;
+        SwingUtils.addEscapeListener(this);
     }
 
     /**
@@ -123,7 +125,7 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
             }
         }
         jLstItems.setListData(filtered);
-        if (selected != null) {
+        if (selected != null && filtered.contains(selected)) {
             jLstItems.setSelectedValue(selected, true);
         } else {
             jLstItems.setSelectedIndex(0);
@@ -162,8 +164,8 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTxtItem, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
+            .addComponent(jTxtItem, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

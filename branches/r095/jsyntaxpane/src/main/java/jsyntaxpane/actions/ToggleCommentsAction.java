@@ -18,7 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
-import jsyntaxpane.util.Configuration;
 
 /**
  * This action will toggle comments on or off on selected whole lines.
@@ -45,6 +44,9 @@ public class ToggleCommentsAction extends DefaultSyntaxAction {
     @Override
     public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
             int dot, ActionEvent e) {
+        if (lineCommentPattern == null) {
+            lineCommentPattern = Pattern.compile("(^" + lineCommentStart + ")(.*)");
+        }
         String[] lines = ActionUtils.getSelectedLines(target);
         int start = target.getSelectionStart();
         StringBuffer toggled = new StringBuffer();
@@ -62,10 +64,7 @@ public class ToggleCommentsAction extends DefaultSyntaxAction {
         target.select(start, start + toggled.length());
     }
 
-    @Override
-    public void config(Configuration config, String name) {
-        // we need to escape the chars
-        lineCommentStart = config.getString(name + ".LineComments", "// ").replace("\"", "");
-        lineCommentPattern = Pattern.compile("(^" + lineCommentStart + ")(.*)");
+    public void setLineComments(String value) {
+        lineCommentStart = value.replace("\"", "");
     }
 }

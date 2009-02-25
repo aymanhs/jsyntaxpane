@@ -64,10 +64,12 @@ public class ActionUtils {
      * if there is no selection then current line is returned.
      * 
      * Note that the strings returned will not contain the terminating line feeds
+     * If the document is empty, then an empty string array is returned.  So
+     * you can always iterate over the returned array without a null check
      * 
      * The text component will then have the full lines set as selection
      * @param target
-     * @return String[] of lines spanning selection / or Dot
+     * @return String[] of lines spanning selection / or line containing dot
      */
     public static String[] getSelectedLines(JTextComponent target) {
         String[] lines = null;
@@ -395,13 +397,11 @@ public class ActionUtils {
      * of the template.  The template String may contain any of the following
      * special tags.
      * 
-     * The template contains the following special characters:
-     * <li>{@code ${tab}} replaced with the document's tab size, in spaces</li>
-     * <li>{@code ${cursor}} will be removed, and the cursor will be placed at
+     * <li>{@code #{cursor}} will be removed, and the cursor will be placed at
      * that location</li>
-     * <li>{@code ${selection}} replaced with the selection, if any.  If there is
-     * no selection, then the {@code ${selection}} tag will be removed.
-     * <li>{@code ${p:any text}} will be replaced by {@code any text} and the
+     * <li>{@code #{selection}} replaced with the selection, if any.  If there is
+     * no selection, then the {@code #{selection}} tag will be removed.
+     * <li>{@code #{p:any text}} will be replaced by {@code any text} and then
      * set selection to {@code any text}
      * 
      * This method properly handles indentation as follows:
@@ -409,66 +409,66 @@ public class ActionUtils {
      * line, or the line with the beginning of the selection, if the selection is
      * in whole line, i.e.e one or more lines of selected text. {@see selectLines()}
      *
-     * To add indentation to a block, use the {@code ${tab}} tag.
-     * 
      * @param target JEditorCOmponent to be affected
-     * @param template template string to use.
+     * @param templateLines template split as a String array of lines.
+     *
+     * @see insertLinesTemplate
      */
-    public static void insertTemplate(JTextComponent target, String template) {
+    public static void insertLinesTemplate(JTextComponent target, String[] templateLines) {
         // get some stuff we'll need:
         String thisIndent = getIndent(getLineAt(target, target.getSelectionStart()));
-        boolean multiLine = selectLines(target);
-        String selection = target.getSelectedText();
-        selection = (selection == null) ? "" : selection;
-        // re-indnent the template
-        String expanded = reIndent(template, thisIndent);
-        if (multiLine) {
-            StringBuffer sb = new StringBuffer();
-            Matcher m = SELECT_TABULATE_PATTERN.matcher(expanded);
-            while (m.find()) {
-                String tab = m.group(1);
-                selection = reIndent(selection, tab);
-                m.appendReplacement(sb, selection);
-            }
-            m.appendTail(sb);
-            expanded = sb.toString();
-        } else {
-            expanded = expanded.replace("${selection}", selection);
-        }
-
-        int cursor = expanded.indexOf("${cursor}");
-        if (cursor >= 0) {
-            cursor += target.getSelectionStart();
-            expanded = expanded.replace("${cursor}", "");
-        }
-        // look for the ${p:*} tags:
-        Matcher pTagsMather = PTAGS_PATTERN.matcher(expanded);
+        String[] selLines = getSelectedLines(target);
+        int selStart = -1, selEnd = -1;
         StringBuffer sb = new StringBuffer();
-        boolean hasPTags = false;
-        int pTagStart = 0;
-        int pTagEnd = 0;
-        int pOfst = target.getSelectionStart();
-        while (pTagsMather.find()) {
-            pTagStart = pTagsMather.start() + pOfst;
-            pTagEnd = pTagStart + pTagsMather.end(1) - pTagsMather.start(1);
-            pTagsMather.appendReplacement(sb, pTagsMather.group(1));
-            hasPTags = true;
-            // the tag has extra 5 chars ${p:} that we did not insert into the expansion
-            pOfst -= 5;
+        for (String tLine : templateLines) {
+            int selNdx = tLine.indexOf("#{selection}");
+            if (selNdx >= 0) {
+                // for each of the selected lines:
+                for (String selLine : selLines) {
+                    sb.append(tLine.subSequence(0, selNdx));
+                    sb.append(selLine);
+                    sb.append('\n');
+                }
+            } else {
+                sb.append(thisIndent);
+                // now check for any ptags
+                Matcher pm = PTAGS_PATTERN.matcher(tLine);
+                int lineStart = sb.length();
+                while (pm.find()) {
+                    selStart = pm.start() + lineStart;
+                    pm.appendReplacement(sb, pm.group(1));
+                    selEnd = sb.length();
+                }
+                pm.appendTail(sb);
+                sb.append('\n');
+            }
         }
-        expanded = pTagsMather.appendTail(sb).toString();
-        // now replace the string
-        target.replaceSelection(expanded);
-        if (cursor >= 0 && !hasPTags) {
-            target.setCaretPosition(cursor);
-        }
-        if (hasPTags) {
-            target.select(pTagStart, pTagEnd);
+        int ofst = target.getSelectionStart();
+        target.replaceSelection(sb.toString());
+        if (selStart >= 0) {
+            // target.setCaretPosition(selStart);
+            target.select(ofst + selStart, ofst + selEnd);
         }
     }
 
-    public static String reIndent(String src, String tab) {
-        return src.replaceAll("(?m)^", tab);
+    /**
+     *
+     * @param target
+     * @param template
+     */
+    public static void insertSimpleTemplate(JTextComponent target, String template) {
+        String selected = target.getSelectedText();
+        selected = (selected == null) ? "" : selected;
+        String expanded = template.replace(TEMPLATE_SELECTION, selected);
+        int cursor = expanded.indexOf(TEMPLATE_CURSOR);
+        if (cursor >= 0) {
+            cursor += target.getSelectionStart();
+            expanded = expanded.replace(TEMPLATE_CURSOR, "");
+        }
+        target.replaceSelection(expanded);
+        if (cursor >= 0) {
+            target.setCaretPosition(cursor);
+        }
     }
 
     /**
@@ -531,11 +531,9 @@ public class ActionUtils {
     // This is used to quickly create Strings of at most 16 spaces (using substring)
     final static String SPACES = "                ";
     /**
-     * The Pattern to use for PTags in insertTemplate
+     * The Pattern to use for PTags in insertSimpleTemplate
      */
-    static final Pattern PTAGS_PATTERN = Pattern.compile("\\$\\{p:([^}]*)\\}");
-    /**
-     * The Pattern to use for removing indentation of selection tag in insertTemplate
-     */
-    static final Pattern SELECT_TABULATE_PATTERN = Pattern.compile("(?m)(^\\s*)(\\$\\{selection\\})");
+    public static final Pattern PTAGS_PATTERN = Pattern.compile("\\#\\{p:([^}]*)\\}");
+    public static final String TEMPLATE_CURSOR = "#{cursor}";
+    public static final String TEMPLATE_SELECTION = "#{selection}";
 }

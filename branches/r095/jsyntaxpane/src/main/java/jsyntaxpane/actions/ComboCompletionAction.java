@@ -17,11 +17,9 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.Map;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
 import jsyntaxpane.actions.gui.ComboCompletionDialog;
-import jsyntaxpane.util.Configuration;
 import jsyntaxpane.util.JarServiceProvider;
 
 /**
@@ -60,22 +58,7 @@ public class ComboCompletionAction extends DefaultSyntaxAction {
         dlg.displayFor(abbrev, items);
     }
 
-    /**
-     * The completions will for now reside on another properties style file
-     * referenced by prefix.Completions.File
-     *
-     * @param config
-     * @param name
-     */
-    @Override
-    public void config(Configuration config, String name) {
-        // for now we will use just one list for anything.  This can be modified
-        // by having a map from TokenType to String[] or something....
-        String itemsUrl = config.getString(name + ".Items.URL");
-        items = JarServiceProvider.readLines(itemsUrl);
-    }
-
-    public TextAction getAction(String key) {
-        return this;
+    public void setItemsURL(String value) {
+        items = JarServiceProvider.readLines(value);
     }
 }

@@ -67,7 +67,7 @@ abstract class MemberCell extends JPanel {
         g.setColor(isSelected ? list.getSelectionForeground() : list.getForeground());
         g.drawImage(getIcon(), 2, 0, null);
         int x = 6 + getIcon().getWidth(this);
-        int y = fm.getAscent();
+        int y = fm.getHeight();
         if (member.getDeclaringClass().equals(theClass)) {
             Font bold = list.getFont().deriveFont(Font.BOLD);
             g.setFont(bold);
@@ -87,7 +87,7 @@ abstract class MemberCell extends JPanel {
         FontMetrics fm = g.getFontMetrics(font);
         // total text for this component:
         String total = getMemberName() + getArguments() + getReturnType() + "  ";
-        return new Dimension(fm.stringWidth(total) + 20, fm.getHeight());
+        return new Dimension(fm.stringWidth(total) + 20, Math.max(fm.getHeight(), 16));
     }
 
     private int drawString(String string, int x, int y, Graphics g) {

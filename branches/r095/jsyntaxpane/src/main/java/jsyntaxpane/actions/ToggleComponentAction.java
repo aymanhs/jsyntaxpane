@@ -17,7 +17,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.JEditorPane;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.DefaultSyntaxKit;
-import jsyntaxpane.util.Configuration;
 
 /**
  * This Action will Toggle any SyntaxComponents on the EditorPane
@@ -36,9 +35,8 @@ public class ToggleComponentAction extends DefaultSyntaxAction {
         putValue(SELECTED_KEY, Boolean.TRUE);
     }
 
-    @Override
-    public void config(Configuration config, String name) {
-        componentName = config.getString(name + ".Component");
+    public void setComponent(String name) {
+        componentName = name;
     }
     
     @Override

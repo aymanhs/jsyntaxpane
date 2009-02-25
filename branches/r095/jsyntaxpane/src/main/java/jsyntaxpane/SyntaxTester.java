@@ -26,8 +26,9 @@ public class SyntaxTester extends javax.swing.JFrame {
 
     /** Creates new form Tester */
     public SyntaxTester() {
-        // this is a test for adding regex lexer.
-        DefaultSyntaxKit.registerContentType("text/aa_regex", "jsyntaxpane.JavaRegexKit");
+        // this is a test for adding regex lexer.  It wont work unless the
+        // JavaRegex.properties is found in the classpath
+        // DefaultSyntaxKit.registerContentType("text/aa_regex", "jsyntaxpane.JavaRegexKit");
         initComponents();
         jCmbLangs.setModel(new DefaultComboBoxModel(DefaultSyntaxKit.getContentTypes()));
         // jEdtTest.setContentType(jCmbLangs.getItemAt(0).toString());

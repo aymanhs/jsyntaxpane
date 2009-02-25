@@ -3,9 +3,9 @@ protected
 private
 class
 static
-.toString()
-.equals(|)
-.hashCode()
+toString()
+equals(|)
+hashCode()
 JTextField
 JEditorPane
 JTextPane
@@ -13,6 +13,6 @@ JComboBox
 JList
 JTree
 jsyntaxpane
-.setContentType("text/|lang|")
-.setProperty("|key|")
+setContentType("text/|lang|")
+setProperty("|key|")
 for(int i=0; i < |max|; i++) {\n\t// loop body \n}

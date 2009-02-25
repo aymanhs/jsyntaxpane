@@ -37,6 +37,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.actions.ActionUtils;
 import jsyntaxpane.util.ReflectUtils;
+import jsyntaxpane.util.StringUtils;
 import jsyntaxpane.util.SwingUtils;
 
 /**
@@ -105,12 +106,12 @@ public class ReflectCompletionDialog extends javax.swing.JDialog {
         Vector<Member> filtered = new Vector<Member>();
         Object selected = jLstItems.getSelectedValue();
         for (Member m : items) {
-            if (m.getName().startsWith(prefix)) {
+            if (StringUtils.camelCaseMatch(m.getName(), prefix)) {
                 filtered.add(m);
             }
         }
         jLstItems.setListData(filtered);
-        if (selected != null) {
+        if (selected != null && filtered.contains(selected)) {
             jLstItems.setSelectedValue(selected, true);
         } else {
             jLstItems.setSelectedIndex(0);
@@ -228,7 +229,7 @@ public class ReflectCompletionDialog extends javax.swing.JDialog {
             if (pressed != '\n') {
                 result += (pressed == '\t') ? ' ' : pressed;
             }
-            ActionUtils.insertMagicString(target, result);
+            target.replaceSelection(result);
             setVisible(false);
         } else {
             // perform bounds checks for i
@@ -288,7 +289,7 @@ public class ReflectCompletionDialog extends javax.swing.JDialog {
      */
     public void displayFor(JTextComponent target) {
         try {
-            int dot = target.getCaretPosition();
+            int dot = target.getSelectionStart();
             Window window = SwingUtilities.getWindowAncestor(target);
             Rectangle rt = target.modelToView(dot);
             Point loc = new Point(rt.x, rt.y);
@@ -304,6 +305,7 @@ public class ReflectCompletionDialog extends javax.swing.JDialog {
         } finally {
             setFonts(target.getFont());
             updateItems();
+            jTxtItem.setText(target.getSelectedText());
             setVisible(true);
         }
     }

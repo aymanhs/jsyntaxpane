@@ -22,7 +22,6 @@ import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
 import jsyntaxpane.actions.gui.ComboCompletionDialog;
-import jsyntaxpane.util.Configuration;
 import jsyntaxpane.util.StringUtils;
 
 /**
@@ -75,13 +74,10 @@ public class CompleteWordAction extends DefaultSyntaxAction {
         dlg.displayFor(cw, matches);
     }
 
-    @Override
-    public void config(Configuration config, String name) {
-        String wordRegexp = config.getString(name + ".WordsRegexp", "\\w+");
-        wordsPattern = Pattern.compile(wordRegexp);
+    public void setWordsRegexp(String value) {
+        wordsPattern = Pattern.compile(value);
+
     }
-    private ComboCompletionDialog dlg;
-    private Pattern wordsPattern;
 
     /**
      * Add words from the matcher m that match the word abbr to matches
@@ -100,4 +96,7 @@ public class CompleteWordAction extends DefaultSyntaxAction {
             }
         }
     }
+    private ComboCompletionDialog dlg;
+    private Pattern wordsPattern = DEFAULT_WORDS_REGEXP;
+    private static final Pattern DEFAULT_WORDS_REGEXP = Pattern.compile("\\w+");
 }

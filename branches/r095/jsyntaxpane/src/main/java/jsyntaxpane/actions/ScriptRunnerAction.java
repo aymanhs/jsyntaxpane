@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
-import jsyntaxpane.util.Configuration;
 
 /**
  * Executes the script in the component's text using a ScriptEngine
@@ -70,11 +69,10 @@ public class ScriptRunnerAction extends DefaultSyntaxAction {
         return engine;
     }
 
-    @Override
-    public void config(Configuration config, String name) {
-        scriptExtension = config.getString(name + ".ScriptExtension");
+    public void setScriptExtension(String value) {
+        scriptExtension = value;
     }
-    
+
     protected static ScriptEngineManager sem;
     private ScriptEngine engine;
     private String scriptExtension;
