@@ -23,14 +23,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JTable;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 
 /**
  * Reflection Utility methods
@@ -294,40 +291,55 @@ public class ReflectUtils {
      * @return
      */
     public static boolean callSetter(Object obj, String property, Object value) {
-        try {
-            Class<?> theClass = obj.getClass();
-            String setter = String.format("set%C%s",
-                    property.charAt(0), property.substring(1));
-            Class paramType = value.getClass();
-            while (paramType != null) {
-                Method m;
-                try {
-                    m = theClass.getMethod(setter, paramType);
-                    m.invoke(obj, value);
-                    return true;
-                } catch (NoSuchMethodException ex) {
-                    // try on the interfaces of this class
-                    for(Class iface:paramType.getInterfaces()) {
-                        try {
-                            m = theClass.getMethod(setter, iface);
-                            m.invoke(obj, value);
-                            return true;
-                        } catch (NoSuchMethodException ex1) {
-                        }
-                    }
-                    paramType = paramType.getSuperclass();
-                }
-            }
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(ReflectUtils.class.getName()).log(Level.INFO, null, ex);
+        String key = String.format("%s.%s(%s)", obj.getClass().getName(),
+                property, value.getClass().getName());
+        Method m = null;
+        boolean result = false;
+        if(!SETTERS_MAP.containsKey(key)) {
+            m = findMethod(obj, property, value);
+            SETTERS_MAP.put(key, m);
+        } else {
+            m = SETTERS_MAP.get(key);
         }
-        return false;
+        if(m != null) {
+            try {
+                m.invoke(obj, value);
+                result = true;
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(ReflectUtils.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(ReflectUtils.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(ReflectUtils.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return result;
+    }
+
+    private static synchronized Method findMethod(Object obj,
+            String property, Object value) {
+        Method m = null;
+        Class<?> theClass = obj.getClass();
+        String setter = String.format("set%C%s",
+                property.charAt(0), property.substring(1));
+        Class paramType = value.getClass();
+        while (paramType != null) {
+            try {
+                m = theClass.getMethod(setter, paramType);
+                return m;
+            } catch (NoSuchMethodException ex) {
+                // try on the interfaces of this class
+                for (Class iface : paramType.getInterfaces()) {
+                    try {
+                        m = theClass.getMethod(setter, iface);
+                        return m;
+                    } catch (NoSuchMethodException ex1) {
+                    }
+                }
+                paramType = paramType.getSuperclass();
+            }
+        }
+        return m;
     }
     public static List<String> DEFAULT_PACKAGES;
 
@@ -337,4 +349,15 @@ public class ReflectUtils {
         DEFAULT_PACKAGES.add("java.util");
         DEFAULT_PACKAGES.add("jsyntaxpane");
     }
+    /**
+     * To speed up find setter methods, this map will be used.
+     * The Key String will be of the format objectClass.property(valueclass)
+     * Where:
+     * objectClass = obj.getClass().getName
+     * property = property (as passed in to callSetter), before set is appended
+     * valueCLass = value.getClass().getName()
+     * The Method will be either the method, or null if a search was not and no
+     * method is found.
+     */
+    private static HashMap<String, Method> SETTERS_MAP = new HashMap<String, Method>();
 }

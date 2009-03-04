@@ -13,8 +13,6 @@
  */
 package jsyntaxpane.util;
 
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import java.util.Comparator;
 
 /**

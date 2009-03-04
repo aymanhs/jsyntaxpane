@@ -13,6 +13,7 @@
  */
 package jsyntaxpane.actions.gui;
 
+import java.lang.ref.WeakReference;
 import jsyntaxpane.actions.*;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
@@ -25,7 +26,7 @@ import jsyntaxpane.util.SwingUtils;
 public class GotoLineDialog extends javax.swing.JDialog {
 
     private static final String PROPERTY_KEY = "GOTOLINE_DIALOG";
-    private JTextComponent text;
+    private WeakReference<JTextComponent> text;
 
     /** 
      * Creates new form GotoLineDialog
@@ -34,7 +35,7 @@ public class GotoLineDialog extends javax.swing.JDialog {
     private GotoLineDialog(JTextComponent text) {
         super(ActionUtils.getFrameFor(text), false);
         initComponents();
-        this.text = text;
+        this.text = new WeakReference<JTextComponent>(text);
         setLocationRelativeTo(text.getRootPane());
         getRootPane().setDefaultButton(jBtnOk);
         text.getDocument().putProperty(PROPERTY_KEY, this);
@@ -103,7 +104,7 @@ public class GotoLineDialog extends javax.swing.JDialog {
             try {
                 int lineNr = Integer.parseInt(line.toString());
                 ActionUtils.insertIntoCombo(jCmbLineNumbers, line);
-                ActionUtils.setCaretPosition(text, lineNr, 0);
+                ActionUtils.setCaretPosition(text.get(), lineNr, 0);
                 setVisible(false);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid Number: " + line,
@@ -133,12 +134,13 @@ public class GotoLineDialog extends javax.swing.JDialog {
      */
     public static void showForEditor(JTextComponent text) {
         GotoLineDialog dlg = null;
-        if ((text == null) || (text.getDocument().getProperty(PROPERTY_KEY) == null)) {
+        if (text.getDocument().getProperty(PROPERTY_KEY) == null) {
             dlg = new GotoLineDialog(text);
         } else {
             dlg = (GotoLineDialog) text.getDocument().getProperty(PROPERTY_KEY);
         }
         dlg.jCmbLineNumbers.requestFocusInWindow();
         dlg.setVisible(true);
+        
     }
 }

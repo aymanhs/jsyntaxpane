@@ -15,7 +15,6 @@ package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
 import java.net.URL;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.text.JTextComponent;

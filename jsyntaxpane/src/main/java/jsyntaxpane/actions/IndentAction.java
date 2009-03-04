@@ -14,13 +14,20 @@
 package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.PlainDocument;
 import jsyntaxpane.SyntaxDocument;
+import jsyntaxpane.Token;
+import jsyntaxpane.util.JarServiceProvider;
 
 /**
  * IndentAction is used to replace Tabs with spaces.  If there is selected
  * text, then the lines spanning the selection will be shifted
+ * Since this is also used as an abbreviation completion action,
+ * Abbreviiations are processed by this event, if there is no selection.
+ * 
  * right by one tab-width space  character
  */
 public class IndentAction extends DefaultSyntaxAction {
@@ -34,12 +41,29 @@ public class IndentAction extends DefaultSyntaxAction {
             int dot, ActionEvent e) {
         String selected = target.getSelectedText();
         if (selected == null) {
-            PlainDocument pDoc = (PlainDocument) target.getDocument();
-            Integer tabStop = (Integer) pDoc.getProperty(PlainDocument.tabSizeAttribute);
-            int lineStart = pDoc.getParagraphElement(target.getCaretPosition()).getStartOffset();
-            int column = target.getCaretPosition() - lineStart;
+            // Check for abbreviations:
+            Token abbrToken = sDoc.getWordAt(dot, wordsPattern);
+            Integer tabStop = ActionUtils.getTabSize(target);
+            int lineStart = sDoc.getParagraphElement(dot).getStartOffset();
+            int column = dot - lineStart;
             int needed = tabStop - (column % tabStop);
-            target.replaceSelection(ActionUtils.SPACES.substring(0, needed));
+            if (abbrvs == null || abbrToken == null) {
+                target.replaceSelection(ActionUtils.SPACES.substring(0, needed));
+            } else {
+                String abbr = abbrToken.getString(sDoc);
+                target.select(abbrToken.start, abbrToken.end());
+                if (abbrvs.containsKey(abbr)) {
+                    abbr = abbrvs.get(abbr);
+                } else {
+                    abbr += ActionUtils.SPACES.substring(0, needed);
+                }
+                String[] abbrLines = abbr.split("\n");
+                if (abbrLines.length > 1) {
+                    ActionUtils.insertLinesTemplate(target, abbrLines);
+                } else {
+                    ActionUtils.insertSimpleTemplate(target, abbr);
+                }
+            }
         } else {
             String[] lines = ActionUtils.getSelectedLines(target);
             int start = target.getSelectionStart();
@@ -52,5 +76,30 @@ public class IndentAction extends DefaultSyntaxAction {
             target.replaceSelection(sb.toString());
             target.select(start, start + sb.length());
         }
+    }
+    private Pattern wordsPattern = Pattern.compile("\\w+");
+    private Map<String, String> abbrvs;
+
+    public void setWordRegex(String regex) {
+        wordsPattern = Pattern.compile(regex);
+    }
+
+    public void setAbbreviations(String loc) {
+        abbrvs = JarServiceProvider.readStringsMap(loc);
+    }
+
+    public void addAbbreviation(String abbr, String template) {
+        if(abbrvs == null) {
+            abbrvs = new HashMap<String, String>();
+        }
+        abbrvs.put(abbr, template);
+    }
+
+    public String getAbbreviation(String abbr) {
+        return abbrvs == null ? null : abbrvs.get(abbr);
+    }
+
+    public Map<String, String> getAbbreviations() {
+        return abbrvs;
     }
 }
