@@ -89,8 +89,8 @@ public class Configuration implements Map<String, String> {
         if (props != null) {
             value = props.get(key);
         }
-        if (value == null && parent != null) {
-            value = parent.get(key);
+        for (Configuration p = parent; value == null && p != null; p = p.parent) {
+            value = p.get(key);
         }
         // if we have a parent, then perform ${} replacements
         if (value != null) {
@@ -263,7 +263,7 @@ public class Configuration implements Map<String, String> {
 
     @Override
     public boolean containsValue(Object value) {
-        return (props == null) ? false: props.containsValue(value);
+        return (props == null) ? false : props.containsValue(value);
     }
 
     @Override
