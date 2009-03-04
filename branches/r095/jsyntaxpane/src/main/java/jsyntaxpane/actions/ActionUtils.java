@@ -397,8 +397,6 @@ public class ActionUtils {
      * of the template.  The template String may contain any of the following
      * special tags.
      * 
-     * <li>{@code #{cursor}} will be removed, and the cursor will be placed at
-     * that location</li>
      * <li>{@code #{selection}} replaced with the selection, if any.  If there is
      * no selection, then the {@code #{selection}} tag will be removed.
      * <li>{@code #{p:any text}} will be replaced by {@code any text} and then
@@ -452,22 +450,44 @@ public class ActionUtils {
     }
 
     /**
+     * Expand the string template and replaces the selection with the expansion
+     * of the template.  The template String may contain any of the following
+     * special tags.
      *
+     * <li>{@code #{selection}} replaced with the selection, if any.  If there is
+     * no selection, then the {@code #{selection}} tag will be removed.
+     * <li>{@code #{p:AnyText}} will be replaced by {@code any text} and then
+     * set the text selection to {@code AnyText}
+     *
+     * This methood does NOT perform any indentation and the template should
+     * generally span one line only
+     * 
      * @param target
      * @param template
      */
     public static void insertSimpleTemplate(JTextComponent target, String template) {
         String selected = target.getSelectedText();
         selected = (selected == null) ? "" : selected;
-        String expanded = template.replace(TEMPLATE_SELECTION, selected);
-        int cursor = expanded.indexOf(TEMPLATE_CURSOR);
-        if (cursor >= 0) {
-            cursor += target.getSelectionStart();
-            expanded = expanded.replace(TEMPLATE_CURSOR, "");
+        StringBuffer sb = new StringBuffer(template.length());
+        Matcher pm = PTAGS_PATTERN.matcher(template.replace(TEMPLATE_SELECTION, selected));
+        int selStart = -1, selEnd = -1;
+        int lineStart = 0;
+        while (pm.find()) {
+            selStart = pm.start() + lineStart;
+            pm.appendReplacement(sb, pm.group(1));
+            selEnd = sb.length();
         }
-        target.replaceSelection(expanded);
-        if (cursor >= 0) {
-            target.setCaretPosition(cursor);
+        pm.appendTail(sb);
+        // String expanded = template.replace(TEMPLATE_SELECTION, selected);
+
+        if (selStart >= 0) {
+            selStart += target.getSelectionStart();
+            selEnd += target.getSelectionStart();
+        }
+        target.replaceSelection(sb.toString());
+        if (selStart >= 0) {
+            // target.setCaretPosition(selStart);
+            target.select(selStart, selEnd);
         }
     }
 
@@ -534,6 +554,5 @@ public class ActionUtils {
      * The Pattern to use for PTags in insertSimpleTemplate
      */
     public static final Pattern PTAGS_PATTERN = Pattern.compile("\\#\\{p:([^}]*)\\}");
-    public static final String TEMPLATE_CURSOR = "#{cursor}";
     public static final String TEMPLATE_SELECTION = "#{selection}";
 }

@@ -116,7 +116,10 @@ public class JarServiceProvider {
             InputStream is = null;
             try {
                 String serviceFile = SERVICES_ROOT +
-                        name.toLowerCase() + ".properties";
+                        name.toLowerCase();
+                if(!serviceFile.endsWith(".properties")) {
+                    serviceFile += ".properties";
+                }
                 URL loc = cl.getResource(serviceFile);
                 if (loc != null) {
                     is = loc.openStream();

@@ -19,14 +19,14 @@ import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
 import jsyntaxpane.TokenType;
 
+/**
+ * This class should be mapped to VK_ENTER.  It performs proper indentation
+ * for Java Type languages and automatically inserts "*" in multi-line comments
+ * Initial Code contributed by ser... AT mail.ru
+ *
+ * @author Ayman Al-Sairafi
+ */
 public class JIndentAction extends DefaultSyntaxAction {
-
-    /**
-     * creates new JIndentAction.
-     * This class should be mapped to VK_ENTER.  It performs proper indentation
-     * for Java Type languages and automatically inserts "*" in multi-line comments
-     * Initial Code contributed by ser... AT mail.ru
-     */
     public JIndentAction() {
         super("JINDENT");
     }

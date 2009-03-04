@@ -88,6 +88,7 @@ public class HTMLPreviewFrame extends javax.swing.JFrame implements DocumentList
 
     private void onWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onWindowClosed
         doc.removeDocumentListener(this);
+        doc= null;
     }//GEN-LAST:event_onWindowClosed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

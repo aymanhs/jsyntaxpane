@@ -43,6 +43,7 @@ import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import jsyntaxpane.actions.DefaultSyntaxAction;
@@ -194,19 +195,18 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
                 }
             } else {
                 Action action = editorPane.getActionMap().get(menuString);
-                if (action == null) {
-                    throw new IllegalArgumentException("Invalid action for menu item: " + menuString);
-                }
-                JMenuItem menuItem;
-                if(action.getValue(Action.SELECTED_KEY) != null) {
-                    menuItem = new JCheckBoxMenuItem(action);
-                } else {
-                    menuItem = new JMenuItem(action);
-                }
-                if (stack == null) {
-                    popupMenu.get(editorPane).add(menuItem);
-                } else {
-                    stack.add(menuItem);
+                if (action != null) {
+                    JMenuItem menuItem;
+                    if (action.getValue(Action.SELECTED_KEY) != null) {
+                        menuItem = new JCheckBoxMenuItem(action);
+                    } else {
+                        menuItem = new JMenuItem(action);
+                    }
+                    if (stack == null) {
+                        popupMenu.get(editorPane).add(menuItem);
+                    } else {
+                        stack.add(menuItem);
+                    }
                 }
             }
         }
@@ -257,9 +257,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
             c.deinstall(editorPane);
         }
         editorComponents.clear();
-
-        // All the Actions were added directly to the editorPane, so we can remove
-        // all of them with one call.  The Parents (defaults) will be intact
+        editorPane.getInputMap().clear();
         editorPane.getActionMap().clear();
     }
 
@@ -270,8 +268,10 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
      * @param editorPane
      */
     public void addActions(JEditorPane editorPane) {
-        InputMap imap = editorPane.getInputMap();
-        ActionMap amap = editorPane.getActionMap();
+        InputMap imap = new InputMap();
+        imap.setParent(editorPane.getInputMap());
+        ActionMap amap = new ActionMap();
+        amap.setParent(editorPane.getActionMap());
 
         for (Configuration.StringKeyMatcher m : getConfig().getKeys(ACTION_KEY_PATTERN)) {
             String[] values = Configuration.COMMA_SEPARATOR.split(
@@ -304,21 +304,25 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         for (Configuration.StringKeyMatcher m : getConfig().getKeys(DEFAULT_ACTION_PATTERN)) {
             String name = m.matcher.group(2);
             Action action = editorPane.getActionMap().get(name);
-            configActionProperties(action, name, m.group1);
-            // The below commented block does find the keys for the default Actions
-            // using InputMap, however there are multiple bound keys for the
-            // default actions that displaying them in the menu will probably not
-            // be the most obvious binding
-            /*
-            for (KeyStroke key : imap.allKeys()) {
-                Object o = imap.get(key);
-                if(name.equals(o)) {
-                    action.putValue(Action.ACCELERATOR_KEY, key);
-                    break;
-                }
+            if (action != null) {
+                configActionProperties(action, name, m.group1);
             }
-            */
+        // The below commented block does find the keys for the default Actions
+        // using InputMap, however there are multiple bound keys for the
+        // default actions that displaying them in the menu will probably not
+        // be the most obvious binding
+            /*
+        for (KeyStroke key : imap.allKeys()) {
+        Object o = imap.get(key);
+        if(name.equals(o)) {
+        action.putValue(Action.ACCELERATOR_KEY, key);
+        break;
         }
+        }
+         */
+        }
+        editorPane.setActionMap(amap);
+        editorPane.setInputMap(JTextComponent.WHEN_FOCUSED, imap);
     }
 
     private void configActionProperties(Action action, String actionName, String configKey) {
@@ -335,7 +339,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         action.putValue(Action.NAME, name);
         // Set the menu tooltips
         String shortDesc = getProperty(configKey + ".ToolTip");
-        action.putValue(Action.SHORT_DESCRIPTION, shortDesc); 
+        action.putValue(Action.SHORT_DESCRIPTION, shortDesc);
     }
 
     private SyntaxAction createAction(String actionClassName) {
@@ -528,5 +532,10 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         } else {
             conf.putAll(p);
         }
+    }
+
+    @Override
+    public String getContentType() {
+        return "text/" + this.getClass().getSimpleName().replace("SyntaxKit", "").toLowerCase();
     }
 }

@@ -18,8 +18,6 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
@@ -34,7 +32,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import jsyntaxpane.SyntaxDocument;
-import jsyntaxpane.util.Configuration;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -61,9 +58,9 @@ public class XmlPrettifyAction extends DefaultSyntaxAction {
             StringWriter out = new StringWriter(sdoc.getLength());
             StringReader reader = new StringReader(target.getText());
             InputSource src = new InputSource(reader);
-            Document doc = docBuilder.parse(src);
+            Document doc = getDocBuilder().parse(src);
             //Setup indenting to "pretty print"
-            transformer.transform(new DOMSource(doc), new StreamResult(out));
+            getTransformer().transform(new DOMSource(doc), new StreamResult(out));
             target.setText(out.toString());
         } catch (SAXParseException ex) {
             showErrorMessage(target,
@@ -79,6 +76,7 @@ public class XmlPrettifyAction extends DefaultSyntaxAction {
         }
     }
     static Transformer transformer;
+    static DocumentBuilderFactory docBuilderFactory;
     static DocumentBuilder docBuilder;
 
     private static void showErrorMessage(JTextComponent text, String msg) {
@@ -86,28 +84,57 @@ public class XmlPrettifyAction extends DefaultSyntaxAction {
         JOptionPane.showMessageDialog(parent, msg, "JsyntaxPAne XML", JOptionPane.ERROR_MESSAGE);
     }
 
-    @Override
-    public void config(Configuration config, String name) {
-        try {
+    public static Transformer getTransformer() {
+        if (transformer == null) {
             TransformerFactory tfactory = TransformerFactory.newInstance();
-            transformer = tfactory.newTransformer();
-            String indentOption = config.getString(name + ".Indent", "yes");
-            transformer.setOutputProperty(OutputKeys.INDENT, indentOption);
-            String standAlone = config.getString(name + ".StandAlone", "yes");
-            transformer.setOutputProperty(OutputKeys.STANDALONE, standAlone);
-            String omitDeclaration = config.getString(name + ".OmitDeclaration", "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, omitDeclaration);
-            String indentAmount = config.getString(name + ".IndentAmount", "4");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", indentAmount);
-            DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-            docBuilderFactory.setIgnoringElementContentWhitespace(true);
-            docBuilder = docBuilderFactory.newDocumentBuilder();
-        } catch (TransformerConfigurationException ex) {
-            Logger.getLogger(XmlPrettifyAction.class.getName()).log(Level.SEVERE, null, ex);
-            transformer = null;
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(XmlPrettifyAction.class.getName()).log(Level.SEVERE, null, ex);
-            transformer = null;
+            try {
+                transformer = tfactory.newTransformer();
+            } catch (TransformerConfigurationException ex) {
+                throw new IllegalArgumentException("Unable to create transformer. ", ex);
+            }
         }
+        return transformer;
+    }
+
+    public void setIndent(String text) {
+        getTransformer().setOutputProperty(OutputKeys.INDENT, text);
+    }
+
+    public void setStandAlone(String text) {
+        getTransformer().setOutputProperty(OutputKeys.STANDALONE, text);
+    }
+
+    public void setSOmitDeclaration(String text) {
+        getTransformer().setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, text);
+    }
+
+    public void setIndentAmount(String text) {
+        getTransformer().setOutputProperty("{http://xml.apache.org/xslt}indent-amount", text);
+    }
+
+    public void setIgnoreComments(String ic) {
+        getDocBuilderFactory().setIgnoringComments(Boolean.parseBoolean(ic));
+    }
+
+    public void setIgnoreWhiteSpace(String value) {
+        getDocBuilderFactory().setIgnoringElementContentWhitespace(Boolean.parseBoolean(value));
+    }
+
+    public static DocumentBuilderFactory getDocBuilderFactory() {
+        if (docBuilderFactory == null) {
+            docBuilderFactory = DocumentBuilderFactory.newInstance();
+        }
+        return docBuilderFactory;
+    }
+
+    public DocumentBuilder getDocBuilder() {
+        if (docBuilder == null) {
+            try {
+                docBuilder = getDocBuilderFactory().newDocumentBuilder();
+            } catch (ParserConfigurationException ex) {
+                throw new IllegalArgumentException("Unable to create document builder", ex);
+            }
+        }
+        return docBuilder;
     }
 }
