@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -164,9 +165,9 @@ public class JarServiceProvider {
      * Each line will not have the line terminator.
      *
      * @param url location of file to read, relative to /META-INF/services
-     * @return List of Strings for each line read.
-     * @throws IllegalArgumentException if URL is invalid
+     * @return List of Strings for each line read. or EMPTY_LIST if URL is not found
      */
+    @SuppressWarnings("unchecked")
     public static List<String> readLines(String url) {
         InputStream is = null;
         List<String> lines = new ArrayList<String>();
@@ -174,7 +175,7 @@ public class JarServiceProvider {
         cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
         URL loc = cl.getResource(SERVICES_ROOT + url);
         if (loc == null) {
-            throw new IllegalArgumentException("Invalid url: " + url);
+            return Collections.EMPTY_LIST;
         }
         try {
             is = loc.openStream();
