@@ -76,6 +76,9 @@ Exponent = [eE] [+-]? [0-9]+
 StringCharacter = [^\r\n\"\\]
 SingleCharacter = [^\r\n\'\\]
 
+// Create states for Double Quoted and Single Quoted Strings
+%state DQ_STRING, SQ_STRING
+
 Reserved =
    "ADD"                 |
    "ALL"                 |
@@ -322,9 +325,16 @@ Reserved =
   ":"                            { return token(TokenType.OPERATOR); }
 
   /* string literal */
-  \"{StringCharacter}+\"         |
-
-  \'{SingleCharacter}+\          { return token(TokenType.STRING); }
+  \"                             {
+                                    yybegin(DQ_STRING);
+                                    tokenStart = yychar;
+                                    tokenLength = 1;
+                                 }
+  \'                             {
+                                    yybegin(SQ_STRING);
+                                    tokenStart = yychar;
+                                    tokenLength = 1;
+                                 }
 
   /* numeric literals */
 
@@ -341,6 +351,30 @@ Reserved =
   /* identifiers */
   {Identifier}                   { return token(TokenType.IDENTIFIER); }
 
+}
+
+<DQ_STRING> {
+  {StringCharacter}+             { tokenLength += yylength(); }
+  \"\"                           { tokenLength += 2; }
+  \\.                            { tokenLength += 2; }
+  {LineTerminator}               { yybegin(YYINITIAL);  }
+  \"                             {
+                                     yybegin(YYINITIAL);
+                                     // length also includes the trailing quote
+                                     return token(TokenType.STRING, tokenStart, tokenLength + 1);
+                                 }
+}
+
+<SQ_STRING> {
+  {SingleCharacter}+             { tokenLength += yylength(); }
+  \'\'                           { tokenLength += 2; }
+  \\.                            { tokenLength += 2; }
+  {LineTerminator}               { yybegin(YYINITIAL);  }
+  \'                             {
+                                     yybegin(YYINITIAL);
+                                     // length also includes the trailing quote
+                                     return token(TokenType.STRING, tokenStart, tokenLength + 1);
+                                 }
 }
 
 /* error fallback */
