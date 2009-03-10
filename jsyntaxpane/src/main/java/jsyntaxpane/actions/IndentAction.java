@@ -25,15 +25,18 @@ import jsyntaxpane.util.JarServiceProvider;
 /**
  * IndentAction is used to replace Tabs with spaces.  If there is selected
  * text, then the lines spanning the selection will be shifted
+ * right by one tab-width space character.
+ *
  * Since this is also used as an abbreviation completion action,
- * Abbreviiations are processed by this event, if there is no selection.
+ * Abbreviiations are processed by this event.
  * 
- * right by one tab-width space  character
+ * @author Ayman Al-Sairafi
+ * 
  */
 public class IndentAction extends DefaultSyntaxAction {
 
     public IndentAction() {
-        super("INSERT_TAB");
+        super("insert-tab");
     }
 
     @Override
@@ -82,6 +85,10 @@ public class IndentAction extends DefaultSyntaxAction {
 
     public void setWordRegex(String regex) {
         wordsPattern = Pattern.compile(regex);
+    }
+
+    public Pattern getWordRegex() {
+        return wordsPattern;
     }
 
     public void setAbbreviations(String loc) {

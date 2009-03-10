@@ -61,4 +61,20 @@ public class ComboCompletionAction extends DefaultSyntaxAction {
     public void setItemsURL(String value) {
         items = JarServiceProvider.readLines(value);
     }
+
+    /**
+     * Gets the items to display in the combo
+     * @return
+     */
+    public List<String> getItems() {
+        return items;
+    }
+
+    /**
+     * Sets the items to display in the combo.
+     * @param items
+     */
+    public void setItems(List<String> items) {
+        this.items = items;
+    }
 }

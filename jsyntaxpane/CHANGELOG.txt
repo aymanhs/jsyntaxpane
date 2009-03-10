@@ -9,6 +9,7 @@ Version 0.9.5 - Java Reflection Completions additions
       Scripting support is installed properly).
     * Hotkeys for actions are displayed in Popup Menus
     * Word Completion action can also do CamelCase matches
+    * Smart Home Action (and Smart Home Extend Selection)
 Version 0.9.4 - IntelliSense additions
     * Adding IntelliSense to Java with simple List of selectable keywords
     * Added Toggle Comment Actions using Control SLASH
