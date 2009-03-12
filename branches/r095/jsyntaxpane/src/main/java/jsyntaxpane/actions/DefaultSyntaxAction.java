@@ -89,6 +89,11 @@ abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAc
      */
     public final void setMenuText(String text) {
         putValue(NAME, text);
+		// also set the SHORT_DESCRIPTIOn if it was not set, so we have
+		// at least some tooltip for toolbar buttons
+		if(getValue(SHORT_DESCRIPTION) == null) {
+			putValue(SHORT_DESCRIPTION, text);
+		}
     }
 
     /**

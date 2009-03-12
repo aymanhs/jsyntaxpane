@@ -10,7 +10,7 @@ import jsyntaxpane.SyntaxDocument;
 public class FindNextAction extends DefaultSyntaxAction {
 
     public FindNextAction() {
-        super("FIND_NEXT");
+        super("find-next");
     }
 
     @Override
@@ -18,7 +18,9 @@ public class FindNextAction extends DefaultSyntaxAction {
             int dot, ActionEvent e) {
         DocumentSearchData dsd = DocumentSearchData.getFromEditor(target);
         if (dsd != null) {
-            dsd.doFindNext(target);
+            if(!dsd.doFindNext(target)) {
+				dsd.msgNotFound(target);
+			}
         }
     }
 }

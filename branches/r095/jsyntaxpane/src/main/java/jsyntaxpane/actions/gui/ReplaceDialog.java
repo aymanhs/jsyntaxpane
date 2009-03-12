@@ -17,7 +17,6 @@ import jsyntaxpane.actions.*;
 import jsyntaxpane.components.Markers;
 import java.awt.Color;
 import java.awt.HeadlessException;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.JOptionPane;
 import javax.swing.event.CaretEvent;
@@ -76,23 +75,14 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
      * update the finder object with data from our UI
      */
     private void updateFinder() {
-        int flag = 0;
-        if (!jChkRegex.isSelected()) {
-            flag |= Pattern.LITERAL;
-        }
-        flag |= (jChkIgnoreCase.isSelected()) ? Pattern.CASE_INSENSITIVE : 0;
-        if (jChkIgnoreCase.isSelected()) {
-            flag |= Pattern.CASE_INSENSITIVE;
-        }
         String regex = (String) jCmbFind.getSelectedItem();
-        if (regex != null && regex.length() > 0) {
-            Pattern pattern = Pattern.compile(regex, flag);
-            dsd.setWrap(jChkWrap.isSelected());
-            dsd.setPattern(pattern);
-            ActionUtils.insertIntoCombo(jCmbFind, regex);
-        } else {
-            dsd.setPattern(null);
-        }
+		try {
+		dsd.setPattern(regex,
+			jChkRegex.isSelected(),
+			jChkIgnoreCase.isSelected());
+		} catch (PatternSyntaxException e) {
+			showRegexpError(e);
+		}
     }
 
     /** 
@@ -229,7 +219,9 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
     private void jBtnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnNextActionPerformed
         try {
             updateFinder();
-            dsd.doFindNext(textComponent);
+            if(!dsd.doFindNext(textComponent)) {
+				dsd.msgNotFound(textComponent);
+			}
             textComponent.requestFocusInWindow();
         } catch (PatternSyntaxException ex) {
             showRegexpError(ex);
