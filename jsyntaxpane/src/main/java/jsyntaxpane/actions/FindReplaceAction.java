@@ -37,6 +37,6 @@ public class FindReplaceAction extends DefaultSyntaxAction {
     public void actionPerformed(JTextComponent target, SyntaxDocument sdoc,
             int dot, ActionEvent e) {
         DocumentSearchData dsd = DocumentSearchData.getFromEditor(target);
-        dsd.showDialog(target);
+        dsd.showReplaceDialog(target);
     }
 }

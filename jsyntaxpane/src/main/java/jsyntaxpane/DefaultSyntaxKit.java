@@ -38,6 +38,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
@@ -66,8 +67,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 	public static final String CONFIG_SELECTION = "SelectionColor";
 	public static final String CONFIG_COMPONENTS = "Components";
 	public static final String CONFIG_MENU = "PopupMenu";
-	public static final String CONFIG_MENU_ICONS = "PopupMenuIcons";
-	public static final String PROPERTY_KEYMAP_JSYNTAXPANE = "jsyntaxpane";
+	public static final String CONFIG_TOOLBAR = "Toolbar";
 	private static final Pattern ACTION_KEY_PATTERN = Pattern.compile("Action\\.((\\w|-)+)");
 	private static final Pattern DEFAULT_ACTION_PATTERN = Pattern.compile("(DefaultAction.((\\w|-)+)).*");
 	private static Font DEFAULT_FONT;
@@ -114,6 +114,12 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		}
 	}
 
+	/**
+	 * Creates a SyntaxComponent of the the given classname and installs
+	 * it on the pane
+	 * @param pane
+	 * @param classname
+	 */
 	public void installComponent(JEditorPane pane, String classname) {
 		try {
 			@SuppressWarnings(value = "unchecked")
@@ -134,6 +140,13 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		}
 	}
 
+	/**
+	 * Find the SyntaxCOmponent with given classname that is installed
+	 * on the given pane, then deinstalls and removes it fom the
+	 * editorComponents list
+	 * @param pane
+	 * @param classname
+	 */
 	public void deinstallComponent(JEditorPane pane, String classname) {
 		for (SyntaxComponent c : editorComponents.get(pane)) {
 			if (c.getClass().getName().equals(classname)) {
@@ -144,6 +157,13 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		}
 	}
 
+	/**
+	 * Checks if the component with given classname is installed on the
+	 * pane.
+	 * @param pane
+	 * @param classname
+	 * @return true if component is installed, false otherwise
+	 */
 	public boolean isComponentInstalled(JEditorPane pane, String classname) {
 		for (SyntaxComponent c : editorComponents.get(pane)) {
 			if (c.getClass().getName().equals(classname)) {
@@ -153,6 +173,14 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		return false;
 	}
 
+	/**
+	 * Toggles the component with given classname.  If component is found
+	 * and installed, then it is deinstalled.  Otherwise a new one is
+	 * installed
+	 * @param pane
+	 * @param classname
+	 * @return true if component was installed, false if it was removed
+	 */
 	public boolean toggleComponent(JEditorPane pane, String classname) {
 		for (SyntaxComponent c : editorComponents.get(pane)) {
 			if (c.getClass().getName().equals(classname)) {
@@ -204,7 +232,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 						menuItem = new JMenuItem(action);
 					}
 					// Use our own property if it was set for the menu text
-					if(action.getValue(ACTION_MENU_TEXT) != null) {
+					if (action.getValue(ACTION_MENU_TEXT) != null) {
 						menuItem.setText((String) action.getValue(ACTION_MENU_TEXT));
 					}
 					if (stack == null) {
@@ -216,6 +244,35 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 			}
 		}
 		editorPane.setComponentPopupMenu(popupMenu.get(editorPane));
+	}
+
+	/**
+	 * Add all pop-up menu items to a Toolbar.  <b>You need to call the validate method
+	 * on the toolbar after this is done to layout the buttons.</b>
+	 * FIXME: add boolean so actions can say if they need to be added to toolbar.
+	 * @param editorPane
+	 * @param toolbar
+	 */
+	public void addToolBarActions(JEditorPane editorPane, JToolBar toolbar) {
+		String[] toolBarItems = getConfig().getPropertyList(CONFIG_TOOLBAR);
+		if (toolBarItems == null || toolBarItems.length == 0) {
+			toolBarItems = getConfig().getPropertyList(CONFIG_MENU);
+			if (toolBarItems == null || toolBarItems.length == 0) {
+				return;
+			}
+		}
+		for (String menuString : toolBarItems) {
+			if (menuString.equals("-") ||
+				menuString.startsWith("<") ||
+				menuString.startsWith(">")) {
+				toolbar.addSeparator();
+			} else {
+				Action action = editorPane.getActionMap().get(menuString);
+				if (action != null && action.getValue(Action.SMALL_ICON) != null) {
+					toolbar.add(action);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -351,7 +408,11 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		}
 		// Set the menu tooltips
 		String shortDesc = getProperty(configKey + ".ToolTip");
-		action.putValue(Action.SHORT_DESCRIPTION, shortDesc);
+		if (shortDesc != null) {
+			action.putValue(Action.SHORT_DESCRIPTION, shortDesc);
+		} else {
+			action.putValue(Action.SHORT_DESCRIPTION, name);
+		}
 	}
 
 	private SyntaxAction createAction(String actionClassName) {
