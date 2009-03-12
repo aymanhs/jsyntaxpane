@@ -197,11 +197,19 @@ public class QuickFindDialog extends javax.swing.JDialog implements DocumentList
     }// </editor-fold>//GEN-END:initComponents
 
 	private void jBtnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnNextActionPerformed
-		dsd.get().doFindNext(target.get());
+		if(dsd.get().doFindNext(target.get())) {
+			jLblStatus.setText(null);
+		} else {
+			jLblStatus.setText("not found");
+		}
 }//GEN-LAST:event_jBtnNextActionPerformed
 
 	private void jBtnPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnPrevActionPerformed
-		dsd.get().doFindPrev(target.get());
+		if(dsd.get().doFindPrev(target.get())) {
+			jLblStatus.setText(null);
+		} else {
+			jLblStatus.setText("not found");
+		}
 }//GEN-LAST:event_jBtnPrevActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
