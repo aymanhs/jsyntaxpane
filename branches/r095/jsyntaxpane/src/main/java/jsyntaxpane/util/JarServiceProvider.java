@@ -105,6 +105,11 @@ public class JarServiceProvider {
     /**
      * Read a file in the META-INF/services named name appended with 
      * ".properties"
+	 *
+	 * The file is searched in /META-INF/services/url, then in
+	 * url, then the url is treated as a location in the current classpath
+	 * and an attempt to read it from that location is done.
+     *
      * If no file is found, then a an empty Property instance will be returned
      * @param name name of file (use dots to separate subfolders).
      * @return Property file read.
@@ -116,12 +121,17 @@ public class JarServiceProvider {
         if (cl != null) {
             InputStream is = null;
             try {
-                String serviceFile = SERVICES_ROOT +
-                        name.toLowerCase();
+                String serviceFile = name.toLowerCase();
                 if(!serviceFile.endsWith(".properties")) {
                     serviceFile += ".properties";
                 }
                 URL loc = cl.getResource(serviceFile);
+				if(loc == null) {
+					loc = cl.getResource(SERVICES_ROOT + serviceFile);
+				}
+				if(loc == null) {
+					loc = ClassLoader.getSystemResource(serviceFile);
+				}
                 if (loc != null) {
                     is = loc.openStream();
                     props.load(is);
@@ -163,8 +173,12 @@ public class JarServiceProvider {
     /**
      * Read the given URL and returns a List of Strings for each input line
      * Each line will not have the line terminator.
+	 *
+	 * The resource is searched in /META-INF/services/url, then in
+	 * url, then the url is treated as a location in the current classpath
+	 * and an attempt to read it from that location is done.
      *
-     * @param url location of file to read, relative to /META-INF/services
+     * @param url location of file to read
      * @return List of Strings for each line read. or EMPTY_LIST if URL is not found
      */
     @SuppressWarnings("unchecked")
@@ -173,7 +187,13 @@ public class JarServiceProvider {
         List<String> lines = new ArrayList<String>();
         ClassLoader cl = JarServiceProvider.class.getClassLoader();
         cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-        URL loc = cl.getResource(SERVICES_ROOT + url);
+        URL loc = cl.getResource(url);
+		if(loc == null) {
+			loc = cl.getResource(SERVICES_ROOT + url);
+		}
+		if(loc == null) {
+			loc = ClassLoader.getSystemResource(url);
+		}
         if (loc == null) {
             return Collections.EMPTY_LIST;
         }
