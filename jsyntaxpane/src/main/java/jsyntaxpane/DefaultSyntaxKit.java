@@ -33,6 +33,7 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JEditorPane;
 import javax.swing.JMenu;
@@ -68,6 +69,9 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 	public static final String CONFIG_COMPONENTS = "Components";
 	public static final String CONFIG_MENU = "PopupMenu";
 	public static final String CONFIG_TOOLBAR = "Toolbar";
+	public static final String CONFIG_TOOLBAR_ROLLOVER = "Toolbar.Rollover";
+	public static final String CONFIG_TOOLBAR_BORDER = "Toolbar.Border";
+	public static final String CONFIG_TOOLBAR_OPAQUE = "Toolbar.Opaque";
 	private static final Pattern ACTION_KEY_PATTERN = Pattern.compile("Action\\.((\\w|-)+)");
 	private static final Pattern DEFAULT_ACTION_PATTERN = Pattern.compile("(DefaultAction.((\\w|-)+)).*");
 	private static Font DEFAULT_FONT;
@@ -249,7 +253,10 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 	/**
 	 * Add all pop-up menu items to a Toolbar.  <b>You need to call the validate method
 	 * on the toolbar after this is done to layout the buttons.</b>
-	 * FIXME: add boolean so actions can say if they need to be added to toolbar.
+	 * Only Actions which have a SMALL_ICON property will be added to the toolbar
+	 * There are three Configuration Keys that affect the appearance of the added buttons:
+	 * CONFIG_TOOLBAR_ROLLOVER, CONFIG_TOOLBAR_BORDER, CONFIG_TOOLBAR_OPAQUE
+	 * 
 	 * @param editorPane
 	 * @param toolbar
 	 */
@@ -261,6 +268,9 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 				return;
 			}
 		}
+		boolean btnRolloverEnabled = getConfig().getBoolean(CONFIG_TOOLBAR_ROLLOVER, true);
+		boolean btnBorderPainted = getConfig().getBoolean(CONFIG_TOOLBAR_BORDER, false);
+		boolean btnOpaque = getConfig().getBoolean(CONFIG_TOOLBAR_OPAQUE, false);
 		for (String menuString : toolBarItems) {
 			if (menuString.equals("-") ||
 				menuString.startsWith("<") ||
@@ -269,7 +279,11 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 			} else {
 				Action action = editorPane.getActionMap().get(menuString);
 				if (action != null && action.getValue(Action.SMALL_ICON) != null) {
-					toolbar.add(action);
+					JButton b = toolbar.add(action);
+					b.setRolloverEnabled(btnRolloverEnabled);
+					b.setBorderPainted(btnBorderPainted);
+					b.setOpaque(btnOpaque);
+					b.setFocusable(false);
 				}
 			}
 		}

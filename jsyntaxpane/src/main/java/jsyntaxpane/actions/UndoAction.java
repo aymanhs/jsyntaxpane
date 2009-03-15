@@ -24,13 +24,15 @@ import jsyntaxpane.util.Configuration;
  */
 public class UndoAction extends DefaultSyntaxAction {
 
-    public UndoAction() {
-        super("UNDO");
-    }
+	public UndoAction() {
+		super("UNDO");
+	}
 
-    @Override
-    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
-            int dot, ActionEvent e) {
-        sDoc.doUndo();
-    }
+	@Override
+	public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+		int dot, ActionEvent e) {
+		if (sDoc != null) {
+			sDoc.doUndo();
+		}
+	}
 }

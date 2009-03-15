@@ -23,18 +23,18 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jToolBar1" alignment="0" pref="650" max="32767" attributes="0"/>
-          <Component id="jScrollPane1" alignment="0" pref="650" max="32767" attributes="0"/>
+          <Component id="jToolBar1" alignment="0" pref="848" max="32767" attributes="0"/>
+          <Component id="jScrollPane1" alignment="0" max="32767" attributes="0"/>
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jCmbLangs" min="-2" pref="135" max="-2" attributes="0"/>
-              <EmptySpace pref="376" max="32767" attributes="0"/>
+              <EmptySpace pref="574" max="32767" attributes="0"/>
               <Component id="lblCaretPos" min="-2" pref="119" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="lblToken" pref="156" max="32767" attributes="0"/>
+              <Component id="lblToken" pref="354" max="32767" attributes="0"/>
               <EmptySpace min="-2" pref="484" max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -110,6 +110,7 @@
     <Container class="javax.swing.JToolBar" name="jToolBar1">
       <Properties>
         <Property name="rollover" type="boolean" value="true"/>
+        <Property name="focusable" type="boolean" value="false"/>
       </Properties>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>

@@ -95,14 +95,14 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        jLblFind = new javax.swing.JLabel();
         jBtnNext = new javax.swing.JButton();
-        jLblStatus = new javax.swing.JLabel();
+        jBtnPrev = new javax.swing.JButton();
         jBtnReplaceAll = new javax.swing.JButton();
         jChkWrap = new javax.swing.JCheckBox();
         jChkRegex = new javax.swing.JCheckBox();
         jChkIgnoreCase = new javax.swing.JCheckBox();
-        jLabel2 = new javax.swing.JLabel();
+        jLblReplace = new javax.swing.JLabel();
         jTglHighlight = new javax.swing.JToggleButton();
         jCmbReplace = new javax.swing.JComboBox();
         jCmbFind = new javax.swing.JComboBox();
@@ -111,13 +111,23 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
         setName(""); // NOI18N
         setResizable(false);
 
-        jLabel1.setText("Find");
+        jLblFind.setDisplayedMnemonic('F');
+        jLblFind.setLabelFor(jCmbFind);
+        jLblFind.setText("Find");
 
         jBtnNext.setMnemonic('N');
         jBtnNext.setText("Next");
         jBtnNext.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jBtnNextActionPerformed(evt);
+            }
+        });
+
+        jBtnPrev.setMnemonic('N');
+        jBtnPrev.setText("Previous");
+        jBtnPrev.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBtnPrevActionPerformed(evt);
             }
         });
 
@@ -139,7 +149,9 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
         jChkIgnoreCase.setMnemonic('I');
         jChkIgnoreCase.setText("Ignore Case");
 
-        jLabel2.setText("Replace");
+        jLblReplace.setDisplayedMnemonic('R');
+        jLblReplace.setLabelFor(jCmbReplace);
+        jLblReplace.setText("Replace");
 
         jTglHighlight.setText("Highlight");
         jTglHighlight.addActionListener(new java.awt.event.ActionListener() {
@@ -159,57 +171,49 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1))
+                    .addComponent(jLblFind)
+                    .addComponent(jLblReplace))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jChkRegex)
-                            .addComponent(jChkIgnoreCase))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(178, 178, 178)
-                                .addComponent(jLblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
-                                .addGap(3, 3, 3))
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jChkWrap, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(jCmbFind, 0, 337, Short.MAX_VALUE)
-                    .addComponent(jCmbReplace, 0, 337, Short.MAX_VALUE))
+                        .addComponent(jChkRegex)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jChkWrap, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jCmbFind, 0, 298, Short.MAX_VALUE)
+                    .addComponent(jCmbReplace, javax.swing.GroupLayout.Alignment.TRAILING, 0, 298, Short.MAX_VALUE)
+                    .addComponent(jChkIgnoreCase))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jBtnReplaceAll, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
-                    .addComponent(jBtnNext, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
-                    .addComponent(jTglHighlight, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE))
+                    .addComponent(jTglHighlight, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(jBtnNext, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(jBtnPrev, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(jBtnReplaceAll, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(29, 29, 29)
-                        .addComponent(jLblStatus))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel1)
-                                .addComponent(jCmbFind, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jBtnNext))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(jBtnReplaceAll)
-                            .addComponent(jCmbReplace, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jChkRegex)
-                            .addComponent(jChkWrap, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTglHighlight))))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLblFind)
+                    .addComponent(jCmbFind, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jBtnNext))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jBtnPrev)
+                    .addComponent(jCmbReplace, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLblReplace))
+                .addGap(5, 5, 5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jBtnReplaceAll)
+                    .addComponent(jChkWrap, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jChkRegex))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jChkIgnoreCase)
+                .addGap(15, 15, 15))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(97, Short.MAX_VALUE)
+                .addComponent(jTglHighlight)
                 .addContainerGap())
         );
 
@@ -245,17 +249,22 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
         updateHighlights();
     }//GEN-LAST:event_jTglHighlightActionPerformed
 
+	private void jBtnPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnPrevActionPerformed
+		updateFinder();
+		dsd.doFindPrev(textComponent);
+}//GEN-LAST:event_jBtnPrevActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBtnNext;
+    private javax.swing.JButton jBtnPrev;
     private javax.swing.JButton jBtnReplaceAll;
     private javax.swing.JCheckBox jChkIgnoreCase;
     private javax.swing.JCheckBox jChkRegex;
     private javax.swing.JCheckBox jChkWrap;
     private javax.swing.JComboBox jCmbFind;
     private javax.swing.JComboBox jCmbReplace;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLblStatus;
+    private javax.swing.JLabel jLblFind;
+    private javax.swing.JLabel jLblReplace;
     private javax.swing.JToggleButton jTglHighlight;
     // End of variables declaration//GEN-END:variables
 

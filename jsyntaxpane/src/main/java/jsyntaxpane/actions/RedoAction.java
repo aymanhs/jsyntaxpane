@@ -24,13 +24,15 @@ import jsyntaxpane.util.Configuration;
  */
 public class RedoAction extends DefaultSyntaxAction {
 
-    public RedoAction() {
-        super("REDO");
-    }
+	public RedoAction() {
+		super("REDO");
+	}
 
-    @Override
-    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
-            int dot, ActionEvent e) {
-        sDoc.doRedo();
-    }
+	@Override
+	public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+		int dot, ActionEvent e) {
+		if (sDoc != null) {
+			sDoc.doRedo();
+		}
+	}
 }
