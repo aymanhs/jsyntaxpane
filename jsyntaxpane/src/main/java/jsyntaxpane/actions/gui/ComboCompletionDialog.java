@@ -158,6 +158,11 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
 
         jLstItems.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jLstItems.setFocusable(false);
+        jLstItems.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLstItemsMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jLstItems);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -219,6 +224,14 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
             setVisible(false);
         }
     }//GEN-LAST:event_jTxtItemKeyPressed
+
+	private void jLstItemsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLstItemsMouseClicked
+		if(evt.getClickCount() == 2) {
+			String selected = jLstItems.getSelectedValue().toString();
+			target.replaceSelection(selected);
+			setVisible(false);
+		}
+	}//GEN-LAST:event_jLstItemsMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList jLstItems;
