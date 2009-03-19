@@ -39,7 +39,6 @@ import jsyntaxpane.util.JarServiceProvider;
  */
 public class SyntaxStyles {
 
-    public static final String STYLE_PROPERTY_KEY = "Style.";
     public static final Pattern STYLE_PATTERN = Pattern.compile("Style\\.(\\w+)");
 
     /**

@@ -14,6 +14,9 @@
 package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
@@ -27,40 +30,52 @@ import jsyntaxpane.TokenType;
  * @author Ayman Al-Sairafi
  */
 public class JIndentAction extends DefaultSyntaxAction {
-    public JIndentAction() {
-        super("JINDENT");
-    }
 
-    /**
-     * {@inheritDoc}
-     * @param e 
-     */
-    @Override
-    public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
-            int dot, ActionEvent e) {
-        int pos = target.getCaretPosition();
-        int start = sDoc.getParagraphElement(pos).getStartOffset();
-        String line = ActionUtils.getLine(target);
-        String lineToPos = line.substring(0, pos - start);
-        String prefix = ActionUtils.getIndent(line);
-        Token t = sDoc.getTokenAt(pos);
-        if (TokenType.isComment(t)) {
-            if (line.trim().endsWith("*/")) {
-                prefix = prefix.substring(0, prefix.length() - 1);
-            } else if (line.trim().startsWith("*")) {
-                prefix += "* ";
-            } else if (line.trim().startsWith("/*")) {
-                prefix += " * ";
-            }
-        } else if (lineToPos.trim().endsWith("{")) {
-            prefix += ActionUtils.getTab(target);
-        } else {
-            String noComment = sDoc.getUncommentedText(start, pos); // skip EOL comments
+	public JIndentAction() {
+		super("JINDENT");
+	}
 
-            if (noComment.trim().endsWith("{")) {
-                prefix += ActionUtils.getTab(target);
-            }
-        }
-        target.replaceSelection("\n" + prefix);
-    }
+	/**
+	 * {@inheritDoc}
+	 * @param e
+	 */
+	@Override
+	public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
+		int dot, ActionEvent e) {
+		int pos = target.getCaretPosition();
+		int start = sDoc.getParagraphElement(pos).getStartOffset();
+		String line = ActionUtils.getLine(target);
+		String lineToPos = line.substring(0, pos - start);
+		String prefix = ActionUtils.getIndent(line);
+		Token t = sDoc.getTokenAt(pos);
+		if (TokenType.isComment(t)) {
+			String trimmed = line.trim();
+			if (trimmed.startsWith("/*") && trimmed.endsWith("*/")) {
+				// it's a single line comment, do not do anything special
+			} else if (trimmed.endsWith("*/")) {
+				try {
+					// the prefix should be the line where the comment started
+					String commentStartLine = sDoc.getLineAt(t.start);
+					prefix = ActionUtils.getIndent(commentStartLine);
+				} catch (BadLocationException ex) {
+					Logger.getLogger(JIndentAction.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			} else if (trimmed.startsWith("*")) {
+				prefix += "* ";
+			} else if (trimmed.startsWith("/**")) {
+				prefix += " * ";
+			} else if (trimmed.startsWith("/*")) {
+				prefix += " ";
+			}
+		} else if (lineToPos.trim().endsWith("{")) {
+			prefix += ActionUtils.getTab(target);
+		} else {
+			String noComment = sDoc.getUncommentedText(start, pos); // skip EOL comments
+
+			if (noComment.trim().endsWith("{")) {
+				prefix += ActionUtils.getTab(target);
+			}
+		}
+		target.replaceSelection("\n" + prefix);
+	}
 }

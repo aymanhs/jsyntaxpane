@@ -32,191 +32,203 @@ import java.util.logging.Logger;
 /**
  *
  * @author subwiz
+ * @author Ayman Al-Sairafi
  */
 public class JarServiceProvider {
 
-    public static final String SERVICES_ROOT = "META-INF/services/";
-    private static final Logger LOG = Logger.getLogger(JarServiceProvider.class.getName());
+	public static final String SERVICES_ROOT = "META-INF/services/";
+	private static final Logger LOG = Logger.getLogger(JarServiceProvider.class.getName());
 
-    /**
-     * Prevent anyone from instantiating this class.  
-     * Just use the static method
-     */
-    private JarServiceProvider() {
-    }
+	/**
+	 * Prevent anyone from instantiating this class.
+	 * Just use the static method
+	 */
+	private JarServiceProvider() {
+	}
 
-    /**
-     * Return an Object array from the file in META-INF/resources/{classname}
-     * @param cls
-     * @return
-     * @throws java.io.IOException
-     */
-    public static List<Object> getServiceProviders(Class cls) throws IOException {
-        ArrayList<Object> l = new ArrayList<Object>();
-        ClassLoader cl = JarServiceProvider.class.getClassLoader();
-        cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-        String serviceFile = SERVICES_ROOT + cls.getName();
-        Enumeration<URL> e = cl.getResources(serviceFile);
-        while (e.hasMoreElements()) {
-            URL u = e.nextElement();
-            InputStream is = u.openStream();
-            BufferedReader br = null;
-            try {
-                br = new BufferedReader(
-                        new InputStreamReader(is, Charset.forName("UTF-8")));
-                String str = null;
-                while ((str = br.readLine()) != null) {
-                    int commentStartIdx = str.indexOf("#");
-                    if (commentStartIdx != -1) {
-                        str = str.substring(0, commentStartIdx);
-                    }
-                    str = str.trim();
-                    if (str.length() == 0) {
-                        continue;
-                    }
-                    try {
-                        Object obj = cl.loadClass(str).newInstance();
-                        l.add(obj);
-                    } catch (Exception ex) {
-                        LOG.warning("Could not load: " + str);
-                        LOG.warning(ex.getMessage());
-                    }
-                }
-            } finally {
-                if (br != null) {
-                    br.close();
-                }
-            }
-        }
-        return l;
-    }
+	/**
+	 * Return an Object array from the file in META-INF/resources/{classname}
+	 * @param cls
+	 * @return
+	 * @throws java.io.IOException
+	 */
+	public static List<Object> getServiceProviders(Class cls) throws IOException {
+		ArrayList<Object> l = new ArrayList<Object>();
+		ClassLoader cl = JarServiceProvider.class.getClassLoader();
+		cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
+		String serviceFile = SERVICES_ROOT + cls.getName();
+		Enumeration<URL> e = cl.getResources(serviceFile);
+		while (e.hasMoreElements()) {
+			URL u = e.nextElement();
+			InputStream is = u.openStream();
+			BufferedReader br = null;
+			try {
+				br = new BufferedReader(
+					new InputStreamReader(is, Charset.forName("UTF-8")));
+				String str = null;
+				while ((str = br.readLine()) != null) {
+					int commentStartIdx = str.indexOf("#");
+					if (commentStartIdx != -1) {
+						str = str.substring(0, commentStartIdx);
+					}
+					str = str.trim();
+					if (str.length() == 0) {
+						continue;
+					}
+					try {
+						Object obj = cl.loadClass(str).newInstance();
+						l.add(obj);
+					} catch (Exception ex) {
+						LOG.warning("Could not load: " + str);
+						LOG.warning(ex.getMessage());
+					}
+				}
+			} finally {
+				if (br != null) {
+					br.close();
+				}
+			}
+		}
+		return l;
+	}
 
-    /**
-     * Read a file in the META-INF/services location.  File name will be
-     * fully qualified classname, in all lower-case, appended with ".properties"
-     * If no file is found, then a an empty Property instance will be returned
-     * @param clazz
-     * @return Property file read.
-     */
-    public static Properties readProperties(Class clazz) {
-        return readProperties(clazz.getName());
-    }
+	/**
+	 * Read a file in the META-INF/services location.  File name will be
+	 * fully qualified classname, in all lower-case, appended with ".properties"
+	 * If no file is found, then a an empty Property instance will be returned
+	 * @param clazz
+	 * @return Property file read.
+	 */
+	public static Properties readProperties(Class clazz) {
+		return readProperties(clazz.getName());
+	}
 
-    /**
-     * Read a file in the META-INF/services named name appended with 
-     * ".properties"
+	/**
+	 * Read a file in the META-INF/services named name appended with
+	 * ".properties"
 	 *
-	 * The file is searched in /META-INF/services/url, then in
-	 * url, then the url is treated as a location in the current classpath
-	 * and an attempt to read it from that location is done.
-     *
-     * If no file is found, then a an empty Property instance will be returned
-     * @param name name of file (use dots to separate subfolders).
-     * @return Property file read.
-     */
-    public static Properties readProperties(String name) {
-        ClassLoader cl = JarServiceProvider.class.getClassLoader();
-        cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-        Properties props = new Properties();
-        if (cl != null) {
-            InputStream is = null;
-            try {
-                String serviceFile = name.toLowerCase();
-                if(!serviceFile.endsWith(".properties")) {
-                    serviceFile += ".properties";
-                }
-                URL loc = cl.getResource(serviceFile);
-				if(loc == null) {
-					loc = cl.getResource(SERVICES_ROOT + serviceFile);
-				}
-				if(loc == null) {
-					loc = ClassLoader.getSystemResource(serviceFile);
-				}
-                if (loc != null) {
-                    is = loc.openStream();
-                    props.load(is);
-                }
-            } catch (IOException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            } finally {
-                try {
-                    // maybe the is was not open coz we did not find the file
-                    if (is != null) {
-                        is.close();
-                    }
-                } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return props;
-    }
+	 * If no file is found, then a an empty Property instance will be returned
+	 * @param name name of file (use dots to separate subfolders).
+	 * @return Property file read.
+	 */
+	public static Properties readProperties(String name) {
+		Properties props = new Properties();
+		String serviceFile = name.toLowerCase();
+		if (!serviceFile.endsWith(".properties")) {
+			serviceFile += ".properties";
+		}
+		InputStream is = findResource(serviceFile);
+		if(is != null) {
+			try {
+				props.load(is);
+			} catch (IOException ex) {
+				Logger.getLogger(JarServiceProvider.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		return props;
+	}
 
-    /**
-     * Read a file in the META-INF/services named name appended with 
-     * ".properties", and returns it as a <code>Map<String, String></code>
-     * If no file is found, then a an empty Property instance will be returned
-     * @param name name of file (use dots to separate subfolders).
-     * @return Map of keys and values
-     */
-    public static Map<String, String> readStringsMap(String name) {
-        Properties props = readProperties(name);
-        HashMap<String, String> map = new HashMap<String, String>();
-        if (props != null) {
-            for (Map.Entry e : props.entrySet()) {
-                map.put(e.getKey().toString(), e.getValue().toString());
-            }
-        }
-        return map;
-    }
+	/**
+	 * Read a file in the META-INF/services named name appended with
+	 * ".properties", and returns it as a <code>Map<String, String></code>
+	 * If no file is found, then a an empty Property instance will be returned
+	 * @param name name of file (use dots to separate subfolders).
+	 * @return Map of keys and values
+	 */
+	public static Map<String, String> readStringsMap(String name) {
+		Properties props = readProperties(name);
+		HashMap<String, String> map = new HashMap<String, String>();
+		if (props != null) {
+			for (Map.Entry e : props.entrySet()) {
+				map.put(e.getKey().toString(), e.getValue().toString());
+			}
+		}
+		return map;
+	}
 
-    /**
-     * Read the given URL and returns a List of Strings for each input line
-     * Each line will not have the line terminator.
+	/**
+	 * Read the given URL and returns a List of Strings for each input line
+	 * Each line will not have the line terminator.
 	 *
 	 * The resource is searched in /META-INF/services/url, then in
 	 * url, then the url is treated as a location in the current classpath
 	 * and an attempt to read it from that location is done.
-     *
-     * @param url location of file to read
-     * @return List of Strings for each line read. or EMPTY_LIST if URL is not found
-     */
-    @SuppressWarnings("unchecked")
-    public static List<String> readLines(String url) {
-        InputStream is = null;
-        List<String> lines = new ArrayList<String>();
-        ClassLoader cl = JarServiceProvider.class.getClassLoader();
-        cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
-        URL loc = cl.getResource(url);
-		if(loc == null) {
+	 *
+	 * @param url location of file to read
+	 * @return List of Strings for each line read. or EMPTY_LIST if URL is not found
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<String> readLines(String url) {
+		InputStream is = findResource(url);
+		if (is == null) {
+			return Collections.EMPTY_LIST;
+		}
+		List<String> lines = new ArrayList<String>();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			for (String line = br.readLine(); line != null; line = br.readLine()) {
+				// Trim and unescape some control chars
+				line = line.trim().replace("\\n", "\n").replace("\\t", "\t");
+				lines.add(line);
+			}
+		} catch (IOException ex) {
+			LOG.log(Level.SEVERE, null, ex);
+		} finally {
+			try {
+				is.close();
+			} catch (IOException ex) {
+				LOG.log(Level.SEVERE, null, ex);
+			}
+			return lines;
+		}
+
+	}
+
+	/**
+	 * Attempt to find a location url.  The following locations are searched in
+	 * sequence:
+	 * url,
+	 * SERVICES_ROOT/url
+	 * all classpath/url
+	 * @param url
+	 * @param cl classloader
+	 * @return InputSTream at that location, or null if not found
+	 * @see JarServiceProvider#findResource(java.lang.String)
+	 */
+	public static InputStream findResource(String url, ClassLoader cl) {
+		InputStream is = null;
+
+		URL loc = cl.getResource(url);
+		if (loc == null) {
+			loc = cl.getResource(url);
+		}
+		if (loc == null) {
 			loc = cl.getResource(SERVICES_ROOT + url);
 		}
-		if(loc == null) {
-			loc = ClassLoader.getSystemResource(url);
+		if (loc == null) {
+			is = ClassLoader.getSystemResourceAsStream(url);
+		} else {
+			try {
+				is = loc.openStream();
+			} catch (IOException ex) {
+				Logger.getLogger(JarServiceProvider.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
-        if (loc == null) {
-            return Collections.EMPTY_LIST;
-        }
-        try {
-            is = loc.openStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                // Trim and unescape some control chars
-                line = line.trim().replace("\\n", "\n").replace("\\t", "\t");
-                lines.add(line);
-            }
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-            return lines;
-        }
+		return is;
+	}
 
-    }
+	/**
+	 * Attempt to find a location url.  The following locations are searched in
+	 * sequence:
+	 * url,
+	 * SERVICES_ROOT/url
+	 * all classpath/url
+	 * The System ClassLoader is used.
+	 * @param url
+	 * @return InputSTream at that location, or null if not found
+	 * @see JarServiceProvider#findResource(java.lang.String, java.lang.ClassLoader)
+	 */
+	public static InputStream findResource(String url) {
+		return findResource(url, ClassLoader.getSystemClassLoader());
+	}
 }

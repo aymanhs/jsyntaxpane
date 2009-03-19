@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
@@ -69,9 +70,10 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 	public static final String CONFIG_COMPONENTS = "Components";
 	public static final String CONFIG_MENU = "PopupMenu";
 	public static final String CONFIG_TOOLBAR = "Toolbar";
-	public static final String CONFIG_TOOLBAR_ROLLOVER = "Toolbar.Rollover";
-	public static final String CONFIG_TOOLBAR_BORDER = "Toolbar.Border";
-	public static final String CONFIG_TOOLBAR_OPAQUE = "Toolbar.Opaque";
+	public static final String CONFIG_TOOLBAR_ROLLOVER = "Toolbar.Buttons.Rollover";
+	public static final String CONFIG_TOOLBAR_BORDER = "Toolbar.Buttons.BorderPainted";
+	public static final String CONFIG_TOOLBAR_OPAQUE = "Toolbar.Buttons.Opaque";
+	public static final String CONFIG_TOOLBAR_BORDER_SIZE = "Toolbar.Buttons.BorderSize";
 	private static final Pattern ACTION_KEY_PATTERN = Pattern.compile("Action\\.((\\w|-)+)");
 	private static final Pattern DEFAULT_ACTION_PATTERN = Pattern.compile("(DefaultAction.((\\w|-)+)).*");
 	private static Font DEFAULT_FONT;
@@ -271,6 +273,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		boolean btnRolloverEnabled = getConfig().getBoolean(CONFIG_TOOLBAR_ROLLOVER, true);
 		boolean btnBorderPainted = getConfig().getBoolean(CONFIG_TOOLBAR_BORDER, false);
 		boolean btnOpaque = getConfig().getBoolean(CONFIG_TOOLBAR_OPAQUE, false);
+		int btnBorderSize = getConfig().getInteger(CONFIG_TOOLBAR_BORDER_SIZE, 2);
 		for (String menuString : toolBarItems) {
 			if (menuString.equals("-") ||
 				menuString.startsWith("<") ||
@@ -284,6 +287,8 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 					b.setBorderPainted(btnBorderPainted);
 					b.setOpaque(btnOpaque);
 					b.setFocusable(false);
+					b.setBorder(BorderFactory.createEmptyBorder(btnBorderSize,
+						btnBorderSize, btnBorderSize, btnBorderSize));
 				}
 			}
 		}
