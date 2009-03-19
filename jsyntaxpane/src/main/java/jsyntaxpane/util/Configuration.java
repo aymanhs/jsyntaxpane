@@ -342,7 +342,7 @@ public class Configuration implements Map<String, String> {
          */
         public final Matcher matcher;
         /**
-         * Matched group 1. COuld be null if no Group 0 is found
+         * Matched group 1. Could be null if no Group 1 is found
          */
         public final String group1;
         /**

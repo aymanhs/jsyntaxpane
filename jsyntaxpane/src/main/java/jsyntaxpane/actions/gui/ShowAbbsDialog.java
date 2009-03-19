@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Map;
 import javax.swing.JEditorPane;
 import jsyntaxpane.actions.ActionUtils;
+import jsyntaxpane.util.SwingUtils;
 
 /**
  * Show abbreviations for a JEditorPane.
@@ -40,6 +41,7 @@ public class ShowAbbsDialog extends javax.swing.JDialog {
 		this.abbs = abbs;
 		jEdtAbbr.setEditorKit(parent.getEditorKit());
 		jLstAbbs.setSelectedIndex(0);
+		SwingUtils.addEscapeListener(this);
 		setVisible(true);
 	}
 

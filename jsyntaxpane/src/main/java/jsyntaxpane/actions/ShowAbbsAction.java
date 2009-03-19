@@ -15,7 +15,6 @@ package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
 import java.util.Map;
-import javax.swing.Action;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
@@ -23,7 +22,9 @@ import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.actions.gui.ShowAbbsDialog;
 
 /**
- *
+ * Display all abbreviations for a JTextComponent., if it has any.
+ * Abbreviations are obtained from the IndentAction, so if the target does not
+ * have an instance of that actions, nothing is displayed.
  * @author Ayman Al-Sairafi
  */
 public class ShowAbbsAction extends DefaultSyntaxAction {
@@ -36,16 +37,14 @@ public class ShowAbbsAction extends DefaultSyntaxAction {
 	public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
 		int dot, ActionEvent e) {
 		// find the abbreviations actions:
-		for (Object k : target.getActionMap().allKeys()) {
-			Action a = target.getActionMap().get(k);
-			if (a instanceof IndentAction) {
-				IndentAction indentAction = (IndentAction) a;
-				Map<String, String> abbs = indentAction.getAbbreviations();
-				if (abbs == null || abbs.isEmpty()) {
-					JOptionPane.showMessageDialog(target, "No Abbreviations exist for this content type");
-				} else {
-					ShowAbbsDialog dlg = new ShowAbbsDialog((JEditorPane) target, abbs);
-				}
+		IndentAction indentAction = ActionUtils.getAction(target, IndentAction.class);
+		if (indentAction != null) {
+			Map<String, String> abbs = indentAction.getAbbreviations();
+			if (abbs == null || abbs.isEmpty()) {
+				JOptionPane.showMessageDialog(target,
+					"No Abbreviations exist for this content type");
+			} else {
+				new ShowAbbsDialog((JEditorPane) target, abbs);
 			}
 		}
 	}
