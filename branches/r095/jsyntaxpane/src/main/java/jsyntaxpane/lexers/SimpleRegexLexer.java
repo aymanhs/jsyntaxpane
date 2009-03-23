@@ -15,7 +15,6 @@ package jsyntaxpane.lexers;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +25,8 @@ import java.util.regex.Pattern;
 import javax.swing.text.Segment;
 import jsyntaxpane.Lexer;
 import jsyntaxpane.Token;
+import jsyntaxpane.TokenComparators;
 import jsyntaxpane.TokenType;
-import jsyntaxpane.util.Configuration;
 
 /**
  * This is a "dynamic" Lexer that will use Regex patterns to parse any document,
@@ -52,7 +51,7 @@ import jsyntaxpane.util.Configuration;
  *
  * @author Ayman Al-Sairafi
  */
-public class SimpleRegexLexer implements Lexer, Comparator<Token> {
+public class SimpleRegexLexer implements Lexer {
 
     public SimpleRegexLexer(Map props) {
         putPatterns(props);
@@ -66,7 +65,7 @@ public class SimpleRegexLexer implements Lexer, Comparator<Token> {
 
     @Override
     public void parse(Segment segment, int ofst, List<Token> tokens) {
-        TreeSet<Token> allMatches = new TreeSet<Token>(this);
+        TreeSet<Token> allMatches = new TreeSet<Token>(TokenComparators.longestFirst);
         // add to ourset all the matches by all our regexes
         for (Map.Entry<TokenType, Pattern> e : patterns.entrySet()) {
             Matcher m = e.getValue().matcher(segment);
@@ -96,23 +95,5 @@ public class SimpleRegexLexer implements Lexer, Comparator<Token> {
             patterns.put(t, Pattern.compile(props.get(key).toString()));
         }
         return this;
-    }
-
-    /**
-     * This comparator is used to have longer tokens becoming LESS than
-     * shorter tokens.  This is needed so the first in a Token tree is
-     * always the longest match
-     * @param t1
-     * @param t2 
-     */
-    @Override
-    public int compare(Token t1, Token t2) {
-        if (t1.start != t2.start) {
-            return (t1.start - t2.start);
-        } else if (t1.length != t2.length) {
-            return (t2.length - t1.length);
-        } else {
-            return t1.type.compareTo(t2.type);
-        }
     }
 }
