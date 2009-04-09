@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
+import jsyntaxpane.DefaultSyntaxKit;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.actions.gui.ShowAbbsDialog;
 
@@ -37,9 +38,9 @@ public class ShowAbbsAction extends DefaultSyntaxAction {
 	public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
 		int dot, ActionEvent e) {
 		// find the abbreviations actions:
-		IndentAction indentAction = ActionUtils.getAction(target, IndentAction.class);
-		if (indentAction != null) {
-			Map<String, String> abbs = indentAction.getAbbreviations();
+		DefaultSyntaxKit kit = ActionUtils.getSyntaxKit(target);
+		if (kit != null) {
+			Map<String, String> abbs = kit.getAbbreviations();
 			if (abbs == null || abbs.isEmpty()) {
 				JOptionPane.showMessageDialog(target,
 					"No Abbreviations exist for this content type");

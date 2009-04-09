@@ -25,13 +25,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
 import javax.swing.MutableComboBoxModel;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
+import jsyntaxpane.DefaultSyntaxKit;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
 
@@ -570,6 +573,24 @@ public class ActionUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Return the DefaultSyntaxKit of this target, or null if the target does not
+	 * have a DefaultSyntaxKit
+	 * @param target
+	 * @return kit or null
+	 */
+	public static DefaultSyntaxKit getSyntaxKit(JTextComponent target) {
+		DefaultSyntaxKit kit = null;
+		if (target instanceof JEditorPane) {
+			JEditorPane jEditorPane = (JEditorPane) target;
+			EditorKit k = jEditorPane.getEditorKit();
+			if (k instanceof DefaultSyntaxKit) {
+				 kit = (DefaultSyntaxKit) k;
+			}
+		}
+		return kit;
 	}
 
 	/**

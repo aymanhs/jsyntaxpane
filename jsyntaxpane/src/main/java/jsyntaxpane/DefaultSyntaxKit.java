@@ -21,6 +21,7 @@ import java.awt.GraphicsEnvironment;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 	private static Font DEFAULT_FONT;
 	private static Set<String> CONTENT_TYPES = new HashSet<String>();
 	private static Boolean initialized = false;
+	private static Map<String, String> abbrvs;
 	private Lexer lexer;
 	private static final Logger LOG = Logger.getLogger(DefaultSyntaxKit.class.getName());
 	private Map<JEditorPane, List<SyntaxComponent>> editorComponents =
@@ -614,6 +616,26 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 			CONFIGS.put(kit, mine);
 			return mine;
 		}
+	}
+
+	public Map<String, String> getAbbreviations() {
+		// if we have not loaded the abbreviations, then load them now:
+		if (abbrvs == null) {
+			String cl = this.getClass().getName().replace('.', '/').toLowerCase();
+			abbrvs = JarServiceProvider.readStringsMap(cl + "/abbreviations.properties");
+		}
+		return abbrvs;
+	}
+
+	public void addAbbreviation(String abbr, String template) {
+		if (abbrvs == null) {
+			abbrvs = new HashMap<String, String>();
+		}
+		abbrvs.put(abbr, template);
+	}
+
+	public String getAbbreviation(String abbr) {
+		return abbrvs == null ? null : abbrvs.get(abbr);
 	}
 
 	private static void loadConfig(Configuration conf, Class<? extends EditorKit> kit) {

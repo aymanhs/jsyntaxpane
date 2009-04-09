@@ -61,7 +61,7 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>de.jflex.maven.plugin</groupId>
+        <groupId>de.jflex</groupId>
         <artifactId>maven-jflex-plugin</artifactId>
         <!--version>0.2</version-->
         <executions>

@@ -46,6 +46,11 @@ public class JarServiceProvider {
 	private JarServiceProvider() {
 	}
 
+	private static ClassLoader getClassLoader() {
+		ClassLoader cl = JarServiceProvider.class.getClassLoader();
+		return cl == null ? ClassLoader.getSystemClassLoader() : cl;
+	}
+
 	/**
 	 * Return an Object array from the file in META-INF/resources/{classname}
 	 * @param cls
@@ -54,8 +59,7 @@ public class JarServiceProvider {
 	 */
 	public static List<Object> getServiceProviders(Class cls) throws IOException {
 		ArrayList<Object> l = new ArrayList<Object>();
-		ClassLoader cl = JarServiceProvider.class.getClassLoader();
-		cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
+		ClassLoader cl = getClassLoader();
 		String serviceFile = SERVICES_ROOT + cls.getName();
 		Enumeration<URL> e = cl.getResources(serviceFile);
 		while (e.hasMoreElements()) {
@@ -118,7 +122,7 @@ public class JarServiceProvider {
 			serviceFile += ".properties";
 		}
 		InputStream is = findResource(serviceFile);
-		if(is != null) {
+		if (is != null) {
 			try {
 				props.load(is);
 			} catch (IOException ex) {
@@ -229,6 +233,6 @@ public class JarServiceProvider {
 	 * @see JarServiceProvider#findResource(java.lang.String, java.lang.ClassLoader)
 	 */
 	public static InputStream findResource(String url) {
-		return findResource(url, ClassLoader.getSystemClassLoader());
+		return findResource(url, getClassLoader());
 	}
 }
