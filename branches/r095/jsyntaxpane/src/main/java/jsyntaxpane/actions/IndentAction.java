@@ -14,13 +14,14 @@
 package jsyntaxpane.actions;
 
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.swing.JEditorPane;
+import javax.swing.text.EditorKit;
 import javax.swing.text.JTextComponent;
+import jsyntaxpane.DefaultSyntaxKit;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
-import jsyntaxpane.util.JarServiceProvider;
 
 /**
  * IndentAction is used to replace Tabs with spaces.  If there is selected
@@ -29,7 +30,8 @@ import jsyntaxpane.util.JarServiceProvider;
  *
  * Since this is also used as an abbreviation completion action,
  * Abbreviiations are processed by this event.
- * 
+ *
+ * FIXME:  Move the abbreviation expansion to an ActionUtils proc
  * @author Ayman Al-Sairafi
  * 
  */
@@ -43,6 +45,8 @@ public class IndentAction extends DefaultSyntaxAction {
     public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
             int dot, ActionEvent e) {
         String selected = target.getSelectedText();
+		EditorKit kit = ((JEditorPane)target).getEditorKit();
+		Map<String, String> abbrvs = ((DefaultSyntaxKit)kit).getAbbreviations();
         if (selected == null) {
             // Check for abbreviations:
             Token abbrToken = sDoc.getWordAt(dot, wordsPattern);
@@ -81,7 +85,7 @@ public class IndentAction extends DefaultSyntaxAction {
         }
     }
     private Pattern wordsPattern = Pattern.compile("\\w+");
-    private Map<String, String> abbrvs;
+//    private Map<String, String> abbrvs;
 
     public void setWordRegex(String regex) {
         wordsPattern = Pattern.compile(regex);
@@ -89,24 +93,5 @@ public class IndentAction extends DefaultSyntaxAction {
 
     public Pattern getWordRegex() {
         return wordsPattern;
-    }
-
-    public void setAbbreviations(String loc) {
-        abbrvs = JarServiceProvider.readStringsMap(loc);
-    }
-
-    public void addAbbreviation(String abbr, String template) {
-        if(abbrvs == null) {
-            abbrvs = new HashMap<String, String>();
-        }
-        abbrvs.put(abbr, template);
-    }
-
-    public String getAbbreviation(String abbr) {
-        return abbrvs == null ? null : abbrvs.get(abbr);
-    }
-
-    public Map<String, String> getAbbreviations() {
-        return abbrvs;
     }
 }

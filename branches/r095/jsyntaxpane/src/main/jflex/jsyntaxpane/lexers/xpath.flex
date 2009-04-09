@@ -256,7 +256,7 @@ S	   =   	[\u20] | [\u9] | [\uD] | [\uA]
 }
 
 <STRING_SINGLE> {
-  \" '                           {
+  \'                             {
                                      yybegin(YYINITIAL);
                                      // length also includes the trailing quote
                                      return token(TokenType.STRING, tokenStart, tokenLength + 1);
