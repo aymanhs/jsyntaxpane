@@ -24,7 +24,7 @@ import jsyntaxpane.actions.gui.HTMLPreviewFrame;
  * 
  */
 public class HTMLPreviewAction extends DefaultSyntaxAction {
-
+	public static final String HTML_PREVIEW_WINDOW = "html-preview-window";
 
     public HTMLPreviewAction() {
         super("HTML_PREVIEW");
@@ -34,10 +34,10 @@ public class HTMLPreviewAction extends DefaultSyntaxAction {
     public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
             int dot, ActionEvent e) {
         // have the document property
-        Object obj = sDoc.getProperty("html-preview-window");
+        Object obj = sDoc.getProperty(HTML_PREVIEW_WINDOW);
         if(obj == null) {
             HTMLPreviewFrame dlg = new HTMLPreviewFrame(sDoc);
-            sDoc.putProperty("html-preview-window", dlg);
+            sDoc.putProperty( HTML_PREVIEW_WINDOW,dlg);
             dlg.setVisible(true);
         } else {
             HTMLPreviewFrame dlg = (HTMLPreviewFrame) obj;
