@@ -52,20 +52,4 @@ public class TokenComparators {
 			}
 		}
 	}
-
-	public static void main(String[] args) {
-		Token[] toks = new Token[] {
-			new Token(TokenType.COMMENT, 0, 10),
-			new Token(TokenType.KEYWORD, 0, 5),
-			new Token(TokenType.DELIMITER, 0, 5),
-			new Token(TokenType.DELIMITER, 1, 15),
-			new Token(TokenType.IDENTIFIER, 1, 3),
-			new Token(TokenType.TYPE, 1, 3),
-		};
-
-		Arrays.sort(toks, longestFirst);
-		System.out.println("Longest:  " + Arrays.toString(toks));
-		Arrays.sort(toks, ShortestFirst);
-		System.out.println("Shortest: " + Arrays.toString(toks));
-	}
 }

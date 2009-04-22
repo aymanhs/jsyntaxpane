@@ -25,7 +25,8 @@ import jsyntaxpane.util.SwingUtils;
  * 
  * @author Ayman Al-Sairafi
  */
-public class ShowAbbsDialog extends javax.swing.JDialog {
+public class ShowAbbsDialog 
+	extends javax.swing.JDialog implements EscapeListener {
 
 	/**
 	 * Creates new form ShowAbbsDialog
@@ -121,4 +122,9 @@ public class ShowAbbsDialog extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 	Map<String, String> abbs;
+
+	@Override
+	public void escapePressed() {
+		setVisible(false);
+	}
 }

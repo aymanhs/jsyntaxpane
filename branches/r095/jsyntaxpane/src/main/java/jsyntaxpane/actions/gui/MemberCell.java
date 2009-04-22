@@ -37,7 +37,7 @@ import jsyntaxpane.util.ReflectUtils;
 
 /**
  * This class will render a Member.  There are Method, Field and Constructor subclasses
- * @author alsairafia
+ * @author Ayman Al-Sairafi
  */
 abstract class MemberCell extends JPanel {
 

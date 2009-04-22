@@ -84,8 +84,9 @@ Exponent = [eE] [+-]? [0-9]+
 
 /* string and character literals */
 StringCharacter = [^\r\n\"\\]
+SQStringCharacter = [^\r\n\'\\]
 
-%state STRING, ML_STRING
+%state STRING, ML_STRING, SQSTRING, SQML_STRING
 
 %%
 
@@ -268,6 +269,17 @@ StringCharacter = [^\r\n\"\\]
                                     tokenLength = 1;
                                  }
 
+  \'{3}                          {
+                                    yybegin(SQML_STRING);
+                                    tokenStart = yychar;
+                                    tokenLength = 3;
+                                 }
+
+  \'                             {
+                                    yybegin(SQSTRING);
+                                    tokenStart = yychar;
+                                    tokenLength = 1;
+                                 }
 
   /* numeric literals */
 
@@ -324,12 +336,49 @@ StringCharacter = [^\r\n\"\\]
 
   \\[0-3]?{OctDigit}?{OctDigit}  { tokenLength += yylength(); }
 
+  \"                             { tokenLength ++;  }
+
   /* escape sequences */
 
   \\.                            { tokenLength += 2; }
   {LineTerminator}               { tokenLength ++;  }
 }
 
+<SQSTRING> {
+  "'"                            {
+                                     yybegin(YYINITIAL);
+                                     // length also includes the trailing quote
+                                     return token(TokenType.STRING, tokenStart, tokenLength + 1);
+                                 }
+
+  {SQStringCharacter}+           { tokenLength += yylength(); }
+
+  \\[0-3]?{OctDigit}?{OctDigit}  { tokenLength += yylength(); }
+
+  /* escape sequences */
+
+  \\.                            { tokenLength += 2; }
+  {LineTerminator}               { yybegin(YYINITIAL);  }
+}
+
+<SQML_STRING> {
+  \'{3}                          {
+                                     yybegin(YYINITIAL);
+                                     // length also includes the trailing quote
+                                     return token(TokenType.STRING, tokenStart, tokenLength + 3);
+                                 }
+
+  {SQStringCharacter}+           { tokenLength += yylength(); }
+
+  \\[0-3]?{OctDigit}?{OctDigit}  { tokenLength += yylength(); }
+
+  \'                             { tokenLength ++;  }
+
+  /* escape sequences */
+
+  \\.                            { tokenLength += 2; }
+  {LineTerminator}               { tokenLength ++;  }
+}
 
 /* error fallback */
 .|\n                             {  }
