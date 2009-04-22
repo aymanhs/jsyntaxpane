@@ -16,6 +16,7 @@ package jsyntaxpane.actions.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -28,6 +29,7 @@ import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.actions.ActionUtils;
 import jsyntaxpane.actions.DocumentSearchData;
@@ -39,12 +41,19 @@ import jsyntaxpane.util.SwingUtils;
  * QuickFind Dialog.  Firefox like dialog shown at bottom of editor.
  * @author Ayman Al-Sairafi
  */
-public class QuickFindDialog extends javax.swing.JDialog implements DocumentListener, ActionListener {
+public class QuickFindDialog extends javax.swing.JDialog 
+	implements DocumentListener, ActionListener, EscapeListener {
 
 	private SimpleMarker marker = new SimpleMarker(Color.PINK);
 	private WeakReference<JTextComponent> target;
 	private WeakReference<DocumentSearchData> dsd;
 	private int oldCaretPosition;
+	/**
+	 * This will be set to true if ESC key is used to quit the form.
+	 * In that case, the caret will be restored to its old pos, otherwise
+	 * it will remain where the user probably clicked.
+	 */
+	private boolean escaped = false;
 
 	/**
 	 * Creates new form QuickFindDialog
@@ -77,7 +86,15 @@ public class QuickFindDialog extends javax.swing.JDialog implements DocumentList
 			public void windowDeactivated(WindowEvent e) {
 				target.getDocument().removeDocumentListener(QuickFindDialog.this);
 				Markers.removeMarkers(target, marker);
-				target.setCaretPosition(oldCaretPosition);
+				if (escaped) {
+					Rectangle aRect;
+					try {
+						aRect = target.modelToView(oldCaretPosition);
+						target.setCaretPosition(oldCaretPosition);
+						target.scrollRectToVisible(aRect);
+					} catch (BadLocationException ex) {
+					}
+				}
 				dispose();
 			}
 		};
@@ -200,7 +217,7 @@ public class QuickFindDialog extends javax.swing.JDialog implements DocumentList
     }// </editor-fold>//GEN-END:initComponents
 
 	private void jBtnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnNextActionPerformed
-		if(dsd.get().doFindNext(target.get())) {
+		if (dsd.get().doFindNext(target.get())) {
 			jLblStatus.setText(null);
 		} else {
 			jLblStatus.setText("not found");
@@ -208,7 +225,7 @@ public class QuickFindDialog extends javax.swing.JDialog implements DocumentList
 }//GEN-LAST:event_jBtnNextActionPerformed
 
 	private void jBtnPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnPrevActionPerformed
-		if(dsd.get().doFindPrev(target.get())) {
+		if (dsd.get().doFindPrev(target.get())) {
 			jLblStatus.setText(null);
 		} else {
 			jLblStatus.setText("not found");
@@ -275,5 +292,11 @@ public class QuickFindDialog extends javax.swing.JDialog implements DocumentList
 		if (e.getSource() instanceof JCheckBox) {
 			updateFind();
 		}
+	}
+
+	@Override
+	public void escapePressed() {
+		escaped = true;
+		setVisible(false);
 	}
 }

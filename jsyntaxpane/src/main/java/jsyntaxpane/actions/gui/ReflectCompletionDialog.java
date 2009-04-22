@@ -44,7 +44,8 @@ import jsyntaxpane.util.SwingUtils;
  *
  * @author Ayman Al-Sairafi
  */
-public class ReflectCompletionDialog extends javax.swing.JDialog {
+public class ReflectCompletionDialog 
+	extends javax.swing.JDialog implements EscapeListener {
 
 	/**
 	 * The class we are displaying its members:
@@ -333,4 +334,9 @@ public class ReflectCompletionDialog extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTxtItem;
     // End of variables declaration//GEN-END:variables
+
+	@Override
+	public void escapePressed() {
+		setVisible(false);
+	}
 }

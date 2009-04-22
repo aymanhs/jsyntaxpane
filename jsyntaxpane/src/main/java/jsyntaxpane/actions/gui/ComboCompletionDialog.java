@@ -35,7 +35,8 @@ import jsyntaxpane.util.SwingUtils;
  *
  * @author Ayman Al-Sairafi
  */
-public class ComboCompletionDialog extends javax.swing.JDialog {
+public class ComboCompletionDialog 
+	extends javax.swing.JDialog implements EscapeListener {
 
     /**
      * The result returned to the caller
@@ -238,4 +239,9 @@ public class ComboCompletionDialog extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTxtItem;
     // End of variables declaration//GEN-END:variables
+
+	@Override
+	public void escapePressed() {
+		setVisible(false);
+	}
 }

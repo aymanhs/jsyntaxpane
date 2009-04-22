@@ -31,7 +31,8 @@ import jsyntaxpane.util.SwingUtils;
  * 
  * @author Ayman Al-Sairafi
  */
-public class ReplaceDialog extends javax.swing.JDialog implements CaretListener {
+public class ReplaceDialog extends javax.swing.JDialog 
+	implements CaretListener, EscapeListener {
 
     private JTextComponent textComponent;
     private DocumentSearchData dsd;
@@ -272,4 +273,9 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
     public void caretUpdate(CaretEvent e) {
         updateHighlights();
     }
+
+	@Override
+	public void escapePressed() {
+		setVisible(false);
+	}
 }

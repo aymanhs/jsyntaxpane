@@ -23,7 +23,8 @@ import jsyntaxpane.util.SwingUtils;
  * A simple dialog to prompt for a line number and go to it
  * @author Ayman Al-Sairafi
  */
-public class GotoLineDialog extends javax.swing.JDialog {
+public class GotoLineDialog 
+	extends javax.swing.JDialog implements EscapeListener {
 
     private static final String PROPERTY_KEY = "GOTOLINE_DIALOG";
     private WeakReference<JTextComponent> text;
@@ -143,4 +144,9 @@ public class GotoLineDialog extends javax.swing.JDialog {
         dlg.setVisible(true);
         
     }
+
+	@Override
+	public void escapePressed() {
+		setVisible(false);
+	}
 }

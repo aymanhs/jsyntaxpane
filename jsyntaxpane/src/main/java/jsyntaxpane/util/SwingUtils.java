@@ -17,9 +17,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.KeyStroke;
+import jsyntaxpane.actions.gui.EscapeListener;
 
 /**
  * As always, some general purpose handy Swing Utility methods
@@ -27,32 +26,22 @@ import javax.swing.KeyStroke;
  */
 public class SwingUtils {
 
-    public static void addEscapeListener(final JDialog dialog) {
+	/**
+	 * FIXME:  These two addEscapeListener can be called on a new interface
+	 * that implements RootPainCOntainer (Swing) and a new method that
+	 * is called
+	 * @param dialog
+	 */
+    public static void addEscapeListener(final EscapeListener dialog) {
         ActionListener escListener = new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                dialog.setVisible(false);
+                dialog.escapePressed();
             }
         };
 
         dialog.getRootPane().registerKeyboardAction(escListener,
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
-
-    }
-
-
-    public static void addEscapeListener(final JFrame frame) {
-        ActionListener escListener = new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
-            }
-        };
-
-        frame.getRootPane().registerKeyboardAction(escListener,
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
 
