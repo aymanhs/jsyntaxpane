@@ -56,6 +56,7 @@ public class ShowAbbsDialog
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jLstAbbs = new javax.swing.JList();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -68,6 +69,9 @@ public class ShowAbbsDialog
         setModal(true);
         setName("dlgShowAbbs"); // NOI18N
 
+        jSplitPane1.setDividerLocation(150);
+        jSplitPane1.setDividerSize(3);
+
         jScrollPane1.setPreferredSize(new java.awt.Dimension(258, 400));
 
         jLstAbbs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -78,9 +82,13 @@ public class ShowAbbsDialog
         });
         jScrollPane1.setViewportView(jLstAbbs);
 
+        jSplitPane1.setLeftComponent(jScrollPane1);
+
         jEdtAbbr.setEditable(false);
         jEdtAbbr.setMinimumSize(new java.awt.Dimension(106, 400));
         jScrollPane2.setViewportView(jEdtAbbr);
+
+        jSplitPane1.setRightComponent(jScrollPane2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -88,19 +96,15 @@ public class ShowAbbsDialog
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE))
-                .addContainerGap())
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 337, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -110,7 +114,7 @@ public class ShowAbbsDialog
 		if (evt.getValueIsAdjusting() == false) {
 			Object selected = jLstAbbs.getSelectedValue();
 			if (selected != null) {
-				jEdtAbbr.setText(abbs.get(selected));
+				jEdtAbbr.setText(abbs.get(selected.toString()));
 			}
 		}
 	}//GEN-LAST:event_jLstAbbsValueChanged
@@ -120,6 +124,7 @@ public class ShowAbbsDialog
     private javax.swing.JList jLstAbbs;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JSplitPane jSplitPane1;
     // End of variables declaration//GEN-END:variables
 	Map<String, String> abbs;
 
