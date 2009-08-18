@@ -13,6 +13,7 @@
  */
 package jsyntaxpane.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -49,7 +50,7 @@ public class StringUtils {
         }
     }
 
-    static class CamelCaseCompare implements Comparator<String> {
+    static class CamelCaseCompare implements Comparator<String>, Serializable {
 
         @Override
         public int compare(String o1, String o2) {

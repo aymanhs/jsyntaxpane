@@ -341,10 +341,9 @@ public class ReflectUtils {
         }
         return m;
     }
-    public static List<String> DEFAULT_PACKAGES;
+    public static final List<String> DEFAULT_PACKAGES = new ArrayList<String>(3);
 
     static {
-        DEFAULT_PACKAGES = new ArrayList<String>(2);
         DEFAULT_PACKAGES.add("java.lang");
         DEFAULT_PACKAGES.add("java.util");
         DEFAULT_PACKAGES.add("jsyntaxpane");

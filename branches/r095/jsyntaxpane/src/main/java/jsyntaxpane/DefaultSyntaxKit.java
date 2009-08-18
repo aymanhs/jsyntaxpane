@@ -18,6 +18,8 @@ import java.awt.Container;
 import java.util.logging.Level;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,6 +83,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 	private static Set<String> CONTENT_TYPES = new HashSet<String>();
 	private static Boolean initialized = false;
 	private static Map<String, String> abbrvs;
+	private static String MENU_MASK_STRING = "control ";
 	private Lexer lexer;
 	private static final Logger LOG = Logger.getLogger(DefaultSyntaxKit.class.getName());
 	private Map<JEditorPane, List<SyntaxComponent>> editorComponents =
@@ -92,11 +95,14 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 	 */
 	private static Map<Class<? extends DefaultSyntaxKit>, Configuration> CONFIGS;
 
-
 	static {
 		// we only need to initialize once.
 		if (!initialized) {
 			initKit();
+		}
+		int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+		if(menuMask == KeyEvent.ALT_DOWN_MASK) {
+			MENU_MASK_STRING = "alt ";
 		}
 	}
 	private static final String ACTION_MENU_TEXT = "MenuText";
@@ -159,7 +165,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		for (SyntaxComponent c : editorComponents.get(pane)) {
 			if (c.getClass().getName().equals(classname)) {
 				c.deinstall(pane);
-				editorComponents.remove(c);
+				editorComponents.get(pane).remove(c);
 				break;
 			}
 		}
@@ -363,22 +369,22 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 			String actionName = m.group1;
 			SyntaxAction action = createAction(actionClass);
 			// The configuration keys will need to be prefixed by Action
-			// to make it more readable in the COnfiguration files.
+			// to make it more readable in the Configuration files.
 			action.config(getConfig(), DefaultSyntaxAction.ACTION_PREFIX + actionName);
 			// Add the action to the component also
 			amap.put(actionName, action);
 			// Now bind all the keys to the Action we have using the InputMap
 			for (int i = 1; i < values.length; i++) {
-				String keyStrokeString = values[i];
+				String keyStrokeString = values[i].replace("menu ", MENU_MASK_STRING);
 				KeyStroke ks = KeyStroke.getKeyStroke(keyStrokeString);
-				// we may have more than value, but we will use the last one in
-				// the single value here.  This will display the key in the popup menus
-				// pretty neat.
-				action.putValue(Action.ACCELERATOR_KEY, ks);
+				// we may have more than onr value ( for key action ), but we will use the 
+				// last one in the single value here.  This will display the key in the
+				// popup menus.  Pretty neat.
 				if (ks == null) {
 					throw new IllegalArgumentException("Invalid KeyStroke: " +
 						keyStrokeString);
 				}
+				action.putValue(Action.ACCELERATOR_KEY, ks);
 				imap.put(ks, actionName);
 			}
 		}
@@ -390,19 +396,19 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 			if (action != null) {
 				configActionProperties(action, name, m.group1);
 			}
-		// The below commented block does find the keys for the default Actions
-		// using InputMap, however there are multiple bound keys for the
-		// default actions that displaying them in the menu will probably not
-		// be the most obvious binding
+			// The below commented block does find the keys for the default Actions
+			// using InputMap, however there are multiple bound keys for the
+			// default actions that displaying them in the menu will probably not
+			// be the most obvious binding
             /*
-		for (KeyStroke key : imap.allKeys()) {
-		Object o = imap.get(key);
-		if(name.equals(o)) {
-		action.putValue(Action.ACCELERATOR_KEY, key);
-		break;
-		}
-		}
-		 */
+			for (KeyStroke key : imap.allKeys()) {
+			Object o = imap.get(key);
+			if(name.equals(o)) {
+			action.putValue(Action.ACCELERATOR_KEY, key);
+			break;
+			}
+			}
+			 */
 		}
 		editorPane.setActionMap(amap);
 		editorPane.setInputMap(JTextComponent.WHEN_FOCUSED, imap);

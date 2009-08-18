@@ -13,7 +13,7 @@
  */
 package jsyntaxpane;
 
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -22,10 +22,10 @@ import java.util.Comparator;
  */
 public class TokenComparators {
 
-	public static Comparator<Token> longestFirst = new LongestFirst();
-	public static Comparator<Token> ShortestFirst = new ShortestFirst();
+	public static final Comparator<Token> LONGEST_FIRST = new LongestFirst();
+	public static final Comparator<Token> SHORTEST_FIRST = new ShortestFirst();
 
-	private static class LongestFirst implements Comparator<Token> {
+	private static class LongestFirst implements Comparator<Token>, Serializable {
 
 		@Override
 		public int compare(Token t1, Token t2) {
@@ -39,7 +39,7 @@ public class TokenComparators {
 		}
 	}
 
-	private static class ShortestFirst implements Comparator<Token> {
+	private static class ShortestFirst implements Comparator<Token>, Serializable {
 
 		@Override
 		public int compare(Token t1, Token t2) {
