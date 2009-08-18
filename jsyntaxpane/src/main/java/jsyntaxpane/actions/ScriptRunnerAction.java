@@ -82,7 +82,7 @@ public class ScriptRunnerAction extends DefaultSyntaxAction {
         scriptExtension = value;
     }
 
-    protected static ScriptEngineManager sem;
+    static ScriptEngineManager sem;
     private ScriptEngine engine;
     private String scriptExtension;
 }
