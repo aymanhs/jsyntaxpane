@@ -493,7 +493,7 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
         } else {
             // recursive call until we read the Super duper DefaultSyntaxKit
             Class superKit = kit.getSuperclass();
-            Configuration defaults = CONFIGS.get(superKit);
+            Configuration defaults = getConfig(superKit);
             Configuration mine = new Configuration(kit, defaults);
             loadConfig(mine, kit);
             CONFIGS.put(kit, mine);
