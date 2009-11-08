@@ -65,7 +65,7 @@ public class SimpleRegexLexer implements Lexer {
 
     @Override
     public void parse(Segment segment, int ofst, List<Token> tokens) {
-        TreeSet<Token> allMatches = new TreeSet<Token>(TokenComparators.longestFirst);
+        TreeSet<Token> allMatches = new TreeSet<Token>(TokenComparators.LONGEST_FIRST);
         // add to ourset all the matches by all our regexes
         for (Map.Entry<TokenType, Pattern> e : patterns.entrySet()) {
             Matcher m = e.getValue().matcher(segment);

@@ -136,8 +136,25 @@ public class DocumentSearchData {
 		} catch (BadLocationException ex) {
 			Logger.getLogger(DocumentSearchData.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		}
+	}
 
+	/**
+	 * Replace single occurance of match with the replacement.
+	 * @param target
+	 * @param replacement
+	 */
+	public void doReplace(JTextComponent target, String replacement) {
+		if (target.getSelectedText() != null) {
+			target.replaceSelection(replacement);
+			doFindNext(target);
+		}
+	}
+
+	/**
+	 * FInd the previous match
+	 * @param target
+	 * @return
+	 */
 	public boolean doFindPrev(JTextComponent target) {
 		if (getPattern() == null) {
 			return false;
