@@ -14,6 +14,7 @@
 package jsyntaxpane.actions.gui;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -25,7 +26,7 @@ import java.lang.ref.WeakReference;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.JCheckBox;
-import javax.swing.JViewport;
+import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -70,7 +71,7 @@ public class QuickFindDialog extends javax.swing.JDialog
 
 	public void showFor(final JTextComponent target) {
 		oldCaretPosition = target.getCaretPosition();
-		JViewport view = (JViewport) target.getParent();
+		Container view = target.getParent();
 		Dimension wd = getSize();
 		wd.width = target.getVisibleRect().width;
 		Point loc = new Point(0, view.getHeight());
