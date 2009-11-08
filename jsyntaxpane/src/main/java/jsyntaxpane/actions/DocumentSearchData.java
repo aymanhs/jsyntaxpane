@@ -14,11 +14,14 @@
 package jsyntaxpane.actions;
 
 import java.awt.Component;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.actions.gui.QuickFindDialog;
@@ -128,8 +131,12 @@ public class DocumentSearchData {
 		}
 		Matcher matcher = sDoc.getMatcher(getPattern());
 		String newText = matcher.replaceAll(replacement);
-		target.setText(newText);
-	}
+		try {
+			sDoc.replace(0, sDoc.getLength(), newText, null);
+		} catch (BadLocationException ex) {
+			Logger.getLogger(DocumentSearchData.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		}
 
 	public boolean doFindPrev(JTextComponent target) {
 		if (getPattern() == null) {
