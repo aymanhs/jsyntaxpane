@@ -24,7 +24,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="jLblFind" min="-2" max="-2" attributes="0"/>
@@ -42,10 +42,11 @@
                   <Component id="jChkIgnoreCase" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" attributes="0">
-                  <Component id="jTglHighlight" alignment="1" pref="98" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jBtnReplace" alignment="1" pref="98" max="32767" attributes="0"/>
                   <Component id="jBtnNext" alignment="0" pref="98" max="32767" attributes="1"/>
                   <Component id="jBtnPrev" alignment="0" pref="98" max="32767" attributes="1"/>
+                  <Component id="jTglHighlight" alignment="1" pref="98" max="32767" attributes="0"/>
                   <Component id="jBtnReplaceAll" alignment="1" pref="98" max="32767" attributes="1"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -67,20 +68,20 @@
                   <Component id="jCmbReplace" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLblReplace" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jBtnReplace" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jBtnReplaceAll" alignment="3" min="-2" max="-2" attributes="1"/>
                   <Component id="jChkWrap" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
                   <Component id="jChkRegex" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jBtnReplaceAll" alignment="3" min="-2" max="-2" attributes="1"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jChkIgnoreCase" min="-2" max="-2" attributes="1"/>
-              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
-          </Group>
-          <Group type="102" alignment="1" attributes="0">
-              <EmptySpace pref="97" max="32767" attributes="0"/>
-              <Component id="jTglHighlight" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jChkIgnoreCase" alignment="3" min="-2" max="-2" attributes="1"/>
+                  <Component id="jTglHighlight" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -173,6 +174,14 @@
           <StringArray count="0"/>
         </Property>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="jBtnReplace">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Replace"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jBtnReplaceActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

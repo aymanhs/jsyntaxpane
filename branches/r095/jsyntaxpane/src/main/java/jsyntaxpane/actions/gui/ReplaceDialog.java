@@ -108,6 +108,7 @@ public class ReplaceDialog extends javax.swing.JDialog
         jTglHighlight = new javax.swing.JToggleButton();
         jCmbReplace = new javax.swing.JComboBox();
         jCmbFind = new javax.swing.JComboBox();
+        jBtnReplace = new javax.swing.JButton();
 
         setTitle("Find and Replace");
         setName(""); // NOI18N
@@ -166,11 +167,18 @@ public class ReplaceDialog extends javax.swing.JDialog
 
         jCmbFind.setEditable(true);
 
+        jBtnReplace.setText("Replace");
+        jBtnReplace.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBtnReplaceActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLblFind)
@@ -185,11 +193,12 @@ public class ReplaceDialog extends javax.swing.JDialog
                     .addComponent(jCmbReplace, javax.swing.GroupLayout.Alignment.TRAILING, 0, 298, Short.MAX_VALUE)
                     .addComponent(jChkIgnoreCase))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jTglHighlight, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
-                    .addComponent(jBtnNext, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
-                    .addComponent(jBtnPrev, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
-                    .addComponent(jBtnReplaceAll, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jBtnReplace, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(jBtnNext, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(jBtnPrev, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(jTglHighlight, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(jBtnReplaceAll, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -205,17 +214,17 @@ public class ReplaceDialog extends javax.swing.JDialog
                     .addComponent(jBtnPrev)
                     .addComponent(jCmbReplace, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLblReplace))
-                .addGap(5, 5, 5)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jBtnReplaceAll)
-                    .addComponent(jChkWrap, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jChkRegex))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jChkIgnoreCase)
-                .addGap(15, 15, 15))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(97, Short.MAX_VALUE)
-                .addComponent(jTglHighlight)
+                .addComponent(jBtnReplace)
+                .addGap(3, 3, 3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jChkWrap, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jChkRegex)
+                    .addComponent(jBtnReplaceAll))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jChkIgnoreCase)
+                    .addComponent(jTglHighlight))
                 .addContainerGap())
         );
 
@@ -255,9 +264,15 @@ public class ReplaceDialog extends javax.swing.JDialog
 		updateFinder();
 		dsd.doFindPrev(textComponent);
 }//GEN-LAST:event_jBtnPrevActionPerformed
+
+	private void jBtnReplaceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnReplaceActionPerformed
+		dsd.doReplace(textComponent, String.valueOf(jCmbReplace.getSelectedItem()));
+	}//GEN-LAST:event_jBtnReplaceActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBtnNext;
     private javax.swing.JButton jBtnPrev;
+    private javax.swing.JButton jBtnReplace;
     private javax.swing.JButton jBtnReplaceAll;
     private javax.swing.JCheckBox jChkIgnoreCase;
     private javax.swing.JCheckBox jChkRegex;

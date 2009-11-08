@@ -13,9 +13,13 @@
  */
 package jsyntaxpane;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
+import javax.swing.text.BadLocationException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
@@ -39,8 +43,6 @@ public class CompoundUndoMan extends UndoManager {
 
 	private SyntaxDocument doc;
 	private CompoundEdit compoundEdit;
-	private int lastOffset;
-	private int lastLength;
 	// This allows us to start combining operations.
 	// it will be reset after the first change.
 	private boolean startCombine = false;
@@ -62,20 +64,15 @@ public class CompoundUndoMan extends UndoManager {
 
 		if (compoundEdit == null) {
 			compoundEdit = startCompoundEdit(e.getEdit());
+			startCombine = false;
 			return;
 		}
-
-		int offsetChange = docEvt.getOffset() - lastOffset;
-		int lengthChange = doc.getLength() - lastLength;
 
 		//  Check for an incremental edit or backspace.
 		//  The Change in Caret position and Document length should both be
 		//  either 1 or -1.
-
-		if (startCombine || offsetChange == lengthChange && Math.abs(offsetChange) == 1) {
+		if (startCombine || Math.abs(docEvt.getLength()) == 1) {
 			compoundEdit.addEdit(e.getEdit());
-			lastOffset = docEvt.getOffset();
-			lastLength = doc.getLength();
 			startCombine = false;
 			return;
 		}
@@ -93,9 +90,6 @@ public class CompoundUndoMan extends UndoManager {
 	private CompoundEdit startCompoundEdit(UndoableEdit anEdit) {
 		//  Track Caret and Document information of this compound edit
 		AbstractDocument.DefaultDocumentEvent docEvt = (DefaultDocumentEvent) anEdit;
-
-		lastOffset = docEvt.getOffset();
-		lastLength = doc.getLength();
 
 		//  The compound edit is used to store incremental edits
 
@@ -136,7 +130,8 @@ public class CompoundUndoMan extends UndoManager {
 	}
 
 	/**
-	 * Start to combine the next operations together.
+	 * Start to combine the next operations together.  Only the next operation is combined.
+	 * The flag is then automatically reset.
 	 */
 	public void startCombine() {
 		startCombine = true;
