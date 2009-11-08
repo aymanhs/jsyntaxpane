@@ -41,7 +41,6 @@ public class CompoundUndoMan extends UndoManager {
 	private CompoundEdit compoundEdit;
 	private int lastOffset;
 	private int lastLength;
-
 	// This allows us to start combining operations.
 	// it will be reset after the first change.
 	private boolean startCombine = false;
