@@ -633,14 +633,24 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 		return abbrvs;
 	}
 
-	public void addAbbreviation(String abbr, String template) {
+	/**
+	 * Adds an abbrevisation to this kit's abbreviations.
+	 * @param abbr
+	 * @param template
+	 */
+	public static void addAbbreviation(String abbr, String template) {
 		if (abbrvs == null) {
 			abbrvs = new HashMap<String, String>();
 		}
 		abbrvs.put(abbr, template);
 	}
 
-	public String getAbbreviation(String abbr) {
+	/**
+	 * Get the template for the given abbreviation
+	 * @param abbr
+	 * @return
+	 */
+	public static String getAbbreviation(String abbr) {
 		return abbrvs == null ? null : abbrvs.get(abbr);
 	}
 
