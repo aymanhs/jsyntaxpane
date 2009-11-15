@@ -16,10 +16,8 @@ package jsyntaxpane.actions;
 import java.awt.event.ActionEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.TextAction;
 import jsyntaxpane.SyntaxDocument;
 import jsyntaxpane.Token;
-import jsyntaxpane.util.Configuration;
 
 public class JUnindentAction extends DefaultSyntaxAction {
 
