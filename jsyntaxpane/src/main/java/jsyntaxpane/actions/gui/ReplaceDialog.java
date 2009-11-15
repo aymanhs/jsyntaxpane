@@ -248,6 +248,7 @@ public class ReplaceDialog extends javax.swing.JDialog
 			updateFinder();
 			String replacement = (String) jCmbReplace.getSelectedItem();
 			ActionUtils.insertIntoCombo(jCmbFind, replacement);
+			jTglHighlight.setSelected(false);
 			dsd.doReplaceAll(textComponent, replacement);
 			textComponent.requestFocusInWindow();
 		} catch (PatternSyntaxException ex) {
@@ -266,9 +267,9 @@ public class ReplaceDialog extends javax.swing.JDialog
 }//GEN-LAST:event_jBtnPrevActionPerformed
 
 	private void jBtnReplaceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnReplaceActionPerformed
+		jTglHighlight.setSelected(false);
 		dsd.doReplace(textComponent, String.valueOf(jCmbReplace.getSelectedItem()));
 	}//GEN-LAST:event_jBtnReplaceActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBtnNext;
     private javax.swing.JButton jBtnPrev;

@@ -10,6 +10,9 @@ Version 0.9.5 - Java Reflection Completions additions
     * Hotkeys for actions are displayed in Popup Menus
     * Word Completion action can also do CamelCase matches
     * Smart Home Action (and Smart Home Extend Selection)
+    * Enhanced JavaScript support.  Issue 115
+    * Better Undo grouping
+    * Replace DIalog ENhancement.  Only for updatedable editors and added single replace.
 Version 0.9.4 - IntelliSense additions
     * Adding IntelliSense to Java with simple List of selectable keywords
     * Added Toggle Comment Actions using Control SLASH
