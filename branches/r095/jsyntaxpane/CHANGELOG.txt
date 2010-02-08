@@ -13,6 +13,8 @@ Version 0.9.5 - Java Reflection Completions additions
     * Enhanced JavaScript support.  Issue 115
     * Better Undo grouping
     * Replace DIalog ENhancement.  Only for updatedable editors and added single replace.
+    * Added append method to SyntaxDocument
+    * Fixed Issue 130 - Compound Undo on multiple lines.
 Version 0.9.4 - IntelliSense additions
     * Adding IntelliSense to Java with simple List of selectable keywords
     * Added Toggle Comment Actions using Control SLASH
