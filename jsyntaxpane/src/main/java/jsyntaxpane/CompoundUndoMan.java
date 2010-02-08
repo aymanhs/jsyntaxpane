@@ -13,13 +13,9 @@
  */
 package jsyntaxpane;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
-import javax.swing.text.BadLocationException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
@@ -41,15 +37,17 @@ import javax.swing.undo.UndoableEdit;
  */
 public class CompoundUndoMan extends UndoManager {
 
-	private SyntaxDocument doc;
 	private CompoundEdit compoundEdit;
 	// This allows us to start combining operations.
 	// it will be reset after the first change.
 	private boolean startCombine = false;
+	// This holds the start of the last line edited, if edits are on multiple
+	// lines, then they will not be combined.
+	private int	lastLine = -1;
 
 	public CompoundUndoMan(SyntaxDocument doc) {
-		this.doc = doc;
 		doc.addUndoableEditListener(this);
+		lastLine = doc.getStartPosition().getOffset();
 	}
 
 	/**
@@ -68,16 +66,19 @@ public class CompoundUndoMan extends UndoManager {
 			return;
 		}
 
+		int editLine = ((SyntaxDocument)docEvt.getDocument()).getLineNumberAt(docEvt.getOffset());
+
 		//  Check for an incremental edit or backspace.
 		//  The Change in Caret position and Document length should both be
 		//  either 1 or -1.
-		if (startCombine || Math.abs(docEvt.getLength()) == 1) {
+		if ((startCombine || Math.abs(docEvt.getLength()) == 1) && editLine == lastLine) {
 			compoundEdit.addEdit(e.getEdit());
 			startCombine = false;
 			return;
 		}
 
 		//  Not incremental edit, end previous edit and start a new one
+		lastLine = editLine;
 
 		compoundEdit.end();
 		compoundEdit = startCompoundEdit(e.getEdit());

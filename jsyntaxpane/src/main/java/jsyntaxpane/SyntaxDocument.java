@@ -576,6 +576,20 @@ public class SyntaxDocument extends PlainDocument {
 		insertString(offset, text, attrs);
 	}
 
+	/**
+	 * Append the given string to the text of this document.
+	 * @param str
+	 * @return this document
+	 */
+	public SyntaxDocument append(String str) {
+		try {
+			insertString(getLength(), str, null);
+		} catch (BadLocationException ex) {
+			log.log(Level.WARNING, "Error appending str", ex);
+		}
+		return this;
+	}
+
 // our logger instance...
 	private static final Logger log = Logger.getLogger(SyntaxDocument.class.getName());
 }
