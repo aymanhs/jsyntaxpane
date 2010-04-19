@@ -46,7 +46,10 @@ abstract public class DefaultSyntaxAction extends TextAction implements SyntaxAc
 				putValue(m.group1, m.value);
 			}
 		}
-		putValue(NAME, actionName);
+		// if we did not put a name, use the action name
+		if (getValue(NAME) == null) {
+			putValue(NAME, actionName);
+		}
 		// if we did not put an icon, try and find one using our name
 		if (getValue(SMALL_ICON) == null) {
 			setSmallIcon(actionName + ".png");

@@ -76,7 +76,7 @@ public class IndentAction extends DefaultSyntaxAction {
 			int start = target.getSelectionStart();
 			StringBuilder sb = new StringBuilder();
 			for (String line : lines) {
-				sb.append('\t');
+				sb.append(ActionUtils.getTab(target));
 				sb.append(line);
 				sb.append('\n');
 			}
@@ -85,7 +85,6 @@ public class IndentAction extends DefaultSyntaxAction {
 		}
 	}
 	private Pattern wordsPattern = Pattern.compile("\\w+");
-//    private Map<String, String> abbrvs;
 
 	public void setWordRegex(String regex) {
 		wordsPattern = Pattern.compile(regex);
