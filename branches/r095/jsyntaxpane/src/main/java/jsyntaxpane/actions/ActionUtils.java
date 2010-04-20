@@ -232,6 +232,10 @@ public class ActionUtils {
 	 */
 	public static int getColumnNumber(JTextComponent editor, int pos)
 		throws BadLocationException {
+		// speedup if the pos is 0
+		if(pos == 0) {
+			return 0;
+		}
 		Rectangle r = editor.modelToView(pos);
 		int start = editor.viewToModel(new Point(0, r.y));
 		int column = pos - start;
