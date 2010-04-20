@@ -56,14 +56,18 @@ public class CaretMonitor implements CaretListener {
         this.label = label;
         this.text = text;
         text.addCaretListener(this);
+		updateLabel(text.getCaretPosition());
     }
 
     @Override
     public void caretUpdate(CaretEvent evt) {
+		updateLabel(evt.getDot());
+	}
+
+	protected void updateLabel(int pos) {
         if (text.getDocument() instanceof SyntaxDocument) {
             try {
                 if (text.getSelectionStart() == text.getSelectionEnd()) {
-                    int pos = evt.getDot();
                     String loc = String.format(noSelectionFormat,
                             ActionUtils.getLineNumber(text, pos) + 1,
                             ActionUtils.getColumnNumber(text, pos) + 1,
