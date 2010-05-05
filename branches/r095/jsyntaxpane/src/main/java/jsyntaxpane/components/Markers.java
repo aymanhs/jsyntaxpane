@@ -126,6 +126,10 @@ public class Markers {
             return;
         }
         Matcher matcher = sDoc.getMatcher(pattern);
+		// we may not have any matcher (due to undo or something, so don't do anything.
+		if(matcher==null) {
+			return;
+		}
         while(matcher.find()) {
             markText(pane, matcher.start(), matcher.end(), marker);
         }
