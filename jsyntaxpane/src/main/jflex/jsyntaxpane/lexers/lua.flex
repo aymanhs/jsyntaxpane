@@ -42,42 +42,45 @@ import jsyntaxpane.TokenType;
     public int yychar() {
         return yychar;
     }
+
+	TokenType longType;
+    int longLen;
 %}
 
 /* main character classes */
 LineTerminator = \r|\n|\r\n
-InputCharacter = [^\r\n]
 
 WhiteSpace = {LineTerminator} | [ \t\f]+
 
-/* comments */
-Comment = {TraditionalComment} | {EndOfLineComment} 
-
-TraditionalComment = "--[[" [^\]] ~"]]" | "-[[" "]"+ "]"
-EndOfLineComment = "--" {InputCharacter}* {LineTerminator}?
+LongStart = \[=*\[
+LongEnd = \]=*\]
 
 /* identifiers */
 Identifier = [:jletter:][:jletterdigit:]*
 
 /* integer literals */
-DecIntegerLiteral = 0 | [1-9][0-9]*
-
-HexIntegerLiteral = 0 [x] 0* {HexDigit} {1,8}
+DecIntegerLiteral = [0-9]+
 HexDigit          = [0-9a-fA-F]
 
-/* floating point literals */        
-FloatLiteral  = ({FLit1}|{FLit2}|{FLit3}) {Exponent}? [fF]
-DoubleLiteral = ({FLit1}|{FLit2}|{FLit3}) {Exponent}?
+HexIntegerLiteral = 0x{HexDigit}+
 
-FLit1    = [0-9]+ \. [0-9]* 
-FLit2    = \. [0-9]+ 
-FLit3    = [0-9]+ 
+/* floating point literals */        
+DoubleLiteral = ({FLit1}|{FLit2}) {Exponent}?
+
+FLit1    = [0-9]+(\.[0-9]*)?
+FLit2    = \.[0-9]+ 
 Exponent = [eE] [+-]? [0-9]+
 
 /* string and character literals */
-StringCharacter = [^\r\n\"\\]
+StringCharacter1 = [^\r\n\"\\]
+StringCharacter2 = [^\r\n\'\\]
 
-%state STRING
+%state STRING1
+%state STRING2
+%state LONGSTRING
+
+%state COMMENT
+%state LINECOMMENT
 
 %%
 
@@ -140,12 +143,32 @@ StringCharacter = [^\r\n\"\\]
   "."                            | 
   ".."                           | 
   "..."                          { return token(TokenType.OPERATOR); } 
-  
+
+  {LongStart}				     {
+                                   longType = TokenType.STRING;
+                                   yybegin(LONGSTRING);
+                                   tokenStart = yychar;
+                                   tokenLength = yylength();
+                                   longLen = tokenLength;
+                                 }
+
+  "--"							 {
+                                   yybegin(COMMENT);
+                                   tokenStart = yychar;
+                                   tokenLength = yylength();
+                                 }
+
+
   /* string literal */
   \"                             {  
-                                    yybegin(STRING); 
+                                    yybegin(STRING1);
                                     tokenStart = yychar; 
                                     tokenLength = 1; 
+                                 }
+  \'                             {
+                                    yybegin(STRING2);
+                                    tokenStart = yychar;
+                                    tokenLength = 1;
                                  }
 
   /* numeric literals */
@@ -154,12 +177,8 @@ StringCharacter = [^\r\n\"\\]
   
   {HexIntegerLiteral}            |
  
-  {FloatLiteral}                 |
   {DoubleLiteral}		         { return token(TokenType.NUMBER); }
   
-  /* comments */
-  {Comment}                      { return token(TokenType.COMMENT); }
-
   /* whitespace */
   {WhiteSpace}                   { }
 
@@ -167,14 +186,79 @@ StringCharacter = [^\r\n\"\\]
   {Identifier}                   { return token(TokenType.IDENTIFIER); }
 }
 
-<STRING> {
+<LONGSTRING> {
+	{LongEnd}                    {
+                                     if (longLen == yylength()) {
+										tokenLength += yylength();
+	                                    yybegin(YYINITIAL);
+                                        return token(longType, tokenStart, tokenLength);
+									 } else {
+                                        tokenLength++;
+									    yypushback(yylength() - 1);
+                                     }
+
+	                             }
+    {LineTerminator}			 { tokenLength += yylength(); }	                             
+    .                            { tokenLength++; }
+}
+
+<COMMENT> {
+	{LongStart}			         {
+	                               longType = TokenType.COMMENT;
+                                   yybegin(LONGSTRING);
+                                   tokenLength += yylength();
+                                   longLen = yylength();
+								}
+
+	{LineTerminator}			{
+									yybegin(YYINITIAL);
+                                    return token(TokenType.COMMENT, tokenStart, tokenLength);
+								}
+
+	.							{
+								   yybegin(LINECOMMENT);
+								   tokenLength += yylength();
+								}
+	<<EOF>>	             		{
+									yybegin(YYINITIAL);
+                                    return token(TokenType.COMMENT, tokenStart, tokenLength);
+								}
+
+}
+
+<LINECOMMENT> {
+	{LineTerminator}			{
+									yybegin(YYINITIAL);
+									tokenLength += yylength();
+                                    return token(TokenType.COMMENT, tokenStart, tokenLength);
+								}
+    {LineTerminator}			 { tokenLength += yylength(); }
+    .                            { tokenLength++; }
+}
+
+<STRING1> {
   \"                             { 
                                      yybegin(YYINITIAL); 
                                      // length also includes the trailing quote
                                      return token(TokenType.STRING, tokenStart, tokenLength + 1);
                                  }
   
-  {StringCharacter}+             { tokenLength += yylength(); }
+  {StringCharacter1}+             { tokenLength += yylength(); }
+
+  /* escape sequences */
+
+  \\.                            { tokenLength += 2; }
+  {LineTerminator}               { yybegin(YYINITIAL);  }
+}
+
+<STRING2> {
+  \'                             {
+                                     yybegin(YYINITIAL);
+                                     // length also includes the trailing quote
+                                     return token(TokenType.STRING, tokenStart, tokenLength + 1);
+                                 }
+
+  {StringCharacter2}+             { tokenLength += yylength(); }
 
   /* escape sequences */
 
