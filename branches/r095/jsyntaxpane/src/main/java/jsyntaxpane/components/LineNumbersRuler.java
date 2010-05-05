@@ -16,216 +16,311 @@ package jsyntaxpane.components;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.logging.Logger;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
+import jsyntaxpane.SyntaxView;
 import jsyntaxpane.actions.ActionUtils;
 import jsyntaxpane.actions.gui.GotoLineDialog;
 import jsyntaxpane.util.Configuration;
 
 /**
- * LineRuleis used to number the lines in the EdiorPane
+ * This class will display line numbers for a related text component. The text
+ * component must use the same line height for each line. 
+ *
+ * This class was designed to be used as a component added to the row header
+ * of a JScrollPane.
+ *
+ * Original code from http://tips4java.wordpress.com/2009/05/23/text-component-line-number/
+ *
+ * @author Rob Camick
+ *
+ * Revised for jsyntaxpane
+ * 
  * @author Ayman Al-Sairafi
  */
-public class LineNumbersRuler extends JComponent
-        implements SyntaxComponent, PropertyChangeListener, DocumentListener {
+public class LineNumbersRuler extends JPanel
+	implements CaretListener, DocumentListener, PropertyChangeListener, SyntaxComponent {
 
-    public static final String PROPERTY_BACKGROUND = "LineNumbers.Background";
-    public static final String PROPERTY_FOREGROUND = "LineNumbers.Foreground";
-    public static final String PROPERTY_LEFT_MARGIN = "LineNumbers.LeftMargin";
-    public static final String PROPERTY_RIGHT_MARGIN = "LineNumbers.RightMargin";
-    public static final String PROPERTY_Y_OFFSET = "LineNumbers.YOFFset";
-    public static final int DEFAULT_R_MARGIN = 5;
-    public static final int DEFAULT_L_MARGIN = 5;
-    public static final int DEFAULT_Y_OFFSET = -2;
-    private JEditorPane pane;
-    private String format;
-    private int lineCount = -1;
-    private int r_margin = DEFAULT_R_MARGIN;
-    private int l_margin = DEFAULT_L_MARGIN;
-    private int y_offset = DEFAULT_Y_OFFSET;
-    private int charHeight;
-    private int charWidth;
-    private MouseListener mouseListener = null;
+	public static final String PROPERTY_BACKGROUND = "LineNumbers.Background";
+	public static final String PROPERTY_FOREGROUND = "LineNumbers.Foreground";
+	public static final String PROPERTY_CURRENT_BACK = "LineNumbers.CurrentBack";
+	public static final String PROPERTY_LEFT_MARGIN = "LineNumbers.LeftMargin";
+	public static final String PROPERTY_RIGHT_MARGIN = "LineNumbers.RightMargin";
+	public static final String PROPERTY_Y_OFFSET = "LineNumbers.YOFFset";
+	public static final int DEFAULT_R_MARGIN = 5;
+	public static final int DEFAULT_L_MARGIN = 5;
+	private Status status;
+	private final static int HEIGHT = Integer.MAX_VALUE - 1000000;
+	//  Text component this TextTextLineNumber component is in sync with
+	private JEditorPane editor;
+	private int minimumDisplayDigits = 3;
+	//  Keep history information to reduce the number of times the component
+	//  needs to be repainted
+	private int lastDigits;
+	private int lastHeight;
+	private int lastLine;
+	private MouseListener mouseListener = null;
+	// The formatting to use for displaying numbers.  Use in String.format(numbersFormat, line)
+	private String numbersFormat = "%3d";
 
-    private Status status;
+	private Color currentLineColor;
 
-    public LineNumbersRuler() {
-        super();
-    }
+	/**
+	 * Get the JscrollPane that contains this EditorPane, or null if no
+	 * JScrollPane is the parent of this editor
+	 * @param editorPane
+	 * @return
+	 */
+	public JScrollPane getScrollPane(JTextComponent editorPane) {
+		Container p = editorPane.getParent();
+		while (p != null) {
+			if (p instanceof JScrollPane) {
+				return (JScrollPane) p;
+			}
+			p = p.getParent();
+		}
+		return null;
+	}
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        g.setFont(pane.getFont());
-        Rectangle clip = g.getClipBounds();
-        g.setColor(getBackground());
-        g.fillRect(clip.x, clip.y, clip.width, clip.height);
-        g.setColor(getForeground());
-        int lh = charHeight;
-        int end = clip.y + clip.height + lh;
-        int lineNum = clip.y / lh + 1;
-        // round the start to a multiple of lh, and shift by 2 pixels to align
-        // properly to the text.
-        for (int y = (clip.y / lh) * lh + lh + y_offset; y <= end; y += lh) {
-            String text = String.format(format, lineNum);
-            g.drawString(text, l_margin, y);
-            lineNum++;
-            if (lineNum > lineCount) {
-                break;
-            }
-        }
-    }
+	@Override
+	public void config(Configuration config) {
+		int right = config.getInteger(PROPERTY_RIGHT_MARGIN, DEFAULT_R_MARGIN);
+		int left = config.getInteger(PROPERTY_LEFT_MARGIN, DEFAULT_L_MARGIN);
+		Color foreground = config.getColor(PROPERTY_FOREGROUND, Color.BLACK);
+		setForeground(foreground);
+		Color back = config.getColor(PROPERTY_BACKGROUND, Color.WHITE);
+		setBackground(back);
+		setBorder(BorderFactory.createEmptyBorder(0, left, 0, right));
+		currentLineColor = config.getColor(PROPERTY_CURRENT_BACK, back);
+	}
 
-    /**
-     * Update the size of the line numbers based on the length of the document
-     */
-    private void updateSize() {
-        int newLineCount = ActionUtils.getLineCount(pane);
-        if (newLineCount == lineCount) {
-            return;
-        }
-        lineCount = newLineCount;
-        int h = lineCount * charHeight + pane.getHeight();
-        int d = (int) Math.log10(lineCount) + 1;
-        if (d < 1) {
-            d = 1;
-        }
-        int w = d * charWidth + r_margin + l_margin;
-        format = "%" + d + "d";
-        setPreferredSize(new Dimension(w, h));
-        getParent().doLayout();
-    }
+	@Override
+	public void install(final JEditorPane editor) {
+		this.editor = editor;
 
-    /**
-     * Get the JscrollPane that contains this EditorPane, or null if no
-     * JScrollPane is the parent of this editor
-     * @param editorPane
-     * @return
-     */
-    public JScrollPane getScrollPane(JTextComponent editorPane) {
-        Container p = editorPane.getParent();
-        while (p != null) {
-            if (p instanceof JScrollPane) {
-                return (JScrollPane) p;
-            }
-            p = p.getParent();
-        }
-        return null;
-    }
+		setFont(editor.getFont());
 
-    @Override
-    public void config(Configuration config) {
-        r_margin = config.getInteger(PROPERTY_RIGHT_MARGIN, DEFAULT_R_MARGIN);
-        l_margin = config.getInteger(PROPERTY_LEFT_MARGIN, DEFAULT_L_MARGIN);
-        y_offset = config.getInteger(PROPERTY_Y_OFFSET, DEFAULT_Y_OFFSET);
-        Color foreground = config.getColor(PROPERTY_FOREGROUND, Color.BLACK);
-        setForeground(foreground);
-        Color back = config.getColor(PROPERTY_BACKGROUND, Color.WHITE);
-        setBackground(back);
-    }
+		// setMinimumDisplayDigits(3);
 
-    @Override
-    public void install(JEditorPane editor) {
-        this.pane = editor;
-        charHeight = pane.getFontMetrics(pane.getFont()).getHeight();
-        charWidth = pane.getFontMetrics(pane.getFont()).charWidth('0');
-        editor.addPropertyChangeListener(this);
-        JScrollPane sp = getScrollPane(pane);
-        if (sp == null) {
-            Logger.getLogger(this.getClass().getName()).warning(
-                    "JEditorPane is not enclosed in JScrollPane, " +
-                    "no LineNumbers will be displayed");
-        } else {
-            sp.setRowHeaderView(this);
-            this.pane.getDocument().addDocumentListener(this);
-            updateSize();
-            mouseListener = new MouseAdapter() {
+		editor.getDocument().addDocumentListener(this);
+		editor.addCaretListener(this);
+		editor.addPropertyChangeListener(this);
+		JScrollPane sp = getScrollPane(editor);
+		sp.setRowHeaderView(this);
+		mouseListener = new MouseAdapter() {
 
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    GotoLineDialog.showForEditor(pane);
-                }
-            };
-            addMouseListener(mouseListener);
-        }
-        status = Status.INSTALLING;
-    }
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				GotoLineDialog.showForEditor(editor);
+			}
+		};
+		addMouseListener(mouseListener);
+		status = Status.INSTALLING;
+	}
 
-    @Override
-    public void deinstall(JEditorPane editor) {
-        removeMouseListener(mouseListener);
-        status = Status.DEINSTALLING;
-        JScrollPane sp = getScrollPane(editor);
-        if (sp != null) {
-            editor.getDocument().removeDocumentListener(this);
-            sp.setRowHeaderView(null);
-        }
-    }
+	@Override
+	public void deinstall(JEditorPane editor) {
+		removeMouseListener(mouseListener);
+		status = Status.DEINSTALLING;
+		this.editor.getDocument().removeDocumentListener(this);
+		editor.removeCaretListener(this);
+		editor.removePropertyChangeListener(this);
+		JScrollPane sp = getScrollPane(editor);
+		if (sp != null) {
+			editor.getDocument().removeDocumentListener(this);
+			sp.setRowHeaderView(null);
+		}
+	}
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("document")) {
-            if (evt.getOldValue() instanceof SyntaxDocument) {
-                SyntaxDocument syntaxDocument = (SyntaxDocument) evt.getOldValue();
-                syntaxDocument.removeDocumentListener(this);
-            }
-            if (evt.getNewValue() instanceof SyntaxDocument && status.equals(Status.INSTALLING)) {
-                SyntaxDocument syntaxDocument = (SyntaxDocument) evt.getNewValue();
-                syntaxDocument.addDocumentListener(this);
-                updateSize();
-            }
-        } else if (evt.getPropertyName().equals("font")) {
-            charHeight = pane.getFontMetrics(pane.getFont()).getHeight();
-            charWidth = pane.getFontMetrics(pane.getFont()).charWidth('0');
-        }
-    }
+	/**
+	 *  Gets the minimum display digits
+	 *
+	 *  @return the minimum display digits
+	 */
+	public int getMinimumDisplayDigits() {
+		return minimumDisplayDigits;
+	}
 
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-        updateSize();
-    }
+	/**
+	 *  Specify the mimimum number of digits used to calculate the preferred
+	 *  width of the component. Default is 3.
+	 *
+	 *  @param minimumDisplayDigits  the number digits used in the preferred
+	 *                               width calculation
+	 */
+	public void setMinimumDisplayDigits(int minimumDisplayDigits) {
+		this.minimumDisplayDigits = minimumDisplayDigits;
+		setPreferredWidth();
+	}
 
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        updateSize();
-    }
+	/**
+	 *  Calculate the width needed to display the maximum line number
+	 */
+	private void setPreferredWidth() {
+		Element root = editor.getDocument().getDefaultRootElement();
+		int lines = ActionUtils.getLineCount(editor);
+		int digits = Math.min(String.valueOf(lines).length(), minimumDisplayDigits);
 
-    @Override
-    public void changedUpdate(DocumentEvent e) {
-        updateSize();
-    }
+		//  Update sizes when number of digits in the line number changes
 
-    public int getLeftMargin() {
-        return l_margin;
-    }
+		if (lastDigits != digits) {
+			lastDigits = digits;
+			numbersFormat = "%" + digits + "d";
+			FontMetrics fontMetrics = getFontMetrics(getFont());
+			int width = fontMetrics.charWidth('0') * digits;
+			Insets insets = getInsets();
+			int preferredWidth = insets.left + insets.right + width;
 
-    public void setLeftMargin(int l_margin) {
-        this.l_margin = l_margin;
-    }
+			Dimension d = getPreferredSize();
+			d.setSize(preferredWidth, HEIGHT);
+			setPreferredSize(d);
+			setSize(d);
 
-    public int getRightMargin() {
-        return r_margin;
-    }
+		}
+	}
 
-    public void setRightMargin(int r_margin) {
-        this.r_margin = r_margin;
-    }
+	/**
+	 *  Draw the line numbers
+	 */
+	@Override
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 
-    public int getYOffset() {
-        return y_offset;
-    }
+		FontMetrics fontMetrics = editor.getFontMetrics(editor.getFont());
+		Insets insets = getInsets();
+		int currentLine = -1;
+		try {
+			// get current line, and add one as we start from 1 for the display
+			currentLine = ActionUtils.getLineNumber(editor, editor.getCaretPosition()) + 1;
+		} catch (BadLocationException ex) {
+			// this wont happen, even if it does, we can ignore it and we will not have
+			// a current line to worry about...
+		}
 
-    public void setYOffset(int y_offset) {
-        this.y_offset = y_offset;
-    }
+		int lh = fontMetrics.getHeight();
+		int maxLines = ActionUtils.getLineCount(editor);
+		SyntaxView.setRenderingHits((Graphics2D) g);
+
+		for (int line = 1; line <= maxLines; line++) {
+			String lineNumber = String.format(numbersFormat, line);
+			int y = line * lh;
+			if (line == currentLine) {
+				g.setColor(currentLineColor);
+				g.fillRect(0, y - lh + fontMetrics.getDescent() - 1, getWidth(), lh);
+				g.setColor(getForeground());
+				g.drawString(lineNumber, insets.left, y);
+			} else {
+				g.drawString(lineNumber, insets.left, y);
+			}
+		}
+	}
+
+//
+//  Implement CaretListener interface
+//
+	@Override
+	public void caretUpdate(CaretEvent e) {
+		//  Get the line the caret is positioned on
+
+		int caretPosition = editor.getCaretPosition();
+		Element root = editor.getDocument().getDefaultRootElement();
+		int currentLine = root.getElementIndex(caretPosition);
+
+		//  Need to repaint so the correct line number can be highlighted
+
+		if (lastLine != currentLine) {
+			repaint();
+			lastLine = currentLine;
+		}
+	}
+
+//
+//  Implement DocumentListener interface
+//
+	@Override
+	public void changedUpdate(DocumentEvent e) {
+		documentChanged();
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		documentChanged();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		documentChanged();
+	}
+
+	/*
+	 *  A document change may affect the number of displayed lines of text.
+	 *  Therefore the lines numbers will also change.
+	 */
+	private void documentChanged() {
+		//  Preferred size of the component has not been updated at the time
+		//  the DocumentEvent is fired
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				int preferredHeight = editor.getPreferredSize().height;
+
+				//  Document change has caused a change in the number of lines.
+				//  Repaint to reflect the new line numbers
+
+				if (lastHeight != preferredHeight) {
+					setPreferredWidth();
+					repaint();
+					lastHeight = preferredHeight;
+				}
+			}
+		});
+	}
+
+	/**
+	 * Implement PropertyChangeListener interface
+	 */
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if (evt.getPropertyName().equals("document")) {
+			if (evt.getOldValue() instanceof SyntaxDocument) {
+				SyntaxDocument syntaxDocument = (SyntaxDocument) evt.getOldValue();
+				syntaxDocument.removeDocumentListener(this);
+			}
+			if (evt.getNewValue() instanceof SyntaxDocument && status.equals(Status.INSTALLING)) {
+				SyntaxDocument syntaxDocument = (SyntaxDocument) evt.getNewValue();
+				syntaxDocument.addDocumentListener(this);
+				setPreferredWidth();
+				repaint();
+			}
+		} else if (evt.getNewValue() instanceof Font) {
+			setPreferredWidth();
+			repaint();
+		}
+	}
 }
