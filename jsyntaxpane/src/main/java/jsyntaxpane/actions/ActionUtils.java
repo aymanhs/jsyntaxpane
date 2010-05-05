@@ -284,9 +284,12 @@ public class ActionUtils {
 	 * item.  If the item already exists, it is removed, so there are no
 	 * duplicates.
 	 * @param combo
-	 * @param item
+	 * @param item the item to insert. if it's null, then nothing is inserted
 	 */
 	public static void insertIntoCombo(JComboBox combo, Object item) {
+		if(item == null) {
+			return;
+		}
 		MutableComboBoxModel model = (MutableComboBoxModel) combo.getModel();
 		if (model.getSize() == 0) {
 			model.insertElementAt(item, 0);

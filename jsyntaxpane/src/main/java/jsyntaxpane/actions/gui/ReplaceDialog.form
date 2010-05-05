@@ -37,17 +37,17 @@
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jChkWrap" min="-2" pref="105" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="jCmbFind" alignment="0" pref="298" max="32767" attributes="0"/>
-                  <Component id="jCmbReplace" alignment="1" pref="298" max="32767" attributes="1"/>
+                  <Component id="jCmbFind" alignment="0" pref="289" max="32767" attributes="0"/>
+                  <Component id="jCmbReplace" alignment="1" pref="289" max="32767" attributes="1"/>
                   <Component id="jChkIgnoreCase" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jBtnReplace" alignment="1" pref="98" max="32767" attributes="0"/>
-                  <Component id="jBtnNext" alignment="0" pref="98" max="32767" attributes="1"/>
-                  <Component id="jBtnPrev" alignment="0" pref="98" max="32767" attributes="1"/>
-                  <Component id="jTglHighlight" alignment="1" pref="98" max="32767" attributes="0"/>
-                  <Component id="jBtnReplaceAll" alignment="1" pref="98" max="32767" attributes="1"/>
+                  <Component id="jBtnReplace" alignment="1" pref="107" max="32767" attributes="0"/>
+                  <Component id="jBtnNext" alignment="0" pref="107" max="32767" attributes="1"/>
+                  <Component id="jBtnPrev" alignment="0" pref="107" max="32767" attributes="1"/>
+                  <Component id="jTglHighlight" alignment="1" pref="107" max="32767" attributes="0"/>
+                  <Component id="jBtnReplaceAll" alignment="1" max="32767" attributes="1"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -98,6 +98,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="jBtnNext">
       <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/META-INF/images/small-icons/go-next.png"/>
+        </Property>
         <Property name="mnemonic" type="int" value="78"/>
         <Property name="text" type="java.lang.String" value="Next"/>
       </Properties>
@@ -107,6 +110,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="jBtnPrev">
       <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/META-INF/images/small-icons/go-previous.png"/>
+        </Property>
         <Property name="mnemonic" type="int" value="78"/>
         <Property name="text" type="java.lang.String" value="Previous"/>
       </Properties>
@@ -116,6 +122,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="jBtnReplaceAll">
       <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/META-INF/images/small-icons/edit-find-replace-all.png"/>
+        </Property>
         <Property name="mnemonic" type="int" value="72"/>
         <Property name="text" type="java.lang.String" value="Replace All"/>
       </Properties>
@@ -153,6 +162,9 @@
     </Component>
     <Component class="javax.swing.JToggleButton" name="jTglHighlight">
       <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/META-INF/images/small-icons/highlight.png"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Highlight"/>
       </Properties>
       <Events>
@@ -177,6 +189,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="jBtnReplace">
       <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/META-INF/images/small-icons/edit-find-replace.png"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Replace"/>
       </Properties>
       <Events>
