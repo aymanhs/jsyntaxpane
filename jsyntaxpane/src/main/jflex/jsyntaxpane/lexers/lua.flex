@@ -43,6 +43,12 @@ import jsyntaxpane.TokenType;
         return yychar;
     }
 
+    private static final byte PARAN     = 1;
+    private static final byte BRACKET   = 2;
+    private static final byte CURLY     = 3;
+    private static final byte ENDBLOCK  = 4;
+    private static final byte REPEATBLOCK = 5;
+
 	TokenType longType;
     int longLen;
 %}
@@ -89,23 +95,13 @@ StringCharacter2 = [^\r\n\'\\]
   /* keywords */
   "and"                        	 |
   "break"                        |
-  "do"      	                 |
-  "else"	                     |
-  "do"                           |
-  "else"                         |
-  "elseif"                       |
-  "end"                          |
   "for"                       	 |
-  "function"                     |
   "if"                         	 |
   "in"                           |
   "local"                        |
   "not"                        	 |
   "or"                         	 |
-  "repeat"                       |
   "return"                       |
-  "then"                     	 |
-  "until"                        |
   "while"                        |
   
   /* boolean literals */
@@ -115,6 +111,18 @@ StringCharacter2 = [^\r\n\'\\]
   /* nil literal */
   "nil"                          { return token(TokenType.KEYWORD); }
 
+  "repeat"                       { return token(TokenType.KEYWORD, REPEATBLOCK); }
+  "until"                        { return token(TokenType.KEYWORD, -REPEATBLOCK); }
+  
+  "function"                     { return token(TokenType.KEYWORD, ENDBLOCK); }
+  "then"                     	 { return token(TokenType.KEYWORD, ENDBLOCK); }
+  "do"                           { return token(TokenType.KEYWORD, ENDBLOCK); }
+
+  "else"                         { return token(TokenType.KEYWORD); }
+  "elseif"                       { return token(TokenType.KEYWORD); }
+  
+  "end"                          { return token(TokenType.KEYWORD, -ENDBLOCK); }
+  
   /* operators */
 
   "+"                            |
@@ -131,18 +139,20 @@ StringCharacter2 = [^\r\n\'\\]
   "<"                            |
   ">"                            | 
   "="                            | 
-  "("                            | 
-  ")"                            | 
-  "{"                            | 
-  "}"                            | 
-  "["                            | 
-  "]"                            | 
   ";"                            | 
   ":"                            | 
   ","                            | 
   "."                            | 
   ".."                           | 
   "..."                          { return token(TokenType.OPERATOR); } 
+  
+  "("                            { return token(TokenType.OPERATOR,  PARAN); }
+  ")"                            { return token(TokenType.OPERATOR, -PARAN); }
+  "{"                            { return token(TokenType.OPERATOR,  CURLY); }
+  "}"                            { return token(TokenType.OPERATOR, -CURLY); }
+  "["                            { return token(TokenType.OPERATOR,  BRACKET); }
+  "]"                            { return token(TokenType.OPERATOR, -BRACKET); }
+  
 
   {LongStart}				     {
                                    longType = TokenType.STRING;
@@ -200,6 +210,10 @@ StringCharacter2 = [^\r\n\'\\]
 	                             }
     {LineTerminator}			 { tokenLength += yylength(); }	                             
     .                            { tokenLength++; }
+	<<EOF>>	             		{
+									yybegin(YYINITIAL);
+                                    return token(longType, tokenStart, tokenLength);
+								}
 }
 
 <COMMENT> {
@@ -234,6 +248,10 @@ StringCharacter2 = [^\r\n\'\\]
 								}
     {LineTerminator}			 { tokenLength += yylength(); }
     .                            { tokenLength++; }
+	<<EOF>>	             		{
+									yybegin(YYINITIAL);
+                                    return token(TokenType.COMMENT, tokenStart, tokenLength);
+								}
 }
 
 <STRING1> {
@@ -249,6 +267,10 @@ StringCharacter2 = [^\r\n\'\\]
 
   \\.                            { tokenLength += 2; }
   {LineTerminator}               { yybegin(YYINITIAL);  }
+	<<EOF>>	             		{
+									yybegin(YYINITIAL);
+                                    return token(TokenType.STRING, tokenStart, tokenLength);
+								}
 }
 
 <STRING2> {
@@ -264,6 +286,10 @@ StringCharacter2 = [^\r\n\'\\]
 
   \\.                            { tokenLength += 2; }
   {LineTerminator}               { yybegin(YYINITIAL);  }
+	<<EOF>>	             		{
+									yybegin(YYINITIAL);
+                                    return token(TokenType.STRING, tokenStart, tokenLength);
+								}
 }
 
 /* error fallback */
