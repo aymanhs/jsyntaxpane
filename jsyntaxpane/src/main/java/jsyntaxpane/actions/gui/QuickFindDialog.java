@@ -122,12 +122,15 @@ public class QuickFindDialog extends javax.swing.JDialog
         jToolBar1 = new javax.swing.JToolBar();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         jLabel1 = new javax.swing.JLabel();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
         jTxtFind = new javax.swing.JTextField();
+        jSeparator3 = new javax.swing.JToolBar.Separator();
         jBtnPrev = new javax.swing.JButton();
         jBtnNext = new javax.swing.JButton();
         jChkIgnoreCase = new javax.swing.JCheckBox();
         jChkRegExp = new javax.swing.JCheckBox();
         jChkWrap = new javax.swing.JCheckBox();
+        jSeparator4 = new javax.swing.JToolBar.Separator();
         jLblStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -144,11 +147,14 @@ public class QuickFindDialog extends javax.swing.JDialog
         jLabel1.setLabelFor(jTxtFind);
         jLabel1.setText("Quick Find");
         jToolBar1.add(jLabel1);
+        jToolBar1.add(jSeparator2);
 
         jTxtFind.setColumns(30);
-        jTxtFind.setMaximumSize(new java.awt.Dimension(200, 20));
-        jTxtFind.setPreferredSize(new java.awt.Dimension(150, 20));
+        jTxtFind.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jTxtFind.setMaximumSize(new java.awt.Dimension(200, 24));
+        jTxtFind.setMinimumSize(new java.awt.Dimension(60, 24));
         jToolBar1.add(jTxtFind);
+        jToolBar1.add(jSeparator3);
 
         jBtnPrev.setIcon(new javax.swing.ImageIcon(getClass().getResource("/META-INF/images/small-icons/go-up.png"))); // NOI18N
         jBtnPrev.setFocusable(false);
@@ -199,7 +205,9 @@ public class QuickFindDialog extends javax.swing.JDialog
         jToolBar1.add(jChkWrap);
         jChkWrap.addActionListener(this);
 
-        jLblStatus.setFont(jLblStatus.getFont().deriveFont(jLblStatus.getFont().getSize()-2f));
+        jToolBar1.add(jSeparator4);
+
+        jLblStatus.setFont(jLblStatus.getFont().deriveFont(jLblStatus.getFont().getStyle() | java.awt.Font.BOLD, jLblStatus.getFont().getSize()-2));
         jLblStatus.setForeground(java.awt.Color.red);
         jToolBar1.add(jLblStatus);
 
@@ -242,6 +250,9 @@ public class QuickFindDialog extends javax.swing.JDialog
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLblStatus;
     private javax.swing.JToolBar.Separator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator2;
+    private javax.swing.JToolBar.Separator jSeparator3;
+    private javax.swing.JToolBar.Separator jSeparator4;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JTextField jTxtFind;
     // End of variables declaration//GEN-END:variables
