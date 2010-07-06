@@ -90,7 +90,7 @@ public class CaretMonitor implements CaretListener {
                 label.setText("Ex: " + ex.getMessage());
             }
         } else {
-            label.setText("Position");
+            label.setText(String.format(noSelectionFormat, 1, 1, 1));
         }
     }
 
