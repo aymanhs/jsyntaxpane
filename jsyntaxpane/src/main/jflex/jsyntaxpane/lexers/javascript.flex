@@ -86,9 +86,10 @@ FLit3    = [0-9]+
 Exponent = [eE] [+-]? [0-9]+
 
 /* string and character literals */
-StringCharacter = [^\r\n\"\\]
+StringCharacter  = [^\r\n\"\\]
+SStringCharacter = [^\r\n\'\\]
 
-%state STRING
+%state STRING SSTRING
 
 %%
 
@@ -125,9 +126,27 @@ StringCharacter = [^\r\n\"\\]
   /* null literal */
   "null"                         { return token(TokenType.KEYWORD); }
 
+  /* standard / builtin functions */
+  "Infinity"                     |
+  "NaN"                          |
+  "undefined"                    |
+  "decodeURI"                    |
+  "encodeURIComponent"           |
+  "escape"                       |
+  "eval"                         |
+  "isFinite"                     |
+  "isNaN"                        |
+  "parseFloat"                   |
+  "parseInt"                     |
+  "unescape"                     { return token(TokenType.KEYWORD2); }
+
   /* Built-in Types*/
   "Array"                        |
   "Boolean"                      |
+  "Date"                         |
+  "Math"                         |
+  "Number"                       |
+  "Object"                       |
   "RegExp"                       |
   "String"                       |
   {Identifier} ":"               { return token(TokenType.TYPE); }
@@ -189,6 +208,12 @@ StringCharacter = [^\r\n\"\\]
                                     tokenLength = 1; 
                                  }
 
+  \'                             {
+                                    yybegin(SSTRING);
+                                    tokenStart = yychar;
+                                    tokenLength = 1;
+                                 }
+
   /* numeric literals */
 
   {DecIntegerLiteral}            |
@@ -225,6 +250,23 @@ StringCharacter = [^\r\n\"\\]
 
   \\[0-3]?{OctDigit}?{OctDigit}  { tokenLength += yylength(); }
   
+  /* escape sequences */
+
+  \\.                            { tokenLength += 2; }
+  {LineTerminator}               { yybegin(YYINITIAL);  }
+}
+
+<SSTRING> {
+  \'                             {
+                                     yybegin(YYINITIAL);
+                                     // length also includes the trailing quote
+                                     return token(TokenType.STRING, tokenStart, tokenLength + 1);
+                                 }
+
+  {SStringCharacter}+            { tokenLength += yylength(); }
+
+  \\[0-3]?{OctDigit}?{OctDigit}  { tokenLength += yylength(); }
+
   /* escape sequences */
 
   \\.                            { tokenLength += 2; }

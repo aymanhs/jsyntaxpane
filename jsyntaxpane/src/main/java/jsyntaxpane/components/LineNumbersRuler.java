@@ -18,12 +18,9 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -77,7 +74,7 @@ public class LineNumbersRuler extends JPanel
 	private final static int HEIGHT = Integer.MAX_VALUE - 1000000;
 	//  Text component this TextTextLineNumber component is in sync with
 	private JEditorPane editor;
-	private int minimumDisplayDigits = 3;
+	private int minimumDisplayDigits = 2;
 	//  Keep history information to reduce the number of times the component
 	//  needs to be repainted
 	private int lastDigits;
@@ -166,7 +163,7 @@ public class LineNumbersRuler extends JPanel
 	}
 
 	/**
-	 *  Specify the mimimum number of digits used to calculate the preferred
+	 *  Specify the minimum number of digits used to calculate the preferred
 	 *  width of the component. Default is 3.
 	 *
 	 *  @param minimumDisplayDigits  the number digits used in the preferred
@@ -181,9 +178,8 @@ public class LineNumbersRuler extends JPanel
 	 *  Calculate the width needed to display the maximum line number
 	 */
 	private void setPreferredWidth() {
-		Element root = editor.getDocument().getDefaultRootElement();
 		int lines = ActionUtils.getLineCount(editor);
-		int digits = Math.min(String.valueOf(lines).length(), minimumDisplayDigits);
+		int digits = Math.max(String.valueOf(lines).length(), minimumDisplayDigits);
 
 		//  Update sizes when number of digits in the line number changes
 
