@@ -122,6 +122,9 @@ public class DocumentSearchData {
 	 * @param replacement
 	 */
 	public void doReplaceAll(JTextComponent target, String replacement) {
+		if (replacement == null) {
+			replacement = "";
+		}
 		SyntaxDocument sDoc = ActionUtils.getSyntaxDocument(target);
 		if (sDoc == null) {
 			return;
@@ -139,13 +142,13 @@ public class DocumentSearchData {
 	}
 
 	/**
-	 * Replace single occurance of match with the replacement.
+	 * Replace single occurrence of match with the replacement.
 	 * @param target
 	 * @param replacement
 	 */
 	public void doReplace(JTextComponent target, String replacement) {
 		if (target.getSelectedText() != null) {
-			target.replaceSelection(replacement);
+			target.replaceSelection(replacement == null ? "" : replacement);
 			doFindNext(target);
 		}
 	}
