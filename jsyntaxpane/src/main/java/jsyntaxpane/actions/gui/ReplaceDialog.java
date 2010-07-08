@@ -274,7 +274,9 @@ public class ReplaceDialog extends javax.swing.JDialog
 
 	private void jBtnReplaceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnReplaceActionPerformed
 		jTglHighlight.setSelected(false);
-		dsd.doReplace(textComponent, String.valueOf(jCmbReplace.getSelectedItem()));
+		String replacement = jCmbReplace.getSelectedItem() == null ?
+			"" : jCmbReplace.getSelectedItem().toString();
+		dsd.doReplace(textComponent, replacement);
 	}//GEN-LAST:event_jBtnReplaceActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBtnNext;
