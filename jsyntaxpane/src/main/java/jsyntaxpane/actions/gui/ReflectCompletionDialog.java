@@ -44,7 +44,7 @@ import jsyntaxpane.util.SwingUtils;
  *
  * @author Ayman Al-Sairafi
  */
-public class ReflectCompletionDialog 
+public class ReflectCompletionDialog
 	extends javax.swing.JDialog implements EscapeListener {
 
 	/**
@@ -208,8 +208,7 @@ public class ReflectCompletionDialog
 		int i = jLstItems.getSelectedIndex();
 		switch (evt.getKeyCode()) {
 			case KeyEvent.VK_ESCAPE:
-				String result = jTxtItem.getText();
-				ActionUtils.insertMagicString(target, result);
+				target.setCaretPosition(target.getSelectionEnd());
 				setVisible(false);
 				return;
 			case KeyEvent.VK_DOWN:
@@ -337,6 +336,7 @@ public class ReflectCompletionDialog
 
 	@Override
 	public void escapePressed() {
+		target.setCaretPosition(target.getSelectionEnd());
 		setVisible(false);
 	}
 }
