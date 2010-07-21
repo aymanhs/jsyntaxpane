@@ -131,14 +131,14 @@ public class SyntaxView extends PlainView {
                 graphics.setColor(rightMarginColor);
                 graphics.drawLine(m_x, y, m_x, y - h);
             }
-            return super.drawUnselectedText(graphics, x, y, p0, p1);
+            return super.drawSelectedText(graphics, x, y, p0, p1);
         } else {
             return drawUnselectedText(graphics, x, y, p0, p1);
         }
     }
 
     /**
-     * Sets the Rendering Hints o nthe Graphics.  This is used so that
+     * Sets the Rendering Hints of the Graphics.  This is used so that
      * any painters can set the Rendering Hits to match the view.
      * @param g2d
      */
