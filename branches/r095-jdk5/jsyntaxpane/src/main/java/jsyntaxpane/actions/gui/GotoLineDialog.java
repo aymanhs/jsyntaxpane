@@ -13,8 +13,13 @@
  */
 package jsyntaxpane.actions.gui;
 
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Window;
+
 import jsyntaxpane.actions.*;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.util.SwingUtils;
 
@@ -27,13 +32,37 @@ public class GotoLineDialog extends javax.swing.JDialog {
     private static final String PROPERTY_KEY = "GOTOLINE_DIALOG";
     private JTextComponent text;
 
+    private static GotoLineDialog createDialog(JTextComponent target) {
+		final GotoLineDialog dlg;
+		Window w = SwingUtilities.getWindowAncestor(target);
+		if (w instanceof Frame)
+			dlg = new GotoLineDialog((Frame) w, target);
+		else if (w instanceof Dialog)
+			dlg = new GotoLineDialog((Dialog) w, target);
+		else 
+			dlg = new GotoLineDialog((Frame) null, target);
+		return dlg;
+    }
     /** 
      * Creates new form GotoLineDialog
      * @param text
      */
-    private GotoLineDialog(JTextComponent text) {
-        super(ActionUtils.getFrameFor(text), false);
-        initComponents();
+    private GotoLineDialog(Frame frame, JTextComponent text) {
+        super(frame, false);
+        init(text);
+    }
+
+    /** 
+     * Creates new form GotoLineDialog
+     * @param text
+     */
+    private GotoLineDialog(Dialog dialog, JTextComponent text) {
+        super(dialog, false);
+        init(text);
+    }
+
+    private void init(JTextComponent text) {
+	    initComponents();
         this.text = text;
         setLocationRelativeTo(text.getRootPane());
         getRootPane().setDefaultButton(jBtnOk);
@@ -116,8 +145,9 @@ public class GotoLineDialog extends javax.swing.JDialog {
     public static void showForEditor(JTextComponent text) {
         GotoLineDialog dlg = null;
         if ((text == null) || (text.getDocument().getProperty(PROPERTY_KEY) == null)) {
-            dlg = new GotoLineDialog(text);
-        } else {
+				dlg = GotoLineDialog.createDialog(text);
+		}
+		else {
             dlg = (GotoLineDialog) text.getDocument().getProperty(PROPERTY_KEY);
         }
         dlg.jCmbLineNumbers.requestFocusInWindow();

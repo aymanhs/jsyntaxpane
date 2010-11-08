@@ -13,9 +13,16 @@
  */
 package jsyntaxpane.actions;
 
+import jsyntaxpane.actions.gui.GotoLineDialog;
 import jsyntaxpane.actions.gui.ReflectCompletionDialog;
+
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.Map;
+
+import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
 
@@ -38,7 +45,7 @@ public class ReflectCompletionAction extends DefaultSyntaxAction {
     public void actionPerformed(JTextComponent target, SyntaxDocument sDoc,
             int dot, ActionEvent e) {
         if (dlg == null) {
-            dlg = new ReflectCompletionDialog(target);
+        	dlg = ReflectCompletionDialog.createDialog(target);
         }
         dlg.displayFor(target);
     }

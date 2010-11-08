@@ -16,10 +16,14 @@ package jsyntaxpane.actions.gui;
 import jsyntaxpane.actions.*;
 import jsyntaxpane.components.Markers;
 import java.awt.Color;
+import java.awt.Dialog;
+import java.awt.Frame;
 import java.awt.HeadlessException;
+import java.awt.Window;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.JTextComponent;
@@ -38,15 +42,41 @@ public class ReplaceDialog extends javax.swing.JDialog implements CaretListener 
     private DocumentSearchData dsd;
     private static Markers.SimpleMarker SEARCH_MARKER = new Markers.SimpleMarker(Color.YELLOW);
 
+	public static ReplaceDialog createDialog(JTextComponent target, DocumentSearchData documentSearchData) {
+		final ReplaceDialog dlg;
+		Window w = SwingUtilities.getWindowAncestor(target);
+		if (w instanceof Frame)
+			dlg = new ReplaceDialog((Frame) w, target, documentSearchData);
+		else if (w instanceof Dialog)
+			dlg = new ReplaceDialog((Dialog) w, target, documentSearchData);
+		else 
+			dlg = new ReplaceDialog((Frame) null, target, documentSearchData);
+		return dlg;
+	}
     /**
      * Creates new form FindDialog
      * @param text
      * @param dsd DocumentSerachData
      */
-    public ReplaceDialog(JTextComponent text,
+    public ReplaceDialog(Frame frame, JTextComponent text,
             DocumentSearchData dsd) {
-        super(ActionUtils.getFrameFor(text), false);
-        initComponents();
+        super(frame, false);
+        init(text, dsd);
+    }
+
+
+    /**
+     * Creates new form FindDialog
+     * @param text
+     * @param dsd DocumentSerachData
+     */
+    public ReplaceDialog(Dialog dialog, JTextComponent text,
+            DocumentSearchData dsd) {
+        super(dialog, false);
+        init(text, dsd);
+    }
+	private void init(JTextComponent text, DocumentSearchData dsd) {
+	    initComponents();
         textComponent = text;
         this.dsd = dsd;
         textComponent.addCaretListener(this);
