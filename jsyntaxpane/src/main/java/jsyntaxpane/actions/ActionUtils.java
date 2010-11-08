@@ -126,21 +126,6 @@ public class ActionUtils {
     }
 
     /**
-     * Returns the Frame that contains this component or null if the component
-     * is not within a Window or the containing window is not a frame
-     * @param comp
-     * @return
-     */
-    public static Frame getFrameFor(Component comp) {
-        Window w = SwingUtilities.getWindowAncestor(comp);
-        if (w != null && w instanceof Frame) {
-            Frame frame = (Frame) w;
-            return frame;
-        }
-        return null;
-    }
-
-    /**
      * Returns the the Token at pos as a String
      * @param doc
      * @param pos

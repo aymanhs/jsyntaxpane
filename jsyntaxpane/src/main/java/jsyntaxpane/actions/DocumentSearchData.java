@@ -14,12 +14,16 @@
 package jsyntaxpane.actions;
 
 import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Window;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 import jsyntaxpane.SyntaxDocument;
+import jsyntaxpane.actions.gui.GotoLineDialog;
 import jsyntaxpane.actions.gui.ReplaceDialog;
 
 /**
@@ -159,7 +163,7 @@ public class DocumentSearchData {
      */
     public void showDialog(JTextComponent target) {
         if (dlg == null) {
-            dlg = new ReplaceDialog(target, this);
+        	dlg = ReplaceDialog.createDialog(target, this);
         }
         dlg.setVisible(true);
     }

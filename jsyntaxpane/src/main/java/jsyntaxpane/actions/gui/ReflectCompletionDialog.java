@@ -13,7 +13,9 @@
  */
 package jsyntaxpane.actions.gui;
 
+import java.awt.Dialog;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -56,14 +58,38 @@ public class ReflectCompletionDialog extends javax.swing.JDialog {
     public List<Member> items;
     private final JTextComponent target;
 
+	public static ReflectCompletionDialog createDialog(JTextComponent target) {
+		final ReflectCompletionDialog dlg;
+		Window w = SwingUtilities.getWindowAncestor(target);
+		if (w instanceof Frame)
+			dlg = new ReflectCompletionDialog((Frame) w, target);
+		else if (w instanceof Dialog)
+			dlg = new ReflectCompletionDialog((Dialog) w, target);
+		else 
+			dlg = new ReflectCompletionDialog((Frame) null, target);
+		return dlg;
+    }
     /**
      * Creates new form ReflectCompletionDialog
      * @param target Text component for this dialog
      */
-    public ReflectCompletionDialog(JTextComponent target) {
-        super(ActionUtils.getFrameFor(target), true);
-        initComponents();
+    public ReflectCompletionDialog(Frame frame, JTextComponent target) {
+        super(frame, true);
         this.target = target;
+        init(target);
+    }
+    /**
+     * Creates new form ReflectCompletionDialog
+     * @param target Text component for this dialog
+     */
+    public ReflectCompletionDialog(Dialog dialog, JTextComponent target) {
+        super(dialog, true);
+        this.target = target;
+        init(target);
+    }
+
+	private void init(JTextComponent target) {
+	    initComponents();
         jTxtItem.getDocument().addDocumentListener(new DocumentListener() {
 
 //            @Override
